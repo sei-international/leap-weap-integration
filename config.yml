@@ -1,0 +1,381 @@
+###############################################################
+#           WAVE integration config file
+# Defines variable parameters required to run integration
+# Needs to be kept up-to-date by user
+###############################################################
+WEAP:
+  Area: 'WAVE-SyrDarya 2022_08_29_MABIA'
+  Branches:
+    Population_KAZ:
+      path: Key\Demographic\KAZ\National population
+      variable: Annual Activity Level
+      unit: cap
+      leap_branch: Population 
+      leap_region: Kazakhstan
+    Population_KGZ:
+      path: Key\Demographic\KAZ\National population
+      variable: Annual Activity Level
+      unit: cap
+      leap_branch: Population
+      leap_region: Kyrgyzstan
+    Population_TJK:
+      path: Key\Demographic\KAZ\National population
+      variable: Annual Activity Level
+      unit: cap
+      leap_branch: Population
+      leap_region: Tajikistan
+    Population_UZB:
+      path: Key\Demographic\KAZ\National population
+      variable: Annual Activity Level
+      unit: cap
+      leap_branch: Population
+      leap_region: Uzbekistan
+    GDP_KAZ:
+      path: Key\Macroeconomic\KAZ\GDP
+      variable: Annual Activity Level
+      unit: Billion 2020 USD
+      leap_branch: GDP
+      leap_region: Kazakhstan
+    GDP_KGZ:
+      path: Key\Macroeconomic\KGZ\GDP
+      variable: Annual Activity Level
+      unit: Billion 2020 USD
+      leap_branch: GDP
+      leap_region: Kyrgyzstan
+    GDP_TJK:
+      path: Key\Macroeconomic\TJK\GDP
+      variable: Annual Activity Level
+      unit: Billion 2020 USD
+      leap_branch: GDP
+      leap_region: Tajikistan
+    GDP_UZB:
+      path: Key\Macroeconomic\UZB\GDP
+      variable: Annual Activity Level
+      unit: Billion 2020 USD
+      leap_branch: GDP
+      leap_region: Uzbekistan
+    Industrial_VA_KAZ:
+      path: Key\Macroeconomic\KAZ\Industrial value added
+      variable: Annual Activity Level
+      unit: '% share'
+      leap_branch: GDP
+      leap_branch: Industrial_VA_fraction
+      leap_region: Kazakhstan
+    Industrial_VA_KGZ:
+      path: Key\Macroeconomic\KGZ\Industrial value added
+      variable: Annual Activity Level
+      unit: '% share'
+      leap_branch: Industrial_VA_fraction
+      leap_region: Kyrgyzstan
+    Industrial_VA_TJK:
+      path: Key\Macroeconomic\TJK\Industrial value added
+      variable: Annual Activity Level
+      unit: '% share'
+      leap_branch: Industrial_VA_fraction
+      leap_region: Tajikistan
+    Industrial_VA_UZB:
+      path: Key\Macroeconomic\UZB\Industrial value added
+      variable: Annual Activity Level
+      unit: '% share'
+      leap_branch: Industrial_VA_fraction
+      leap_region: Uzbekistan
+
+
+  Hydropower_plants: 
+    Toktogul:
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [TOKTOGUL]
+    Kambarata_II:
+      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kambarata II
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [KAMBARATA_2]
+    Kayrakkum :
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kayrakkum reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [KAIRAKKUM]
+    Shardara :
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Shardara reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [SHARDARINSKYA]
+    Kurpsaiskaja:
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kurpsaiskaja
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [KURPSAI]
+    Taschkumyrskaja : 
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Taschkumyrskaja_cascade
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [TASH_KUMYR, SHAMALDYSAI,UCH_KURGANSK]
+    Farkhad : 
+      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Farkhad reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [FARKHAD]
+    Akhangaran : 
+      weap_path : Supply and Resources\River\Ahangaran\Reservoirs\Akhangaran reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps: [AKHANGARAN]
+    Charvak: 
+      weap_path : Supply and Resources\River\Circik River\Reservoirs\Charvak reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [CHARVAK, GAZLKENT, KHODZHIKENT]
+    Chirchik:
+      weap_path : Supply and Resources\River\Circik River\Reservoirs\Chirchik_cascade
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [AKKAVAK_1, CHIRCHIK_1, CHIRCHIK_2, TAVAK]
+    Andijan :
+      weap_path : Supply and Resources\River\Andijan River\Reservoirs\Andijan Reservoir
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [ANDIJAN_1, ANDIJAN_2]
+    At-Bashi : 
+      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [AT_BASHIN]
+
+  Agricultural regions: # these are used for water pumping
+    Kazakhstan:
+      Kyzlorda:
+        weap_path : Demand Sites and Catchments\Agriculture_KAZ_Kyzylorda 
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+      Shmykent:
+        weap_path: Demand Sites and Catchments\Agriculture_KAZ_Turkestan_Shymkent
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+    Kyrgyzstan:
+      JalalAbat:
+        weap_path: Demand Sites and Catchments\Agriculture_KGZ_Naryn_JalalAbat_Osh_Batken
+        leap_region: Kyrgyzstan
+        variable: Supply Requirement
+        unit: m^3
+    Tajikistan:
+      Sogd:
+        weap_path: Demand Sites and Catchments\Agriculture_TJK_Sogd
+        leap_region: Tajikistan
+        variable: Supply Requirement
+        unit: m^3
+    Uzbekistan:
+      Andijan:
+        weap_path: Demand Sites and Catchments\Agriculture_UZB_Andijan_Namangan_Fergana
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: m^3
+      SyrDarya:
+        weap_path: Demand Sites and Catchments\Agriculture_UZB_SyrDarya_Tashkent_Jizzakh
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: 'm^3'
+  
+  Industrial and domestic regions: # these are used for water pumping
+    Kazakhstan:
+      Kyzlorda_Ind:
+        weap_path : Demand Sites and Catchments\Industrial_KAZ_Kyzylorda 
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+      Shmykent_Ind:
+        weap_path: Demand Sites and Catchments\Industrial_KAZ_Turkestan_Shymkent
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+      Kyzlorda_Dom:
+        weap_path : Demand Sites and Catchments\Domestic_KAZ_Kyzylorda 
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+      Shmykent_Dom:
+        weap_path: Demand Sites and Catchments\Domestic_KAZ_Turkestan_Shymkent
+        leap_region: Kazakhstan
+        variable: Supply Requirement
+        unit: m^3
+    Kyrgyzstan:
+      JalalAba_Ind:
+        weap_path: Demand Sites and Catchments\Industrial_KGZ_Naryn_JalalAbat_Osh_Batken
+        leap_region: Kyrgyzstan
+        variable: Supply Requirement
+        unit: m^3
+      JalalAbat_Dom:
+        weap_path: Demand Sites and Catchments\Domestic_KGZ_Naryn_JalalAbat_Osh_Batken
+        leap_region: Kyrgyzstan
+        variable: Supply Requirement
+        unit: m^3
+    Tajikistan:
+      Sogd_Ind:
+        weap_path: Demand Sites and Catchments\Industrial_TJK_Sogd
+        leap_region: Tajikistan
+        variable: Supply Requirement
+        unit: m^3
+      Sogd_Dom:
+        weap_path: Demand Sites and Catchments\Domestic_TJK_Sogd
+        leap_region: Tajikistan
+        variable: Supply Requirement
+        unit: m^3
+    Uzbekistan:
+      Andijan_Ind:
+        weap_path: Demand Sites and Catchments\Industrial_UZB_Andijan_Namangan_Fergana
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: m^3
+      SyrDarya_Ind:
+        weap_path: Demand Sites and Catchments\Industrial_UZB_SyrDarya_Tashkent_Jizzakh
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: m^3
+      Andijan_Dom:
+        weap_path: Demand Sites and Catchments\Domestic_UZB_Andijan_Namangan_Fergana
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: m^3
+      SyrDarya_Dom:
+        weap_path: Demand Sites and Catchments\Domestic_UZB_SyrDarya_Tashkent_Jizzakh
+        leap_region: Uzbekistan
+        variable: Supply Requirement
+        unit: m^3
+
+
+LEAP:
+  Area: 'wave central asia v35'
+  Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
+  Branches: 
+    GDP:
+      path: Key\Macroeconomic\Gross Domestic Product
+      variable: Activity Level
+      unit: 2020 USD
+    Population: 
+      path: Key\Demographic\Population
+      variable: Activity Level
+      unit: people
+    Industrial_VA_fraction:
+      path: Key\Macroeconomic\Industrial\Industry_Value Added Fraction
+      variable: Activity Level
+      unit: Fraction
+    Industrial VA:
+      path: Key\Macroeconomic\Industrial_Value Added
+      variable: Activity Level
+      unit: 2020 USD
+    Commercial VA:
+      path: Key\Macroeconomic\Commercial_Value Added
+      variable: Activity Level
+      unit: 2020 USD
+    Agricultural VA:
+      path: Key\Macroeconomic\Agriculture_Value Added
+      variable: Activity Level
+      unit: 2020 USD
+    Ag_water_demand:
+      path: Demand\Agriculture\Syr Darya\Water demand
+      variable: Activity Level
+      unit: Cubic Meter/No Data
+    Ind_water_demand:
+      path: Demand\Industry\Other\Syr Darya Water Pumping
+      variable: Activity Level
+      unit: Cubic Meter/No Data
+  
+  Hydropower_plants: # LEAP results to be checked for convergence
+    AKHANGARAN:
+      leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    ANDIJAN_1: 
+      leap_path: Transformation\Electricity Production\Processes\ANDIJAN_1
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    AKKAVAK_1:
+      leap_path: Transformation\Electricity Production\Processes\AKKAVAK_1
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    ANDIJAN_2: 
+      leap_path: Transformation\Electricity Production\Processes\ANDIJAN_2
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    AT_BASHIN:
+      leap_path: Transformation\Electricity Production\Processes\AT_BASHIN
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    CHARVAK:
+      leap_path: Transformation\Electricity Production\Processes\CHARVAK
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    CHIRCHIK_1:
+      leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_1
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    CHIRCHIK_2:
+      leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_2
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    FARKHAD: 
+      leap_path : Transformation\Electricity Production\Processes\FARKHAD
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    GAZLKENT:
+      leap_path: Transformation\Electricity Production\Processes\GAZALKENT
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KAIRAKKUM:
+      leap_path: Transformation\Electricity Production\Processes\KAIRAKKUM
+      leap_region: Tajikistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KAMBARATA_2:
+      leap_path: Transformation\Electricity Production\Processes\KAMBARATA_2
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KHODZHIKENT:
+      leap_path: Transformation\Electricity Production\Processes\KHODZHIKENT
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KURPSAI:
+      leap_path: Transformation\Electricity Production\Processes\KURPSAI
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    SHAMALDYSAI:
+      leap_path: Transformation\Electricity Production\Processes\SHAMALDYSAI
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    SHARDARINSKYA:
+      leap_path: Transformation\Electricity Production\Processes\SHARDARINSKYA
+      leap_region: Kazakhstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    TASH_KUMYR:
+      leap_path: Transformation\Electricity Production\Processes\TASH_KUMYR
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    TAVAK:
+      leap_path: Transformation\Electricity Production\Processes\TAVAK
+      leap_region: Uzbekistan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    TOKTOGUL:
+      leap_path: Transformation\Electricity Production\Processes\TOKTOGUL
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    UCH_KURGANSK:
+      leap_path: Transformation\Electricity Production\Processes\UCH_KURGANSK
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+  
+LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
+  Kazakhstan:
+    directory_name: KAZ_Macro
+    target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA'] # these have to match branches in LEAP config above, and be exactly the same for each region in LEAP-Macro
+ # Kyrgyzstan:
+ #   directory_name:
