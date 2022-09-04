@@ -398,7 +398,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         exit()
     elif len(scenarios_map)== 0:
         if lang == "RUS": msg= ["Не удалось найти сценарии в активной области", other_app, "соответствующие сценариям, рассчитанным в активной области", runfrom_app, ". Выход..."]
-        else : msg = ["Could not find scenarios in the active ", other_app, " area corresponding to the scenarios calculated in the active ", runfrom_app & " area. Exiting..."]
+        else : msg = ["Could not find scenarios in the active ", other_app, " area corresponding to the scenarios calculated in the active ", runfrom_app , " area. Exiting..."]
         tkmessagebox.showerror(procedure_title, " ".join(msg))
         exit()
 
