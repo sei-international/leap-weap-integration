@@ -356,7 +356,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     # BEGIN: Determine which scenarios are calculated.
     # Logic in this section: 1) look at all scenarios in runfrom_app for which results are shown; 2) try to find corresponding scenarios in other_app, looking for exact name matches and checking predefined_mappings; 3) calculate a) scenarios from 1 with a corresponding scenario from 2; and b) corresponding scenarios from 2. Disable calculations for all other scenarios.
-    if lang=="RUS": msg = "Определение сценариев для расчетаP."
+    if lang=="RUS": msg = "Определение сценариев для расчета."
     else : msg = "Identifying scenarios to calculate."
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(10)
