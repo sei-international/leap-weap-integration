@@ -514,9 +514,6 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if leap_macro:
         last_iteration_leapmacro_results=[]
 
-    for proc in psutil.process_iter():
-        if proc.name() == "excel.exe":
-            proc.kill()
     fs_obj = win32.Dispatch('Scripting.FileSystemObject') # ' Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
     excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files and query Windows list separator
     excel.ScreenUpdating = False
@@ -642,11 +639,16 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
                 # Convert csv_path into an XLSX file
                 st = time.time()
-                print('saving as excel')
-                excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
-                excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
+                print('saving as Excel with filename "' + xlsx_file + '"')
+                try:
+                    excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
+                    excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
+                    excel.ActiveWorkbook.Close()
+                except:
+                    print('could not save to Excel')
+                finally:
+                    excel.Application.Quit()
                 print('xls file exists:', os.path.isfile(xlsx_path))
-                excel.ActiveWorkbook.Close()
                 et = time.time()
                 elapsed_time = et - st
                 print('Elapsed time: ', elapsed_time, ' seconds')
