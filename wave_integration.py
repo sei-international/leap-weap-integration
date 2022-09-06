@@ -566,12 +566,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(30)
 
-        print('Calculating WEAP...')
+        print('Calculating WEAP...', flush = True)
         weap.Calculate()
         while weap.IsCalculating :
            leap.Sleep(1000)
 
-        print('DONE: calculating WEAP. Moving Hydropower Maximum Availabilities from WEAP to LEAP....')
+        print('DONE: calculating WEAP. Moving Hydropower Maximum Availabilities from WEAP to LEAP....', flush = True)
 
         # Move hydropower availability information from WEAP to LEAP.
         # Availability information saved to Excel files specific to WEAP branches and LEAP scenarios. Excel pathway used since LEAP's performance is extremely poor when reading from text files.
@@ -583,7 +583,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
         for i in range(0, len(weap_scenarios)):
             for wb in weap_hydro_branches:
-                print('weap hydro reservoir:', wb)
+                print('weap hydro reservoir:', wb, flush = True)
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap.Scenarios(leap_scenarios[i]).Id), ".xlsx" ]) # Name of XLSX file being written
                 xlsx_path = "".join([leap.ActiveArea.Directory, xlsx_file])  # Full path to XLSX file being written
                 xlsx_path=fr"{xlsx_path}"
@@ -599,7 +599,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
                 num_lines_written = 0 # Number of lines written to csv_path
 
-                print('Writing csv...')
+                print('Writing csv...', flush = True)
                 st = time.time()
                 for y in range(weap.BaseYear, weap.EndYear):
                     leap_capacity_year = y
@@ -635,7 +635,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 ts.Close()
                 et = time.time()
                 elapsed_time = et - st
-                print('Elapsed time: ', elapsed_time, ' seconds')
+                print('Elapsed time: ', elapsed_time, ' seconds', flush = True)
 
                 # Convert csv_path into an XLSX file
                 st = time.time()
@@ -651,7 +651,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 print('xls file exists:', os.path.isfile(xlsx_path))
                 et = time.time()
                 elapsed_time = et - st
-                print('Elapsed time: ', elapsed_time, ' seconds')
+                print('Elapsed time: ', elapsed_time, ' seconds', flush = True)
 
                 # Update LEAP Maximum Availability
                 leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
@@ -698,7 +698,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
 
         # Move industrial and domestic water requirements from WEAP to LEAP
-        print('Moving industrial water requirements from WEAP to LEAP ....')
+        print('Moving industrial water requirements from WEAP to LEAP ....', flush = True)
         if lang == "RUS":
             msg = ["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", промышленное и бытовое использование)." ]
         else :
