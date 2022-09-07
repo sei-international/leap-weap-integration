@@ -428,8 +428,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
 
     if leap_macro:
-        first_region=list(config_params['LEAP-Macro'].keys())[0]
-        list_leapmacro_keys=(config_params['LEAP-Macro'][first_region]['target_variables'])
+        list_leapmacro_keys=(config_params['LEAP-Macro']['target_variables'])
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
     # BEGIN: Determine which scenarios are calculated.
@@ -500,13 +499,16 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
     if leap_macro:
-        macrofile = "runleapmacro.jl"
         for s in leap_scenarios:
-            print(leap_scenarios)
-            for r in config_params['LEAP-Macro']:
-                print('Macro region:', r)
-                macrodir = "".join([leap.ActiveArea.Directory,  config_params['LEAP-Macro'][r]['directory_name'], "\\", macrofile])
-                errorcode= os.system(juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1]))
+            print('Running LEAP-Macro for scenario: ', s)
+            for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+                print('Region:', r, flush = True)
+                macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
+                exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1])
+                print("Executing: '", exec_string, "'", flush = True)
+                errorcode= os.system(exec_string)
+                if errorcode != 0:
+                    raise RuntimeError("LEAP-Macro exited with an error")
 
     # start iterative calculations
     last_iteration_leap_results=[]
@@ -743,13 +745,16 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
         # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
         if leap_macro:
-            macrofile = "runleapmacro.jl"
             for s in leap_scenarios:
-                print(leap_scenarios)
-                for r in config_params['LEAP-Macro']:
-                    print('Macro region:', r)
-                    macrodir = "".join([leap.ActiveArea.Directory,  config_params['LEAP-Macro'][r]['directory_name'], "\\", macrofile])
-                    errorcode= os.system(juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1]) + " --load-leap-first")
+                print('Running LEAP-Macro for scenario: ', s)
+                for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+                    print('Region:', r)
+                    macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1]) + " --load-leap-first"
+                    print("Executing: '", exec_string, "'", flush = True)
+                    errorcode= os.system(exec_string)
+                    if errorcode != 0:
+                        raise RuntimeError("LEAP-Macro exited with an error")
 
         # BEGIN: Record target results for this iteration.
         if lang == "RUS":

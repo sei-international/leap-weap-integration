@@ -374,8 +374,12 @@ LEAP:
       leap_unit: GWh
   
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
-  Kazakhstan:
-    directory_name: KAZ_Macro
-    target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA'] # these have to match branches in LEAP config above, and be exactly the same for each region in LEAP-Macro
- # Kyrgyzstan:
- #   directory_name:
+  # Target variables are the same for each region: must match branches in LEAP config above
+  target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
+  regions:
+      Kazakhstan:
+        directory_name: KAZ_Macro
+        script: runleapmacro.jl
+      Kyrgyzstan:
+        directory_name: KGZ_Macro
+        script: runleapmacro.jl
