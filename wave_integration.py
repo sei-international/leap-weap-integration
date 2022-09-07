@@ -516,6 +516,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if leap_macro:
         last_iteration_leapmacro_results=[]
 
+    for proc in psutil.process_iter():
+        if proc.name() == "excel.exe":
+            proc.kill()
     fs_obj = win32.Dispatch('Scripting.FileSystemObject') # ' Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
     excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files and query Windows list separator
     excel.ScreenUpdating = False
