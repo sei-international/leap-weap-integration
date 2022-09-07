@@ -497,6 +497,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # get calculated years in leap
     leap_calc_years=get_leap_calc_years(leap)
 
+    ps_re = re.compile(r'excel', flags=re.IGNORECASE)
+    for proc in psutil.process_iter():
+        if ps_re.search(proc.name()) is not None:
+            proc.kill()
+
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
     if leap_macro:
         for s in leap_scenarios:
@@ -516,9 +521,6 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if leap_macro:
         last_iteration_leapmacro_results=[]
 
-    for proc in psutil.process_iter():
-        if proc.name() == "excel.exe":
-            proc.kill()
     fs_obj = win32.Dispatch('Scripting.FileSystemObject') # ' Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
     excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files and query Windows list separator
     excel.ScreenUpdating = False
