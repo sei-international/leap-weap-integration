@@ -87,7 +87,7 @@ def get_julia_path(shell):
     hklm = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
     hkcu = ConnectRegistry(None, HKEY_CURRENT_USER)
     common_prefix = r"SOFTWARE"
-    common_path = r"\Microsoft\Windows\CurrentVersion\Uninstall"
+    common_path = r"Microsoft\Windows\CurrentVersion\Uninstall"
     # NEMO key
     if juliapath is None:
         try:
