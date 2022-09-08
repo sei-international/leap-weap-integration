@@ -813,11 +813,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
         print('Checking Macro results...')
         if leap_macro:
-            this_iteration_leapmacro_results= numpy.empty((len(target_leapmacro_results)*len(config_params['LEAP-Macro'].keys())*len(leap_scenarios)*len(leap_calc_years)), dtype=object)  # Array of target LEAP result values obtained in this iteration. Contains one set of result values for each scenario in leap_scenarios and year calculated in LEAP; results are ordered by scenario, year, and result in target_leap_results
+            this_iteration_leapmacro_results= numpy.empty((len(target_leapmacro_results)*len(config_params['LEAP-Macro']['regions'].keys())*len(leap_scenarios)*len(leap_calc_years)), dtype=object)  # Array of target LEAP result values obtained in this iteration. Contains one set of result values for each scenario in leap_scenarios and year calculated in LEAP; results are ordered by scenario, year, and result in target_leap_results
             current_index = 0  # Index currently being written to this_iteration_leap_results/this_iteration_weap_results/this_teration_leapmacro_results
 
             for e in target_leapmacro_results:
-                for r in config_params['LEAP-Macro']:
+                for r in config_params['LEAP-Macro']['regions']:
                     for s in leap_scenarios:
                         for y in leap_calc_years:
                             # Elements in target_leap_results: Array(branch full name, variable name, region name, unit name)
