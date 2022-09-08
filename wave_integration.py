@@ -656,7 +656,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                             if m_num in month_vals:
                                 val=month_vals[m_num]
                             else:
-                                val = round(weap_hpp_gen[y_range.index(y)*12+m_num-1] / 3600/ (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path (GJ > GW)
+                                val = round(weap_hpp_gen[y_range.index(y)*12+m_num-1] / 3.6/ (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path (GJ > GW)
                                 if val > 100 : val = 100
                                 month_vals[m_num] = val
 
@@ -671,31 +671,32 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 elapsed_time = et - st
                 print('Elapsed time: ', elapsed_time, ' seconds', flush = True)
 
-                # Convert csv_path into an XLSX file
-                st = time.time()
-                print('saving as Excel with filename "' + xlsx_file + '"')
-                try:
-                    excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
-                    excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
-                    excel.ActiveWorkbook.Close()
-                except Exception as e:
-                    print('could not save to Excel: ', e)
-                finally:
-                    excel.Application.Quit()
-                print('xls file exists:', os.path.isfile(xlsx_path))
-                et = time.time()
-                elapsed_time = et - st
-                print('Elapsed time: ', elapsed_time, ' seconds', flush = True)
+                if num_lines_written>0 :
+                    # Convert csv_path into an XLSX file
+                    st = time.time()
+                    print('saving as Excel with filename "' + xlsx_file + '"')
+                    try:
+                        excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
+                        excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
+                        excel.ActiveWorkbook.Close()
+                    except Exception as e:
+                        print('could not save to Excel: ', e)
+                    finally:
+                        excel.Application.Quit()
+                    print('xls file exists:', os.path.isfile(xlsx_path))
+                    et = time.time()
+                    elapsed_time = et - st
+                    print('Elapsed time: ', elapsed_time, ' seconds', flush = True)
 
-                # Update LEAP Maximum Availability
-                leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
-                for lhpp in leap_hpps:
-                    print('leap hpp:', lhpp)
-                    lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
-                    lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
-                    leap.ActiveRegion=lhpp_region
-                    leap.ActiveScenario=leap_scenarios[i]
-                    leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
+                    # Update LEAP Maximum Availability
+                    leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
+                    for lhpp in leap_hpps:
+                        print('leap hpp:', lhpp)
+                        lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
+                        lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
+                        leap.ActiveRegion=lhpp_region
+                        leap.ActiveScenario=leap_scenarios[i]
+                        leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
 
         if excel:
             del excel
@@ -904,7 +905,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     else :
         msg = "Completed WEAP-LEAP integration procedure."
     leap.ShowProgressBar(procedure_title, "".join(msg))
-
+    
 
     tet = time.time()
     total_elapsed_time = tet - tst
