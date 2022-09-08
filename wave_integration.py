@@ -761,7 +761,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                     print('Region:', r)
                     macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1]) + " --load-leap-first"
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -y " + str(leap_calc_years[-1]) + " -r " + str(2*(completed_iterations + 1)) + " --load-leap-first"
                     print("Executing: '", exec_string, "'", flush = True)
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
