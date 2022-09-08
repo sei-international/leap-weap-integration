@@ -87,7 +87,7 @@ def get_julia_path(shell):
     hklm = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
     hkcu = ConnectRegistry(None, HKEY_CURRENT_USER)
     common_prefix = r"SOFTWARE"
-    common_path = r"\Microsoft\Windows\CurrentVersion\Uninstall"
+    common_path = r"Microsoft\Windows\CurrentVersion\Uninstall"
     # NEMO key
     if juliapath is None:
         try:
@@ -769,6 +769,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
+        print('Running LEAP...', flush = True)
         kill_excel()
         leap.Calculate(False)
 

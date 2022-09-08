@@ -407,6 +407,6 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
       Kazakhstan:
         directory_name: KAZ_Macro
         script: runleapmacro.jl
-      Kyrgyzstan:
-        directory_name: KGZ_Macro
-        script: runleapmacro.jl
+      # Kyrgyzstan:
+        # directory_name: KGZ_Macro
+        # script: runleapmacro.jl
