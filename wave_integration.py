@@ -769,6 +769,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
+        print('Running LEAP...', flush = True)
         kill_excel()
         leap.Calculate(False)
 
