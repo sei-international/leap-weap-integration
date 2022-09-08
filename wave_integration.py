@@ -269,6 +269,14 @@ def get_month_num(month_name, procedure_title):
         msg= ["Unrecognized month (", month_name, ") in month_num function. Exiting..."]
         tkmessagebox.showerror(procedure_title, "".join(msg))
     return month_num
+    
+# function to clear out any running instances of Excel (no return value)
+def kill_excel():
+    ps_re = re.compile(r'excel', flags=re.IGNORECASE)
+    for proc in psutil.process_iter():
+        if ps_re.search(proc.name()) is not None:
+            proc.kill()
+
 # function that returns an array whose length is length argument; allows creating an array based on an expression for the length.
 #==================================================================================================#
 #                                         MAIN ROUTINE                                             #
@@ -497,13 +505,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # get calculated years in leap
     leap_calc_years=get_leap_calc_years(leap)
 
-    ps_re = re.compile(r'excel', flags=re.IGNORECASE)
-    for proc in psutil.process_iter():
-        if ps_re.search(proc.name()) is not None:
-            proc.kill()
-
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
     if leap_macro:
+        kill_excel()
         for s in leap_scenarios:
             print('Running LEAP-Macro for scenario: ', s)
             for r, rinfo in config_params['LEAP-Macro']['regions'].items():
@@ -651,8 +655,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
                     excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
                     excel.ActiveWorkbook.Close()
-                except:
-                    print('could not save to Excel')
+                except Exception as e:
+                    print('could not save to Excel: ', e)
                 finally:
                     excel.Application.Quit()
                 print('xls file exists:', os.path.isfile(xlsx_path))
@@ -742,6 +746,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
+        kill_excel()
         leap.Calculate(False)
 
         # ++++++++++++++++++
@@ -750,6 +755,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
         # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
         if leap_macro:
+            kill_excel()
             for s in leap_scenarios:
                 print('Running LEAP-Macro for scenario: ', s)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
