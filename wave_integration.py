@@ -612,6 +612,29 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
                 print('Writing csv...', flush = True)
                 st = time.time()
+
+                # check unit
+                weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').Unit
+                if not weap_unit=='GJ':
+                    if lang=='RUS':
+                        msg="Выработка энергии в WEAP должна быть в гигаджоулях. Выход..."
+                    else:
+                        msg="Energy Generation in WEAP has to be in Gigajoules. Exiting..."
+                    tkmessagebox.showerror("WAVE integration", msg)
+                    exit()
+                # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
+                weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
+
+                # check that there are values for every month
+                if not len(weap_hpp_gen)%12==0:
+                    if lang=='RUS':
+                        msg="Выработка энергии в WEAP не является ежемесячной или не доступна для каждого месяца моделирования. Выход...."
+                    else:
+                        msg="Energy generation in WEAP is not monthly or not available for every simulation month. Exiting..."
+                    tkmessagebox.showerror("WAVE integration", msg)
+                    exit()
+                y_range=range(weap.BaseYear, weap.EndYear+1)
+                
                 for y in range(weap.BaseYear, weap.EndYear):
                     leap_capacity_year = y
                     if leap.BaseYear > y :
@@ -633,7 +656,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                             if m_num in month_vals:
                                 val=month_vals[m_num]
                             else:
-                                val = round(weap.ResultValue("".join([config_params['WEAP']['Hydropower_plants'][wb]['weap_path'],":Hydropower Generation[MWH]"]), y, m_num, weap_scenarios[i]) / (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path
+                                val = round(weap_hpp_gen[y_range.index(y)*12+m_num-1] / 3600/ (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path (GJ > GW)
                                 if val > 100 : val = 100
                                 month_vals[m_num] = val
 
