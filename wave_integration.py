@@ -78,7 +78,7 @@ def get_julia_path(shell):
     
 	# Then check in C:\USER\AppData\Local\Programs
     if juliapath is None:
-        for p in os.scandir(os.path.join(os.env['localappdata'],'Programs')):
+        for p in os.scandir(os.path.join(os.environ['localappdata'],'Programs')):
             if p.is_dir() and r.search(p) is not None:
                 juliapath = os.path.join(p.path, 'bin', 'julia.exe')
                 break
