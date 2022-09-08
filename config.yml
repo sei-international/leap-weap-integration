@@ -130,6 +130,18 @@ WEAP:
       weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
       weap_variable: :Hydropower Generation[GWH]
       leap_hpps : [AT_BASHIN]
+    Kokomeren : 
+      weap_path : Supply and Resources\River\Kokomeren River\Run of River Hydro\Kokomeren RoR
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [KOKOMEREN]
+    Upper Naryn : 
+      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Upper Naryn RoR
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [UPPER NARYN]
+    Kazarman : 
+      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
+      weap_variable: :Hydropower Generation[GWH]
+      leap_hpps : [KAZARMAN]
 
   Agricultural regions: # these are used for water pumping
     Kazakhstan:
@@ -235,7 +247,7 @@ WEAP:
 
 
 LEAP:
-  Area: 'wave central asia v35'
+  Area: 'wave central asia v38'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   Branches: 
     GDP:
@@ -369,6 +381,21 @@ LEAP:
       leap_unit: GWh
     UCH_KURGANSK:
       leap_path: Transformation\Electricity Production\Processes\UCH_KURGANSK
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KOKOMEREN:
+      leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    UPPER NARYN:
+      leap_path: Transformation\Electricity Production\Processes\UPPER NARYN CASCADE
+      leap_region: Kyrgyzstan
+      leap_variable: Energy Generation
+      leap_unit: GWh
+    KAZARMAN:
+      leap_path: Transformation\Electricity Production\Processes\KAZARMAN CASCADE
       leap_region: Kyrgyzstan
       leap_variable: Energy Generation
       leap_unit: GWh
