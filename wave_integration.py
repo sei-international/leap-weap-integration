@@ -511,6 +511,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     # Clear hydropower reservoir energy demand from WEAP scenarios
     print('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.')
+    weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
     for s in weap_scenarios:
         weap.ActiveScenario=s
         for wb in weap_hydro_branches:
