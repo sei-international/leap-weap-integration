@@ -233,11 +233,10 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
     weap_scenarios_local.append('Current Accounts')
     # Loop over scenarios and add LEAP data to WEAP expressions.
     for i in range(0, len(leap_scenarios_local)):
-        print('Current scenario:', leap_scenarios_local[i])
         weap.ActiveScenario = weap_scenarios_local[i]
-        print(weap.Branches(weap_branch).Variables(weap_variable).Name)
+        print('LEAP Scenario:', leap_scenarios_local[i], ', LEAP Variable:', weap.Branches(weap_branch).Variables(weap_variable).Name)
         weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
-        print(weap_expression)
+        print('Current WEAP expression: ', weap_expression)
         if not weap_expression[0:6]=='Interp':
             msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
             tkmessagebox.showerror(procedure_title,msg)
@@ -258,7 +257,7 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         else:
             new_weap_expression = "".join([new_weap_expression, split_weap_expression[1]])
         weap.Branches(weap_branch).Variables(weap_variable).Expression = new_weap_expression
-        print('Updated expression: ', weap.Branches(weap_branch).Variables(weap_variable).Expression)
+        print('Updated WEAP expression: ', weap.Branches(weap_branch).Variables(weap_variable).Expression)
 
 # function that returns the month number associated with the month named month_name.
 def get_month_num(month_name, procedure_title):
@@ -396,8 +395,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
 
-
     #validate branches
+    print('Validating branches in WEAP and LEAP', flush=True)
     for aep in config_params:
         if (aep == 'WEAP' or aep=="LEAP"):
             for key in config_params[aep]['Branches']:
@@ -422,10 +421,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # validate regions
     calculated_leap_regions = config_params['LEAP']['Regions']
     for r in calculated_leap_regions :
+        print(r)
         check_region(leap, r)
 
     # validate hydropower reservoirs in weap
     for b in config_params['WEAP']['Hydropower_plants'] :
+        print(b)
         check_branch_var(weap, config_params['WEAP']['Hydropower_plants'][b]['weap_path'], "Hydropower Generation", "GJ")
 
 
@@ -503,6 +504,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     for k in scenarios_map.keys():
         msg = [msg1, k,  "(LEAP) <-> ", scenarios_map[k], "(WEAP)"]
         leap.ShowProgressBar(procedure_title, " ".join(msg))
+        leap.SetProgressBar(10)
 
     # get calculated years in leap
     leap_calc_years=get_leap_calc_years(leap)
@@ -777,7 +779,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.Calculate(False)
 
         # ++++++++++++++++++
-        # +++++ NOTE: script from Emily to be added prior to this, will get results from WEAP)
+        # +++++ NOTE: script from Emily to be added here, will get results from WEAP)
         # ++++++++++++++++++
 
         # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
@@ -813,8 +815,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     this_iteration_leap_results[current_index] = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable']).ValueRS(leap.Regions(config_params['LEAP']['Hydropower_plants'][e]['leap_region']).Id, leap.Scenarios(s).Id, y, config_params['LEAP']['Hydropower_plants'][e]['leap_unit'])
                     current_index = current_index + 1
 
-        print('Checking Macro results...')
+
         if leap_macro:
+            print('Checking Macro results...')
             this_iteration_leapmacro_results= numpy.empty((len(target_leapmacro_results)*len(config_params['LEAP-Macro']['regions'].keys())*len(leap_scenarios)*len(leap_calc_years)), dtype=object)  # Array of target LEAP result values obtained in this iteration. Contains one set of result values for each scenario in leap_scenarios and year calculated in LEAP; results are ordered by scenario, year, and result in target_leap_results
             current_index = 0  # Index currently being written to this_iteration_leap_results/this_iteration_weap_results/this_teration_leapmacro_results
 
@@ -901,12 +904,13 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         last_iteration_weap_results = this_iteration_weap_results
 
         completed_iterations += 1
-
+    
     if lang == "RUS":
         msg ="Завершена процедура интеграции WEAP-LEAP."
     else :
         msg = "Completed WEAP-LEAP integration procedure."
     leap.ShowProgressBar(procedure_title, "".join(msg))
+    leap.SetProgressBar(100)
     
 
     tet = time.time()
