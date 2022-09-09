@@ -509,6 +509,15 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # get calculated years in leap
     leap_calc_years=get_leap_calc_years(leap)
 
+    # Clear hydropower reservoir energy demand from WEAP scenarios
+    print('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.')
+    for s in weap_scenarios:
+        weap.ActiveScenario=s
+        for wb in weap_hydro_branches:
+            if not 'Run of River' in weap_path: 
+                weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+                weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = ""
+
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
     if leap_macro:
         kill_excel()
