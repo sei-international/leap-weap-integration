@@ -2,6 +2,7 @@
 # installed packages: os, pywin32, pywingui, Tkinter, tkMessageBox, winreg, calendar, time, yaml, psutil, numpy, calendar
 # ultimate environment will need to contain these
 
+from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
 import win32gui
@@ -515,6 +516,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     for s in weap_scenarios:
         weap.ActiveScenario=s
         for wb in weap_hydro_branches:
+            weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
             if not 'Run of River' in weap_path: 
                 weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
                 weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = ""
