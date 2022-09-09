@@ -53,7 +53,7 @@ cfg_file = parsed_args["config_file"]
 cfg_yaml = YAML.load_file(cfg_file)
 # These must be set to these values for the script to work
 cfg_yaml["model"]["run_leap"] = true
-cfg_yaml["model"]["max_runs"] = 1
+cfg_yaml["model"]["max_runs"] = 0
 # Get options from command line
 cfg_yaml["output_folder"] = parsed_args["scenario"]
 cfg_yaml["LEAP-info"]["scenario"] = parsed_args["scenario"]
