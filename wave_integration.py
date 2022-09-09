@@ -906,6 +906,40 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         completed_iterations += 1
     
     if lang == "RUS":
+        msg ="Заключительный шаг: Перемещение выработки гидроэлектроэнергии в WEAP и повторный запуск WEAP..."
+    else :
+        msg = "Final Step: Moving hydropower generation to WEAP and rerunning WEAP..."
+    leap.ShowProgressBar(procedure_title, "".join(msg))
+    leap.SetProgressBar(95)
+    
+    print("Final Step: Moving hydropower generation to WEAP and rerunning WEAP...", flush = True)
+    weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
+    for i in range(0, len(weap_scenarios)):
+        weap.ActiveScenario = weap_scenarios[i]
+        for wb in weap_hydro_branches:
+            weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+            print('weap hydro reservoir:', wb, flush = True)
+            if 'Run of River' in weap_path: 
+                print('This is a Run of River hydropower plant, ignoring....', flush = True)
+            else:
+                new_data='Interp('
+                for y in range(weap.BaseYear, weap.EndYear):
+                    weap_branch_energydemand = 0 
+                    leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
+                    for lb in leap_hpps:
+                        leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
+                        leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
+                        weap_branch_energydemand +=leap.Branches(leap_path).Variables('Energy Generation').ValueRS(leap.regions(leap_region).id, leap_scenarios[i], y, 'GWh') 
+                    new_data ="".join([new_data, str(y), listseparator, str(weap_branch_energydemand), listseparator])
+                new_data ="".join([new_data[0:-1], ")"]) # remove last listseparator and close bracket
+                weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = weap_branch_energydemand # Cannot specify unit, but is GWh in WEAP
+
+    print('Calculating WEAP on last time...', flush = True)
+    weap.Calculate()
+    while weap.IsCalculating :
+        leap.Sleep(1000)
+
+    if lang == "RUS":
         msg ="Завершена процедура интеграции WEAP-LEAP."
     else :
         msg = "Completed WEAP-LEAP integration procedure."
