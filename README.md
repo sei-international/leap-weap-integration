@@ -20,7 +20,7 @@ Required files:
 7. Configure config file as needed:
     - area name in config.yml needs to match they one you would like to use
     - comment out LEAP-Macro if you do not want run leap-macro
-8. Open command prompt window and change to wave-integration directory
+8. Open command prompt window and change to leap-weap-integration directory
 9. Execute integration by typing in command prompt window:
     $ python3.9 wave_integration.py
 
