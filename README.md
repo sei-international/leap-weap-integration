@@ -11,7 +11,6 @@ Required files:
 **Set-up instructions**
 1. Install and register LEAP,  WEAP and NEMO softwares
 2. Install latest LEAP and WEAP areas for WAVE
-3. 
 4. Install python3.9 and required packages (for full list see leap-weap-integration repository)
 5. Download leap-weap-integration repository from github
 6. If running with LEAP-Macro:
