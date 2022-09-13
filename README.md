@@ -14,12 +14,12 @@ Required files:
 4. Install python3.9 and required packages (for full list see leap-weap-integration repository)
 5. Download leap-weap-integration repository from github
 6. If running with LEAP-Macro:
-      a. Open Julia and add LEAP-Macro package
-      b. Place LEAP-Macro country folders in LEAP area for each region you would like to run
+      - Open Julia and add LEAP-Macro package
+      - Place LEAP-Macro country folders in LEAP area for each region you would like to run
 6. Open LEAP area and select scenarios you would like to run (for production run all will be activated) - save
 7. Configure config file as needed:
-    - area name in config.yml needs to match they one you would like to use
-    - comment out LEAP-Macro if you do not want run leap-macro
+      - area name in config.yml needs to match they one you would like to use
+      - comment out LEAP-Macro if you do not want run leap-macro
 8. Open command prompt window and change to leap-weap-integration directory
 9. Execute integration by typing in command prompt window:
     $ python3.9 wave_integration.py
