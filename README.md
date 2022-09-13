@@ -11,11 +11,11 @@ Required files:
 **Set-up instructions**
 1. Install and register LEAP,  WEAP and NEMO softwares
 2. Install latest LEAP and WEAP areas for WAVE
-3. Clone LEAP-Macro repository
+3. 
 4. Install python3.9 and required packages (for full list see leap-weap-integration repository)
 5. Download leap-weap-integration repository from github
 6. If running with LEAP-Macro:
-      a. Download LEAP-Macro repository from github
+      a. Open Julia and add LEAP-Macro package
       b. Place LEAP-Macro country folders in LEAP area for each region you would like to run
 6. Open LEAP area and select scenarios you would like to run (for production run all will be activated) - save
 7. Configure config file as needed:
