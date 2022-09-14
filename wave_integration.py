@@ -1,9 +1,14 @@
 
+# EKB thinks this list is out of date. See below
 # installed packages: os, pywin32, pywingui, Tkinter, tkMessageBox, winreg, calendar, time, yaml, psutil, numpy, calendar
 # ultimate environment will need to contain these
 
+# If install via Miniconda, must then run:
+#   conda install pyyaml, numpy, psutil
+
 from errno import WSAEDQUOT
 from ntpath import altsep
+import pywintypes
 import win32com.client as win32
 import win32gui
 from tkinter import Tk, Label, Button, Radiobutton, IntVar
