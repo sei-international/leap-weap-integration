@@ -20,7 +20,6 @@ import time
 from winreg import *
 from calendar import monthrange
 import os #os.path, os.system
-import csv
 import psutil
 import numpy
 import re
