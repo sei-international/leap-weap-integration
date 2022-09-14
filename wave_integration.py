@@ -5,10 +5,12 @@
 
 # If install via Miniconda, must then run:
 #   conda install pyyaml, numpy, psutil
+#   conda install pywin32, then run in command prompt:
+#      cd "C:\ProgramData\Miniconda3\Scripts"
+#      python pywin32_postinstall.py -install
 
 from errno import WSAEDQUOT
 from ntpath import altsep
-import pywintypes
 import win32com.client as win32
 import win32gui
 from tkinter import Tk, Label, Button, Radiobutton, IntVar
