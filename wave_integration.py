@@ -365,21 +365,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             leap.ShowProgressBar(procedure_title, msg)
             exit()
 
-    # open correct leap and weap areas
-    if  user_interface :
-        root=Tk()
-        root.withdraw()
-        if lang == "RUS" :
-            msg = "Пожалуйста, откройте модель WAVE (область) в WEAP."
-            title = "Открытая область WEAP"
-        else :
-            title = "Open WEAP Area"
-            msg = "Please open the WAVE model (area) in WEAP."
-        messagebox=tkmessagebox.askokcancel(title, msg)
-        if messagebox != True :
-            exit()
-        else :
-            wait_apps(weap,leap)
+    # open correct leap area and select scenarios and years to be calculated
         if lang == "RUS" :
             msg = "Пожалуйста, откройте модель WAVE (область) в LEAP и выберите сценарии и годы, которые вы хотели бы запустить.ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария в WEAP будет переписан."
             title = "Открытая область LEAP"
