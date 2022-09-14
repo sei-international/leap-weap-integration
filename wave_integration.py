@@ -311,7 +311,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         print("WAVE integration", "Cannot start LEAP and WEAP. Exiting...")
         exit()
         
-    leap.Verbose = 1
+    # leap.Verbose = 1
 
     if runfrom_app == "LEAP" :
         runfrom_app_obj = leap
