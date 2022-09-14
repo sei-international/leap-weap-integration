@@ -381,11 +381,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         else :
             wait_apps(weap,leap)
         if lang == "RUS" :
-            msg = "Пожалуйста, откройте модель WAVE (область) в LEAP."
+            msg = "Пожалуйста, откройте модель WAVE (область) в LEAP и выберите сценарии и годы, которые вы хотели бы запустить.ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария в WEAP будет переписан."
             title = "Открытая область LEAP"
         else :
             title = "Open LEAP Area"
-            msg = "Please open the WAVE model (area) in LEAP."
+            msg = "Please open the WAVE model (area) in LEAP and select the scenarios and years you would like to run. NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten."
         messagebox=tkmessagebox.askokcancel(title, msg)
         if messagebox != True :
             exit()
@@ -954,7 +954,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 new_data ="".join([new_data[0:-1], ")"]) # remove last listseparator and close bracket
                 weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = weap_branch_energydemand # Cannot specify unit, but is GWh in WEAP
 
-    print('Calculating WEAP on last time...', flush = True)
+    print('Calculating WEAP one last time...', flush = True)
     weap.Calculate()
     while weap.IsCalculating :
         leap.Sleep(1000)
@@ -972,4 +972,4 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     print('Total elapsed time:', total_elapsed_time, 'seconds')
 
 
-main_integration(user_interface=False, tolerance=0.1, max_iterations=1) # can later be run from VB script
+main_integration(user_interface=True, tolerance=0.1, max_iterations=1) # can later be run from VB script
