@@ -366,22 +366,22 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             exit()
 
     # open correct leap area and select scenarios and years to be calculated
-        if lang == "RUS" :
-            msg = "Пожалуйста, откройте модель WAVE (область) в LEAP и выберите сценарии и годы, которые вы хотели бы запустить.ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария в WEAP будет переписан."
-            title = "Открытая область LEAP"
-        else :
-            title = "Open LEAP Area"
-            msg = "Please open the WAVE model (area) in LEAP and select the scenarios and years you would like to run. NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten."
-        messagebox=tkmessagebox.askokcancel(title, msg)
-        if messagebox != True :
-            exit()
-        else :
-            wait_apps(leap, weap)
+    if lang == "RUS" :
+        msg = ["Пожалуйста, откройте модель WAVE (область) в LEAP (такую же, как определена в config.yml) и выберите сценарии и годы, которые вы хотели бы запустить.", "ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария в WEAP будет переписан."]
+        title = "Открытая область LEAP"
     else :
-        weap.ActiveArea = config_params['WEAP']['Area'] # needs to be  put in a yaml file
-        wait_apps(weap, leap)
-        leap.ActiveArea = config_params['LEAP']['Area']
+        title = "Open LEAP Area"
+        msg = ["Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run." , "NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten."]
+    messagebox=tkmessagebox.askokcancel(title, "\n".join(msg))
+    if messagebox != True :
+        exit()
+    else :
         wait_apps(leap, weap)
+    
+    weap.ActiveArea = config_params['WEAP']['Area'] # needs to be  put in a yaml file
+    wait_apps(weap, leap)
+    leap.ActiveArea = config_params['LEAP']['Area']
+    wait_apps(leap, weap)
 
     # Validate leap and weap areas
     if lang == "RUS" : msg = "Валидирование областей WEAP и LEAP."
