@@ -965,6 +965,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         msg = "Completed WEAP-LEAP integration procedure."
     leap.ShowProgressBar(procedure_title, "".join(msg))
     leap.SetProgressBar(100)
+    leap.CloseProgressBar()
     
 
     tet = time.time()
