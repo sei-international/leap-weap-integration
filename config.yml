@@ -4,7 +4,7 @@
 # Needs to be kept up-to-date by user
 ###############################################################
 WEAP:
-  Area: 'WAVE-SyrDarya 2022_08_29_MABIA'
+  Area: 'WAVE-SyrDarya 2022_09_13_MABIA'
   Branches:
     Population_KAZ:
       path: Key\Demographic\KAZ\National population
@@ -247,7 +247,7 @@ WEAP:
 
 
 LEAP:
-  Area: 'wave central asia v38'
+  Area: 'wave central asia v39'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   Branches: 
     GDP:
@@ -407,6 +407,6 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
       Kazakhstan:
         directory_name: KAZ_Macro
         script: runleapmacro.jl
-      # Kyrgyzstan:
-        # directory_name: KGZ_Macro
-        # script: runleapmacro.jl
+      Kyrgyzstan:
+        directory_name: KGZ_Macro
+        script: runleapmacro.jl
