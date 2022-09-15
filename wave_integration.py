@@ -41,7 +41,7 @@ logging.basicConfig(filename=logfile, encoding='utf-8', level=logging.INFO)
 tst= time.time()
 # List of functions to be defined
 # Convert number of seconds into HH::MM::SS
-def hms_from_sec(dt)
+def hms_from_sec(dt):
     h = int(dt // 3600)
     m = int(dt % 3600 // 60)
     s = round(dt % 3600 % 60)
