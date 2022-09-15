@@ -35,7 +35,7 @@ import logging
 # Copyright © 2022: Stockholm Environment Institute U.S.
 #==================================================================================================#
 logfile = 'wave_integration_' + str(uuid.uuid4().hex) + '.log'
-print('Sending to log file "' + logfile + '"')
+print('Sending to log file "' + logfile + '"', flush = True)
 logging.basicConfig(filename=logfile, encoding='utf-8', level=logging.INFO)
 
 tst= time.time()
