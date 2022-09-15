@@ -40,6 +40,13 @@ logging.basicConfig(filename=logfile, encoding='utf-8', level=logging.INFO)
 
 tst= time.time()
 # List of functions to be defined
+# Convert number of seconds into HH::MM::SS
+def hms_from_sec(dt)
+    h = int(dt // 3600)
+    m = int(dt % 3600 // 60)
+    s = round(dt % 3600 % 60)
+    return '{:02}:{:02}:{:02}'.format(h,m,s)    
+
 # function that enumerates windows
 def windowEnumerationHandler(hwnd, top_windows):
     top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
@@ -247,9 +254,9 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
     # Loop over scenarios and add LEAP data to WEAP expressions.
     for i in range(0, len(leap_scenarios_local)):
         weap.ActiveScenario = weap_scenarios_local[i]
-        logging.info('LEAP Scenario:', leap_scenarios_local[i], ', LEAP Variable:', weap.Branches(weap_branch).Variables(weap_variable).Name)
+        logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
         weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
-        logging.info('Current WEAP expression: ', weap_expression)
+        logging.info('Current WEAP expression: ' + weap_expression)
         if not weap_expression[0:6]=='Interp':
             msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
             tkmessagebox.showerror(procedure_title,msg)
@@ -270,7 +277,7 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         else:
             new_weap_expression = "".join([new_weap_expression, split_weap_expression[1]])
         weap.Branches(weap_branch).Variables(weap_variable).Expression = new_weap_expression
-        logging.info('Updated WEAP expression: ', weap.Branches(weap_branch).Variables(weap_variable).Expression)
+        logging.info('Updated WEAP expression: ' + weap.Branches(weap_branch).Variables(weap_variable).Expression)
 
 # function that returns the month number associated with the month named month_name.
 def get_month_num(month_name, procedure_title):
@@ -313,7 +320,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     wait_apps(weap, leap)
 
     if not leap or not weap:
-        logging.error("WAVE integration", "Cannot start LEAP and WEAP. Exiting...")
+        logging.error("WAVE integration: Cannot start LEAP and WEAP. Exiting...")
         exit()
         
     # leap.Verbose = 1
@@ -395,7 +402,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.SetProgressBar(5)
 
     #validate branches
-    logging.info('Validating branches in WEAP and LEAP', flush=True)
+    logging.info('Validating branches in WEAP and LEAP')
     for aep in config_params:
         if (aep == 'WEAP' or aep=="LEAP"):
             for key in config_params[aep]['Branches']:
@@ -407,11 +414,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 for r in config_params[aep]['Agricultural regions']:
                     for key in config_params[aep]['Agricultural regions'][r]:
                         check_branch_var(weap, config_params[aep]['Agricultural regions'][r][key]['weap_path'], config_params[aep]['Agricultural regions'][r][key]['variable'], config_params[aep]['Agricultural regions'][r][key]['unit'])
-                        logging.info('Does this path exist?', config_params[aep]['Agricultural regions'][r][key]['weap_path'])
+                        logging.info('Does this path exist? ' + config_params[aep]['Agricultural regions'][r][key]['weap_path'])
                 for r in config_params[aep]['Industrial and domestic regions']:
                     for key in config_params[aep]['Industrial and domestic regions'][r]:
                         check_branch_var(weap, config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'], config_params[aep]['Industrial and domestic regions'][r][key]['variable'], config_params[aep]['Industrial and domestic regions'][r][key]['unit'])
-                        logging.info('Does this path exist?', config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'])
+                        logging.info('Does this path exist? ' + config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'])
 
     # validate hydropower plants in leap
     for b in config_params['LEAP']['Hydropower_plants'] :
@@ -523,12 +530,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if leap_macro:
         kill_excel()
         for s in leap_scenarios:
-            logging.info('Running LEAP-Macro for scenario: ', s)
+            logging.info('Running LEAP-Macro for scenario: ' + s)
             for r, rinfo in config_params['LEAP-Macro']['regions'].items():
-                logging.info('Region:', r)
+                logging.info('Region: ' + r)
                 macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
                 exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -v -y " + str(leap_calc_years[-1])
-                logging.info("Executing: '", exec_string, "'")
+                logging.info("Executing: '" + exec_string + "'")
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
                     raise RuntimeError("LEAP-Macro exited with an error")
@@ -580,7 +587,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, listseparator,procedure_title)
 
             count+=1
-            logging.info('Pushed ', count, ' variable(s) to WEAP')
+            logging.info('Pushed ' + count + ' variable(s) to WEAP')
 
 
         # Calculate WEAP
@@ -608,7 +615,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
         for i in range(0, len(weap_scenarios)):
             for wb in weap_hydro_branches:
-                logging.info('weap hydro reservoir:', wb)
+                logging.info('weap hydro reservoir: ' + wb)
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap.Scenarios(leap_scenarios[i]).Id), ".xlsx" ]) # Name of XLSX file being written
                 xlsx_path = "".join([leap.ActiveArea.Directory, xlsx_file])  # Full path to XLSX file being written
                 xlsx_path=fr"{xlsx_path}"
@@ -683,7 +690,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 ts.Close()
                 et = time.time()
                 elapsed_time = et - st
-                logging.info('Elapsed time: ', elapsed_time, ' seconds')
+                logging.info('Elapsed time: ' + hms_from_sec(elapsed_time))
 
                 if num_lines_written>0 :
                     # Convert csv_path into an XLSX file
@@ -694,18 +701,18 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                         excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
                         excel.ActiveWorkbook.Close()
                     except Exception as e:
-                        logging.error('could not save to Excel: ', e)
+                        logging.error('could not save to Excel: ' + e)
                     finally:
                         excel.Application.Quit()
-                    logging.info('xls file exists:', os.path.isfile(xlsx_path))
+                    logging.info('Excel file exists: ' + os.path.isfile(xlsx_path))
                     et = time.time()
                     elapsed_time = et - st
-                    logging.info('Elapsed time: ', elapsed_time, ' seconds')
+                    logging.info('Elapsed time: '  + hms_from_sec(elapsed_time))
 
                     # Update LEAP Maximum Availability
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
                     for lhpp in leap_hpps:
-                        logging.info('leap hpp:', lhpp)
+                        logging.info('LEAP hydropower plant: ' + lhpp)
                         lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
                         lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
                         leap.ActiveRegion=lhpp_region
@@ -739,10 +746,10 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion=r
                 leap.ActiveScenario=leap_scenarios[i]
-                logging.info('This region', r)
-                logging.info('leap expr before:', leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression)
+                logging.info('Current region: ' + r)
+                logging.info('LEAP expr before: ' + leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression)
                 leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
-                logging.info('leap expr after:', leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression)
+                logging.info('LEAP expr after: ' + leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression)
 		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
 
 
@@ -769,10 +776,10 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion=r
                 leap.ActiveScenario=leap_scenarios[i]
-                logging.info('This region', r)
-                logging.info('Original leap expr :', leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression)
+                logging.info('Current region: ' + r)
+                logging.info('Original LEAP expr: ' + leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression)
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
-                logging.info('Upated leap expr:', leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression)
+                logging.info('Upated LEAP expr: ' + leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression)
 
 
         # BEGIN: Calculate LEAP.
@@ -797,12 +804,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         if leap_macro:
             kill_excel()
             for s in leap_scenarios:
-                logging.info('Running LEAP-Macro for scenario: ', s)
+                logging.info('Running LEAP-Macro for scenario: ' + s)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
-                    logging.info('Region:', r)
+                    logging.info('Region: ' + r)
                     macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
                     exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
-                    logging.info("Executing: '", exec_string, "'")
+                    logging.info("Executing: '" + exec_string + "'")
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
                         raise RuntimeError("LEAP-Macro exited with an error")
@@ -929,7 +936,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         weap.ActiveScenario = weap_scenarios[i]
         for wb in weap_hydro_branches:
             weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
-            logging.info('weap hydro reservoir:', wb)
+            logging.info('weap hydro reservoir: ' + wb)
             if 'Run of River' in weap_path: 
                 logging.info('This is a Run of River hydropower plant, ignoring....')
             else:
@@ -961,7 +968,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     tet = time.time()
     total_elapsed_time = tet - tst
-    logging.info('Total elapsed time:', total_elapsed_time, 'seconds')
+    logging.info('Total elapsed time:' hms_from_sec(total_elapsed_time))
 
 
 main_integration(user_interface=True, tolerance=0.1, max_iterations=1) # can later be run from VB script
