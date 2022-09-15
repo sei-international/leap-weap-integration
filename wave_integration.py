@@ -31,7 +31,7 @@ import logging
 
 #in julia: using LEAPMacro
 #using YAML
-#using ArgParse need to be installed)
+#using ArgParse need to be installed
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
 #
@@ -589,7 +589,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, listseparator,procedure_title)
 
             count+=1
-            logging.info('Pushed ' + count + ' variable(s) to WEAP')
+            logging.info('Pushed ' + str(count) + ' variable(s) to WEAP')
 
 
         # Calculate WEAP
