@@ -395,7 +395,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.SetProgressBar(5)
 
     #validate branches
-    logging.info('Validating branches in WEAP and LEAP', flush=True)
+    logging.info('Validating branches in WEAP and LEAP')
     for aep in config_params:
         if (aep == 'WEAP' or aep=="LEAP"):
             for key in config_params[aep]['Branches']:
