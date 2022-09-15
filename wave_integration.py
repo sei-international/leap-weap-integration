@@ -36,7 +36,7 @@ import logging
 #==================================================================================================#
 logfile = 'wave_integration_' + str(uuid.uuid4().hex) + '.log'
 print('Sending to log file "' + logfile + '"', flush = True)
-logging.basicConfig(filename=logfile, encoding='utf-8', level=logging.INFO)
+logging.basicConfig(filename=logfile, format='%(levelname)s:%(message)s', encoding='utf-8', level=logging.INFO)
 
 tst= time.time()
 # List of functions to be defined
