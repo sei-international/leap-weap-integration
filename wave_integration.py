@@ -968,7 +968,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     tet = time.time()
     total_elapsed_time = tet - tst
-    logging.info('Total elapsed time:' hms_from_sec(total_elapsed_time))
+    logging.info('Total elapsed time: ' + hms_from_sec(total_elapsed_time))
 
 
 main_integration(user_interface=True, tolerance=0.1, max_iterations=1) # can later be run from VB script
