@@ -20,7 +20,7 @@ Required files:
             Variable Name: PYTHON 
             Variable: location of python executable\python.exe
       - from command prompt window run:
-        $pip install pyyaml pywin32 psutil numpy
+        `$pip install pyyaml pywin32 psutil numpy`
         (if pip command is not recognised, get get-pip.py script (https://bootstrap.pypa.io/get-pip.py) and place in python installation folder;from command prompt window, change to python installation folder and run py -3.9 get-pip.py; change to where pip is installed and run above install command)
 4. Download and install latest LEAP and WEAP areas for WAVE, currently:
       -  LEAP: wave central asia v41 (this will come with require LEAP-Macro country folders, if not or outdated check here: https://www.dropbox.com/home/USAID%20Central%20Asia%20WAVE%20project/Economic%20Modeling)
