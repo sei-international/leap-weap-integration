@@ -928,6 +928,10 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         last_iteration_weap_results = this_iteration_weap_results
 
         completed_iterations += 1
+        
+        leap.SaveArea()
+        weap.SaveArea()
+
     
     if lang == "RUS":
         msg ="Заключительный шаг: Перемещение выработки гидроэлектроэнергии в WEAP и повторный запуск WEAP..."
