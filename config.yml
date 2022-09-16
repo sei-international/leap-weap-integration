@@ -405,6 +405,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   LEAP:
     target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
   WEAP:
+    cov_to_util_exponent: 0.2
     sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
     croplist: ["Seasonal crops", "Perennial crops"]
   regions:

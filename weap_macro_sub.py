@@ -104,7 +104,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
             coverage = coverage.append(coveragetemp)
     fname = os.path.join(fdirmacroinput, scenario + "_coverage.csv")
-    coverage = coverage.transpose()
+    coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent'] # If exponent = 0, max_util = 1.0; if = 1, then max_util = coverage
     coverage.to_csv(fname, index=True, index_label = "year") #final output to csv
         
 
