@@ -111,7 +111,9 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     #Crop production
     cropprod = pd.DataFrame()
     prodvalue = pd.DataFrame()
+    realtemp2 = pd.DataFrame()
     real = pd.DataFrame()
+    pricegrowthtemp2 = pd.DataFrame()
     pricegrowth = pd.DataFrame()
     for sector in config_params['LEAP-Macro']['weap_sectorlist']:    
         try:
@@ -233,8 +235,8 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
         dfshare = dfshare.drop(columns = min(dfcrop_cols))
         
         
-        ##real output growth / index
-        realtemp = dfshare * (1 + dfinflation) * dfcropchange
+        ##real output growth
+        realtemp = dfshare * (1 + dfinflation) * dfcropchange   
         try:
             macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]
             macrocropno = len(macrocrop)        
@@ -245,8 +247,8 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                         realtemp = realtemp.drop('other')
                 for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]['All crops']: 
                     realtemp = realtemp.rename(index={countries[0]: macrocrop})
-                    real = real.append(realtemp)
-                real = real.drop_duplicates()
+                    realtemp2 = realtemp2.append(realtemp)
+                realtemp2 = realtemp2.drop_duplicates()
             else:
                 realtemp = realtemp.groupby(['country', 'crop category']).sum()
                 for x, y in realtemp.index: 
@@ -259,11 +261,21 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 for crop in config_params['LEAP-Macro']['weap_croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
                         realtemp = realtemp.rename(index={crop: macrocrop})
-                        pricegrowth = pricegrowth.append(realtemp.loc[macrocrop])
+                        realtemp2 = realtemp2.append(realtemp.loc[macrocrop])
         except:
-            pass    
+            pass
+        
+        
+        ## convert real output growth to indices
+        for x in realtemp2:
+            if x == min(realtemp2):
+                real[x] = 1*(1+(realtemp2[x]))
+                y = real[x]
+            else:
+                real[x] = y*(1+(realtemp2[x]))
+                y = real[x]
                     
-        ##price growth / index
+        ##price growth
         pricegrowthtemp = dfinflation * dfshare
         try:
             macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]
@@ -275,8 +287,8 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                         pricegrowthtemp = pricegrowthtemp.drop('other') 
                 for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]['All crops']: 
                     pricegrowthtemp = pricegrowthtemp.rename(index={countries[0]: macrocrop})
-                    pricegrowth = pricegrowth.append(pricegrowthtemp.loc[macrocrop])
-                pricegrowth = pricegrowth.drop_duplicates()
+                    pricegrowthtemp2 = pricegrowthtemp2.append(pricegrowthtemp.loc[macrocrop])
+                pricegrowthtemp2 = pricegrowthtemp2.drop_duplicates()
             else:
                 pricegrowthtemp = pricegrowthtemp.groupby(['country', 'crop category']).sum()
                 for x, y in pricegrowthtemp.index: 
@@ -289,10 +301,19 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 for crop in config_params['LEAP-Macro']['weap_croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
-                        pricegrowth = pricegrowth.append(pricegrowthtemp.loc[macrocrop])
+                        pricegrowthtemp2 = pricegrowthtemp2.append(pricegrowthtemp.loc[macrocrop])
         except:
             pass    
 
+        ## convert price growth to indices
+        for x in pricegrowthtemp2:
+            if x == min(pricegrowthtemp2):
+                pricegrowth[x] = 1*(1+(pricegrowthtemp2[x]))
+                y = pricegrowth[x]
+            else:
+                pricegrowth[x] = y*(1+(pricegrowthtemp2[x]))
+                y = pricegrowth[x]
+                    
                 
     fname = fdirmacroinput + scenario + "_crop_production.csv"
     cropprod = cropprod.transpose()
@@ -302,11 +323,11 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     prodvalue = prodvalue.transpose()
     prodvalue.to_csv(fname, index=True) #final output to csv
     
-    fname = fdirmacroinput + scenario + "_realoutputgrowth.csv"
+    fname = fdirmacroinput + scenario + "_realoutputindex.csv"
     real = real.transpose()
     real.to_csv(fname, index=True) #final output to csv
     
-    fname = fdirmacroinput + scenario + "_pricegrowth.csv"
+    fname = fdirmacroinput + scenario + "_priceindex.csv"
     pricegrowth = pricegrowth.transpose()
     pricegrowth.to_csv(fname, index=True) #final output to csv
     
