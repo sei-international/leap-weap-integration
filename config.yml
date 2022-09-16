@@ -247,7 +247,7 @@ WEAP:
 
 
 LEAP:
-  Area: 'wave central asia v39'
+  Area: 'wave central asia v41'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   Branches: 
     GDP:
