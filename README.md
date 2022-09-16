@@ -28,7 +28,8 @@ Required files:
 5. Download or clone leap-weap-integration repository from github and place anywhere on your machine
 6. If running with LEAP-Macro:
       - Open Julia window
-      - add LEAP-Macro package 
+      - add LEAP-Macro package : 
+      $add https://github.com/sei-international/LEAPMacro.jl
       - add and build PyCall: 
         $add PyCall
         $build PyCall 
