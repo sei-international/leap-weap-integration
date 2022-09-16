@@ -560,7 +560,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
 
     while completed_iterations < max_iterations :
-        logging.info(completed_iterations)
+        logging.info(str(completed_iterations))
         if lang == "RUS":
             msg = ["Перемещение демографических и макроэкономических предположений из LEAP в WEAP (итерация ", str(completed_iterations+1), ")." ]
         else :
@@ -703,10 +703,13 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                         excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
                         excel.ActiveWorkbook.Close()
                     except Exception as e:
-                        logging.error('could not save to Excel: ' + e)
+                        logging.error('could not save to Excel: ' + str(e))
                     finally:
                         excel.Application.Quit()
-                    logging.info('Excel file exists: ' + os.path.isfile(xlsx_path))
+                    if os.path.isfile(xlsx_path):
+                        logging.info('Excel file exists')
+                    else:
+                        logging.error('Excel file does not exist')
                     et = time.time()
                     elapsed_time = et - st
                     logging.info('Elapsed time: '  + hms_from_sec(elapsed_time))
