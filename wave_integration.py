@@ -45,10 +45,11 @@ tst= time.time()
 # List of functions to be defined
 # Convert number of seconds into HH::MM::SS
 def hms_from_sec(dt):
-    h = int(dt // 3600)
-    m = int(dt % 3600 // 60)
-    s = round(dt % 3600 % 60)
-    return '{:02}:{:02}:{:02}'.format(h,m,s)    
+    dtn = round(dt)
+    h = dtn // 3600
+    m = dtn % 3600 // 60
+    s = dtn % 3600 % 60
+    return '{:02}:{:02}:{:02}'.format(h,m,s)
 
 # function that enumerates windows
 def windowEnumerationHandler(hwnd, top_windows):
