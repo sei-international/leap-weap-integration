@@ -22,7 +22,7 @@ def exportcsv(WEAP, fname, favname):
 #WEAP favorites to export
 def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
     
-    #loadweapscen(WEAP, scenario)
+    loadweapscen(WEAP, scenario)
     
     #Coverage
     favname = "WEAP Macro\Demand Site Coverage"
