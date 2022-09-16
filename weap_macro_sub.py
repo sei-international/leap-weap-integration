@@ -105,7 +105,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
             coverage = coverage.append(coveragetemp)
     fname = os.path.join(fdirmacroinput, scenario + "_coverage.csv")
     coverage = coverage.transpose()
-    coverage.to_csv(fname, index=True) #final output to csv
+    coverage.to_csv(fname, index=True, index_label = "year") #final output to csv
         
 
     #Crop production
@@ -317,19 +317,19 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 
     fname = os.path.join(fdirmacroinput, scenario + "_crop_production.csv")
     cropprod = cropprod.transpose()
-    cropprod.to_csv(fname, index=True) #final output to csv
+    cropprod.to_csv(fname, index=True, index_label = "year") #final output to csv
 
     fname = os.path.join(fdirmacroinput, scenario + "_productionvalue.csv")
     prodvalue = prodvalue.transpose()
-    prodvalue.to_csv(fname, index=True) #final output to csv
+    prodvalue.to_csv(fname, index=True, index_label = "year") #final output to csv
     
     fname = os.path.join(fdirmacroinput, scenario + "_realoutputindex.csv")
     real = real.transpose()
-    real.to_csv(fname, index=True) #final output to csv
+    real.to_csv(fname, index=True, index_label = "year") #final output to csv
     
     fname = os.path.join(fdirmacroinput, scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
-    pricegrowth.to_csv(fname, index=True) #final output to csv
+    pricegrowth.to_csv(fname, index=True, index_label = "year") #final output to csv
     
     #Investment parameters
     #RESERVOIR NAMES NOT BY COUNTRY; 
