@@ -73,7 +73,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
 
     #Process coverage data
     coverage = pd.DataFrame()
-    for sector in config_params['LEAP-Macro']['weap_sectorlist']:    
+    for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: #subsector data is the same across a given sector
             dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)] #removes strings not related to sector
             conditions = list(map(dfcovsec['Demand Site'].str.contains, countries)) #figure out which row is associated with which country
@@ -115,7 +115,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     real = pd.DataFrame()
     pricegrowthtemp2 = pd.DataFrame()
     pricegrowth = pd.DataFrame()
-    for sector in config_params['LEAP-Macro']['weap_sectorlist']:    
+    for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: #subsector data is the same across a given sector
                 dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)] #removes strings not related to sector  
@@ -258,7 +258,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                         except:
                             pass
                 realtemp = realtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['weap_croplist']:   
+                for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
                         realtemp = realtemp.rename(index={crop: macrocrop})
                         realtemp2 = realtemp2.append(realtemp.loc[macrocrop])
@@ -298,7 +298,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                         except:
                             pass
                 pricegrowthtemp = pricegrowthtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['weap_croplist']:   
+                for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
                         pricegrowthtemp2 = pricegrowthtemp2.append(pricegrowthtemp.loc[macrocrop])

@@ -453,7 +453,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
 
     if leap_macro:
-        list_leapmacro_keys=(config_params['LEAP-Macro']['target_variables'])
+        list_leapmacro_keys=(config_params['LEAP-Macro']['LEAP']['target_variables'])
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
     # BEGIN: Determine which scenarios are calculated.
@@ -825,23 +825,20 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 
                 #create directory to store WEAP outputs
                 fdirmain = os.path.dirname(leap.ActiveArea.Directory)
-                fdirweapoutput = fdirmain + "\\WEAP Outputs\\"
+                fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
                 if not os.path.exists(fdirweapoutput):
                     os.mkdir(fdirweapoutput)
                     
                 #export weap data
                 dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, scenario, weap, rowskip)     
                 
-                
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
                     # set file directories for WEAP to leap-macro
                     fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
-                    fdirmacroinput = fdirmain + "\\Macro Inputs\\"
-                    if not os.path.exists(fdirmacroinput):
-                        os.mkdir(fdirmacroinput)
+                    fdirmacroinput = os.path.join(fdirmain, "inputs")
                         
                     # process WEAP data for leap-macro
-                    weaptomacroprocessing(weap, scenario, config_params, r, rinfo['weap_country'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weaptomacroprocessing(weap, scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # LEAP-macro
             for s in leap_scenarios:

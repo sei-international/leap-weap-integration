@@ -402,14 +402,16 @@ LEAP:
 
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
   # Target variables are the same for each region: must match branches in LEAP config above
-  target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
-  weap_sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
-  weap_croplist: ["Seasonal crops", "Perennial crops"]
+  LEAP:
+    target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
+  WEAP:
+    sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
+    croplist: ["Seasonal crops", "Perennial crops"]
   regions:
       Kazakhstan:
         directory_name: KAZ_Macro
         script: runleapmacro.jl
-        weap_country: ['KAZ']
+        weap_region: ['KAZ']
         weap_coverage_mapping: 
           'Agriculture_': ['S_agfor']
           'Industrial_': ['S_food', 'S_paperpulp', 'S_otherind']
@@ -426,7 +428,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
       Kyrgyzstan:
         directory_name: KGZ_Macro
         script: runleapmacro.jl
-        weap_country: ['KGZ']
+        weap_region: ['KGZ']
         weap_coverage_mapping: 
           'Agriculture_': ['S_agfor']
           'Industrial_': ['S_food', 'S_woodpaper', 'S_otherind']
