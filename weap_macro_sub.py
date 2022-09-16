@@ -26,19 +26,19 @@ def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
     
     #Coverage
     favname = "WEAP Macro\Demand Site Coverage"
-    fname = fdirweapoutput + scenario + "_Coverage_Percent.csv"
+    fname = os.path.join(fdirweapoutput, scenario + "_Coverage_Percent.csv")
     exportcsv(WEAP, fname, favname) 
     dfcov = pd.read_csv(fname, skiprows=rowskip) 
     
     #Water demand in order to figure out coverage for each country
     favname = "WEAP Macro\Water Demand Annual Total - Level 1"
-    fname = fdirweapoutput + scenario + "_Water_Demand_Lvl1.csv"
+    fname = os.path.join(fdirweapoutput, scenario + "_Water_Demand_Lvl1.csv")
     exportcsv(WEAP, fname, favname)
     dfcovdmd = pd.read_csv(fname, skiprows=rowskip) 
     
     #Crop production
     favname = "WEAP Macro\Annual Crop Production"
-    fname = fdirweapoutput + scenario + "_Annual_Crop_Production.csv"
+    fname = os.path.join(fdirweapoutput, scenario + "_Annual_Crop_Production.csv")
     exportcsv(WEAP, fname, favname)
     dfcrop = pd.read_csv(fname, skiprows=rowskip)
     dfcrop = dfcrop.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
@@ -103,7 +103,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                     coveragetemp = coveragetemp.drop('other') 
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
             coverage = coverage.append(coveragetemp)
-    fname = fdirmacroinput + scenario + "_coverage.csv"
+    fname = os.path.join(fdirmacroinput, scenario + "_coverage.csv")
     coverage = coverage.transpose()
     coverage.to_csv(fname, index=True) #final output to csv
         
@@ -315,19 +315,19 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 y = pricegrowth[x]
                     
                 
-    fname = fdirmacroinput + scenario + "_crop_production.csv"
+    fname = os.path.join(fdirmacroinput, scenario + "_crop_production.csv")
     cropprod = cropprod.transpose()
     cropprod.to_csv(fname, index=True) #final output to csv
 
-    fname = fdirmacroinput + scenario + "_productionvalue.csv"
+    fname = os.path.join(fdirmacroinput, scenario + "_productionvalue.csv")
     prodvalue = prodvalue.transpose()
     prodvalue.to_csv(fname, index=True) #final output to csv
     
-    fname = fdirmacroinput + scenario + "_realoutputindex.csv"
+    fname = os.path.join(fdirmacroinput, scenario + "_realoutputindex.csv")
     real = real.transpose()
     real.to_csv(fname, index=True) #final output to csv
     
-    fname = fdirmacroinput + scenario + "_priceindex.csv"
+    fname = os.path.join(fdirmacroinput, scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
     pricegrowth.to_csv(fname, index=True) #final output to csv
     
