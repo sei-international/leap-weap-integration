@@ -535,13 +535,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
     if leap_macro:
-        kill_excel()
         for s in leap_scenarios:
             logging.info('Running LEAP-Macro for scenario: ' + s)
             for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                 logging.info('Region: ' + r)
                 macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -v -y " + str(leap_calc_years[-1])
+                exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
                 logging.info("Executing: '" + exec_string + "'")
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
@@ -801,10 +800,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
-        if not leap_macro:
-            logging.info('Running LEAP...')
-            kill_excel()
-            leap.Calculate(False)
+        logging.info('Running LEAP...')
+        kill_excel()
+        leap.Calculate(False)
 
         # ++++++++++++++++++
         # +++++ NOTE: script from Emily to be added here, will get results from WEAP)
@@ -812,13 +810,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
         # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
         if leap_macro:
-            kill_excel()
             for s in leap_scenarios:
                 logging.info('Running LEAP-Macro for scenario: ' + s)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                     logging.info('Region: ' + r)
                     macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
                     logging.info("Executing: '" + exec_string + "'")
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
