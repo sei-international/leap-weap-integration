@@ -43,6 +43,9 @@ function parse_commandline()
             help = "final year in LEAP"
  			arg_type = Int64
             default = 2050
+        "--use-weap-results", "-w"
+            help = "use exported WEAP results"
+            action = :store_true
     end
 
     return parse_args(argp)
@@ -63,6 +66,13 @@ cfg_yaml["LEAP-info"]["scenario"] = parsed_args["scenario"]
 cfg_yaml["model"]["hide_leap"] = parsed_args["suppress_leap"]
 cfg_yaml["years"]["end"] = parsed_args["final_year"]
 cfg_yaml["report-diagnostics"] = parsed_args["report_diagnostics"]
+
+if parsed_args["use_weap_results"]
+	cfg_yaml["exog-files"]["pot_output"] = parsed_args["scenario"] * "_realoutputindex.csv"
+	cfg_yaml["exog-files"]["max_util"] = parsed_args["scenario"] * "_max_util.csv"
+	cfg_yaml["exog-files"]["real_price"] = parsed_args["scenario"] * "_priceindex.csv"
+end
+
 if parsed_args["init_run_number"] != 0
     cfg_yaml["clear-folders"]["results"] = false
     cfg_yaml["clear-folders"]["calibration"] = false
