@@ -37,12 +37,37 @@ def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
     dfcovdmd = pd.read_csv(fname, skiprows=rowskip) 
     
     #Crop production
-    favname = "WEAP Macro\Annual Crop Production"
-    fname = os.path.join(fdirweapoutput, scenario + "_Annual_Crop_Production.csv")
-    exportcsv(WEAP, fname, favname)
-    dfcrop = pd.read_csv(fname, skiprows=rowskip)
-    dfcrop = dfcrop.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
+    # favname = "WEAP Macro\Annual Crop Production"
+    # fname = os.path.join(fdirweapoutput, scenario + "_Annual_Crop_Production.csv")
+    # exportcsv(WEAP, fname, favname)
+    # dfcrop = pd.read_csv(fname, skiprows=rowskip)
+    # dfcrop = dfcrop.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
     
+    #------------------------------------
+    # Potential crop production
+    #------------------------------------
+    favname = "WEAP Macro\Area"
+    fname = os.path.join(fdirweapoutput, scenario + "_Area.csv")
+    exportcsv(WEAP, fname, favname)
+    dfcroparea = pd.read_csv(fname, skiprows=rowskip)
+    dfcroparea = dfcroparea.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
+    
+    favname = "WEAP Macro\Potential Yield"
+    fname = os.path.join(fdirweapoutput, scenario + "_Potential_Yield.csv")
+    exportcsv(WEAP, fname, favname)
+    dfcroppotyld = pd.read_csv(fname, skiprows=rowskip)
+    dfcroppotyld = dfcroppotyld.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
+    
+    # The tables pull a lot of irrelevant branches -- the intersection is what we want
+    common_branches = set(dfcroparea['Branch']).intersection(set(dfcroppotyld['Branch']))
+    dfcroparea = dfcroparea[dfcroparea['Branch'].isin(common_branches)]
+    dfcroppotyld = dfcroppotyld[dfcroppotyld['Branch'].isin(common_branches)]
+    # Compute total potential yield based on area
+    dfcrop = dfcroparea # Make a copy
+    for dfcndx, dfcrow in dfcrop.iterrows():
+        curr_branch = dfcrow[0]
+        dfcrop.iloc[dfcndx,1:] = dfcroparea[dfcroparea['Branch'] == curr_branch].iloc[0,1:] * dfcroppotyld[dfcroppotyld['Branch'] == curr_branch].iloc[0,1:]
+
     #Water demand in order to figure out crop production for each country
     #favname = "WEAP Macro\Water Demand Annual Total - Level 2"
     #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Water_Demand_Lvl2_" + scenario + ".csv"
@@ -76,8 +101,8 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: #subsector data is the same across a given sector
             dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)] #removes strings not related to sector
-            conditions = list(map(dfcovsec['Demand Site'].str.contains, countries)) #figure out which row is associated with which country
-            dfcovsec['country'] = np.select(conditions, countries, 'other') #new column for countries
+            conditions = list(map(dfcovsec.loc[:,'Demand Site'].str.contains, countries)) #figure out which row is associated with which country
+            dfcovsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovsec) #list of columns
             cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
             dfcovsec = dfcovsec.loc[:,cols] #reorder columns in dataframe
@@ -87,8 +112,8 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
             dfcovsec = dfcovsec/100 #indexes to 1
          
             dfcovdmdsec = dfcovdmd[dfcovdmd['Branch'].str.contains(sector)] #removes strings not related to sector
-            conditions = list(map(dfcovdmdsec['Branch'].str.contains, countries)) #figure out which row is associated with which country
-            dfcovdmdsec['country'] = np.select(conditions, countries, 'other') #new column for countries
+            conditions = list(map(dfcovdmdsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
+            dfcovdmdsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovdmdsec) #list of columns
             cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
             dfcovdmdsec = dfcovdmdsec.loc[:,cols] #reorder columns in dataframe
@@ -103,8 +128,12 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                     coveragetemp = coveragetemp.drop('other') 
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
             coverage = coverage.append(coveragetemp)
-    fname = os.path.join(fdirmacroinput, scenario + "_coverage.csv")
+    fname = os.path.join(fdirmacroinput, scenario + "_max_util.csv") # After conversion, this is max utilization
     coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent'] # If exponent = 0, max_util = 1.0; if = 1, then max_util = coverage
+    coverage.index = coverage.index.astype('int64') # After transpose, the index is years
+    # Have to add for 2019
+    coverage.loc[2019] = coverage.loc[2020]
+    coverage.sort_index(inplace=True)
     coverage.to_csv(fname, index=True, index_label = "year") #final output to csv
         
 
@@ -119,10 +148,10 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: #subsector data is the same across a given sector
                 dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)] #removes strings not related to sector  
-                conditions = list(map(dfcropsec['Branch'].str.contains, countries)) #figure out which row is associated with which country
-                dfcropsec['country'] = np.select(conditions, countries, 'other') #new column for countries
-                dfcropsec['crop']= dfcropsec['Branch'].str.rsplit('\\', n=1).str.get(1)
-                dfcropsec['crop category'] = dfcropsec['crop'].map(config_params['LEAP-Macro']['crop_categories']['WEAP_to_Macro'])
+                conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
+                dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
+                dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
+                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(config_params['LEAP-Macro']['crop_categories']['WEAP_to_Macro'])
                 cols = list(dfcropsec) #list of columns
                 cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
                 cols.insert(2, cols.pop(cols.index('crop'))) #move the country column to specified index location
@@ -315,20 +344,21 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 y = pricegrowth[x]
                     
                 
-    fname = os.path.join(fdirmacroinput, scenario + "_crop_production.csv")
-    cropprod = cropprod.transpose()
-    cropprod.to_csv(fname, index=True, index_label = "year") #final output to csv
-
-    fname = os.path.join(fdirmacroinput, scenario + "_productionvalue.csv")
-    prodvalue = prodvalue.transpose()
-    prodvalue.to_csv(fname, index=True, index_label = "year") #final output to csv
-    
     fname = os.path.join(fdirmacroinput, scenario + "_realoutputindex.csv")
     real = real.transpose()
+    real.index = real.index.astype('int64') # After transpose, the index is years
+    # Must add some values to get to 2019
+    real.loc[2020] = 1
+    real.loc[2019] = 1/real.loc[2021]
+    real.sort_index(inplace=True)
     real.to_csv(fname, index=True, index_label = "year") #final output to csv
     
     fname = os.path.join(fdirmacroinput, scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
+    pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
+    pricegrowth.loc[2020] = 1
+    pricegrowth.loc[2019] = 1/real.loc[2021]
+    pricegrowth.sort_index(inplace=True)
     pricegrowth.to_csv(fname, index=True, index_label = "year") #final output to csv
     
     #Investment parameters

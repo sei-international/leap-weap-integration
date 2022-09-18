@@ -818,6 +818,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             
             rowskip = 3 # number of rows to skip in weap csv outputs
             
+            logging.info('Pushing WEAP results to Macro...')
             for scenario in weap_scenarios:
                 
                 #create directory to store WEAP outputs
@@ -829,6 +830,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 #export weap data
                 dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, scenario, weap, rowskip)     
                 
+                logging.info('Processing for WEAP scenario: ' + scenario)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
                     # set file directories for WEAP to leap-macro
                     fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
@@ -843,7 +845,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                     logging.info('Region: ' + r)
                     macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -w -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
                     logging.info("Executing: '" + exec_string + "'")
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
