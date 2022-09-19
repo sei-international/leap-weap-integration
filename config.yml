@@ -424,8 +424,8 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
             'All crops': ['S_agfor']
         weap_price_index_mapping: 
           'Agriculture_':
-            'Seasonal crops': ['p_agforseasonal']
-            'Perennial crops': ['p_agforperennial']
+            'Seasonal crops': ['P_agforseasonal']
+            'Perennial crops': ['P_agforperennial']
       Kyrgyzstan:
         directory_name: KGZ_Macro
         script: runleapmacro.jl
@@ -441,7 +441,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
             'All crops': ['S_agfor']
         weap_price_index_mapping: 
           'Agriculture_': 
-            'All crops': ['p_agfor']
+            'All crops': ['P_agfor']
   crop_categories:
       WEAP_to_Macro:
           'Apples': 'Perennial crops'
