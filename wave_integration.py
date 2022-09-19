@@ -819,7 +819,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             rowskip = 3 # number of rows to skip in weap csv outputs
             
             logging.info('Pushing WEAP results to Macro...')
-            for scenario in weap_scenarios:
+            for leap_scenario in leap_scenarios:
+                weap_scenario = scenarios_map[leap_scenario]
                 
                 #create directory to store WEAP outputs
                 fdirmain = os.path.dirname(leap.ActiveArea.Directory)
@@ -828,16 +829,16 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     os.mkdir(fdirweapoutput)
                     
                 #export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, scenario, weap, rowskip)     
+                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, rowskip)     
                 
-                logging.info('Processing for WEAP scenario: ' + scenario)
+                logging.info('Processing for WEAP scenario: ' + weap_scenario)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
                     # set file directories for WEAP to leap-macro
                     fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
                     fdirmacroinput = os.path.join(fdirmain, "inputs")
                         
                     # process WEAP data for leap-macro
-                    weaptomacroprocessing(weap, scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # LEAP-macro
             for s in leap_scenarios:

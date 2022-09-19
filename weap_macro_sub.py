@@ -10,9 +10,9 @@ import pandas as pd
 import os
 
 #Load and calculate correct scenario
-def loadweapscen(WEAP, scenario):
+def loadweapscen(WEAP, weap_scenario):
     WEAP.View = "Results"
-    WEAP.ActiveScenario = scenario
+    WEAP.ActiveScenario = weap_scenario
     
 #Export WEAP files    
 def exportcsv(WEAP, fname, favname):
@@ -20,25 +20,25 @@ def exportcsv(WEAP, fname, favname):
     WEAP.ExportResults(fname)
 
 #WEAP favorites to export
-def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
+def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     
-    loadweapscen(WEAP, scenario)
+    loadweapscen(WEAP, weap_scenario)
     
     #Coverage
     favname = "WEAP Macro\Demand Site Coverage"
-    fname = os.path.join(fdirweapoutput, scenario + "_Coverage_Percent.csv")
+    fname = os.path.join(fdirweapoutput, weap_scenario + "_Coverage_Percent.csv")
     exportcsv(WEAP, fname, favname) 
     dfcov = pd.read_csv(fname, skiprows=rowskip) 
     
     #Water demand in order to figure out coverage for each country
     favname = "WEAP Macro\Water Demand Annual Total - Level 1"
-    fname = os.path.join(fdirweapoutput, scenario + "_Water_Demand_Lvl1.csv")
+    fname = os.path.join(fdirweapoutput, weap_scenario + "_Water_Demand_Lvl1.csv")
     exportcsv(WEAP, fname, favname)
     dfcovdmd = pd.read_csv(fname, skiprows=rowskip) 
     
     #Crop production
     # favname = "WEAP Macro\Annual Crop Production"
-    # fname = os.path.join(fdirweapoutput, scenario + "_Annual_Crop_Production.csv")
+    # fname = os.path.join(fdirweapoutput, weap_scenario + "_Annual_Crop_Production.csv")
     # exportcsv(WEAP, fname, favname)
     # dfcrop = pd.read_csv(fname, skiprows=rowskip)
     # dfcrop = dfcrop.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
@@ -47,13 +47,13 @@ def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
     # Potential crop production
     #------------------------------------
     favname = "WEAP Macro\Area"
-    fname = os.path.join(fdirweapoutput, scenario + "_Area.csv")
+    fname = os.path.join(fdirweapoutput, weap_scenario + "_Area.csv")
     exportcsv(WEAP, fname, favname)
     dfcroparea = pd.read_csv(fname, skiprows=rowskip)
     dfcroparea = dfcroparea.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
     
     favname = "WEAP Macro\Potential Yield"
-    fname = os.path.join(fdirweapoutput, scenario + "_Potential_Yield.csv")
+    fname = os.path.join(fdirweapoutput, weap_scenario + "_Potential_Yield.csv")
     exportcsv(WEAP, fname, favname)
     dfcroppotyld = pd.read_csv(fname, skiprows=rowskip)
     dfcroppotyld = dfcroppotyld.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
@@ -70,8 +70,8 @@ def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
 
     #Water demand in order to figure out crop production for each country
     #favname = "WEAP Macro\Water Demand Annual Total - Level 2"
-    #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Water_Demand_Lvl2_" + scenario + ".csv"
-    #exportcsv(scenario, fname, favname)
+    #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Water_Demand_Lvl2_" + weap_scenario + ".csv"
+    #exportcsv(weap_scenario, fname, favname)
     #dfcropdmd = pd.read_csv(fname, skiprows=rowskip) 
     
     #Crop list categorization
@@ -88,13 +88,13 @@ def exportcsvmodule(fdirweapoutput, fdirmain, scenario, WEAP, rowskip):
         
     #Investment
     #favname = "WEAP Macro\Reservoir Storage Capacity"
-    #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Reservoir_Capacity_" + scenario + ".csv"
-    #exportcsv(scenario, fname, favname)
+    #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Reservoir_Capacity_" + weap_scenario + ".csv"
+    #exportcsv(weap_scenario, fname, favname)
     
     return dfcov, dfcovdmd, dfcrop, dfcropprice
 
 #WEAP RESULTS PROCESSING 
-def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
+def weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
 
     #Process coverage data
     coverage = pd.DataFrame()
@@ -128,7 +128,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                     coveragetemp = coveragetemp.drop('other') 
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
             coverage = coverage.append(coveragetemp)
-    fname = os.path.join(fdirmacroinput, scenario + "_max_util.csv") # After conversion, this is max utilization
+    fname = os.path.join(fdirmacroinput, leap_scenario + "_max_util.csv") # After conversion, this is max utilization
     coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent'] # If exponent = 0, max_util = 1.0; if = 1, then max_util = coverage
     coverage.index = coverage.index.astype('int64') # After transpose, the index is years
     # Have to add for 2019
@@ -344,7 +344,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
                 y = pricegrowth[x]
                     
                 
-    fname = os.path.join(fdirmacroinput, scenario + "_realoutputindex.csv")
+    fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
     real = real.transpose()
     real.index = real.index.astype('int64') # After transpose, the index is years
     # Must add some values to get to 2019
@@ -353,7 +353,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     real.sort_index(inplace=True)
     real.to_csv(fname, index=True, index_label = "year") #final output to csv
     
-    fname = os.path.join(fdirmacroinput, scenario + "_priceindex.csv")
+    fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
     pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
     pricegrowth.loc[2020] = 1
