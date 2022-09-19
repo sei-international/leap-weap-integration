@@ -325,6 +325,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.Visible = True
     weap = win32.Dispatch('WEAP.WEAPApplication') # will open last area
     weap.Visible = True
+    weap.Verbose = 0
     other_app = "WEAP"
     wait_apps(weap, leap)
 
