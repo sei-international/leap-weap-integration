@@ -357,7 +357,7 @@ def weaptomacroprocessing(weap, scenario, config_params, region, countries, fdir
     pricegrowth = pricegrowth.transpose()
     pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
     pricegrowth.loc[2020] = 1
-    pricegrowth.loc[2019] = 1/real.loc[2021]
+    pricegrowth.loc[2019] = 1/pricegrowth.loc[2021]
     pricegrowth.sort_index(inplace=True)
     pricegrowth.to_csv(fname, index=True, index_label = "year") #final output to csv
     
