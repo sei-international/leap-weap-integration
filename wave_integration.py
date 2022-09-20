@@ -1008,6 +1008,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.SetProgressBar(100)
     leap.CloseProgressBar()
     
+    weap.SaveArea()
+    leap.SaveArea()
 
     tet = time.time()
     total_elapsed_time = tet - tst
