@@ -28,6 +28,8 @@ import numpy
 import re
 import uuid
 import logging
+from julia_utils import get_julia_path
+from leap_weap_sub import add_leap_data_to_weap_interp
 from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 
 #in julia: using LEAPMacro
@@ -93,90 +95,6 @@ def ask_multiple_choice_question(prompt, options):
     if v.get() == 0: return None
     return options[v.get()]
 
-# function that retrieve path where julia is installed
-def get_julia_path(shell):
-    juliapath = None
-    
-    # First check the PATH environment variable
-    r = re.compile('julia', re.IGNORECASE)
-    path_array = os.environ['PATH'].split(';')
-    for p in path_array:
-        if r.search(p) is not None:
-            juliapath = os.path.join(p, 'julia.exe')
-            break
-    
-	# Then check in C:\USER\AppData\Local\Programs
-    if juliapath is None:
-        for p in os.scandir(os.path.join(os.environ['localappdata'],'Programs')):
-            if p.is_dir() and r.search(p.name) is not None:
-                juliapath = os.path.join(p.path, 'bin', 'julia.exe')
-                break
-
-    # Then check registry
-    hklm = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
-    hkcu = ConnectRegistry(None, HKEY_CURRENT_USER)
-    common_prefix = r"SOFTWARE"
-    common_path = r"Microsoft\Windows\CurrentVersion\Uninstall"
-    # NEMO key
-    if juliapath is None:
-        try:
-            key = OpenKey(hklm, os.path.join(common_prefix, common_path, '{4EEC991C-8D33-4773-84D3-7FE4162EEF82}'))
-            juliapath = QueryValueEx(key, 'JuliaPath')[0]
-        except:
-            pass
-    # Julia keys
-    if juliapath is None:
-        # HKEY_LOCAL_MACHINE
-        try:
-            key = OpenKey(hklm, os.path.join(common_prefix, common_path, 'Julia-1.7.2_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hklm, os.path.join(common_prefix, common_path, '{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hklm, os.path.join(common_prefix, 'WOW6432Node', common_path, 'Julia-1.7.2_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hklm, os.path.join(common_prefix, 'WOW6432Node', common_path, '{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-        # HKEY_CURRENT_USER
-    if juliapath is None:
-        try:
-            key = OpenKey(hkcu, os.path.join(common_prefix, common_path, 'Julia-1.7.2_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hkcu, os.path.join(common_prefix, common_path, '{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hkcu, os.path.join(common_prefix, 'WOW6432Node', common_path, 'Julia-1.7.2_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass
-    if juliapath is None:
-        try:
-            key = OpenKey(hkcu, os.path.join(common_prefix, 'WOW6432Node', common_path, '{054B4BC6-BD30-45C8-A623-8F5BA6EBD55D}_is1'))
-            juliapath = QueryValueEx(key, 'DisplayIcon')[0]
-        except:
-            pass        
-    return juliapath
-
 # function that checks branch-variable-unit combination exists in app (WEAP or LEAP)
 def check_branch_var(app, branch_path, variable, unit) :
     check_passed = False
@@ -220,73 +138,6 @@ def get_leap_calc_years(app) :
             leap_calculated_years.append(y)
             last_index += 1
     return leap_calculated_years
-
-# Splits the Interp expression exp into two parts: before startyear and after endyear (years from startyear to endyear are omitted). Returns an array with the two parts. listseparator is the currently active Windows list separator character (e.g., ",").
-def split_interp_ex(exp, startyear, endyear, listseparator):
-    return_val=[]
-    return_val.append("Interp(")
-    return_val.append("")
-    interp_termination = exp[-(len(exp) - exp.find(")") ):len(exp)]  # Closing ) and any subsequent content in Interp expression
-    exp=exp.lower().replace("interp(", "")
-    exp=exp[0:exp.find(")")]
-    exp_split = exp.split(listseparator)
-    for i in range(0, len(exp_split),2):
-        if i==len(exp_split)-1:
-            # exp_split[i] is final, optional growth rate parameter for Interp
-            return_val[1] = "".join([return_val[1], exp_split[-1].strip()])
-            break
-        if int(exp_split[i].strip())<startyear :
-            return_val[0] = "".join([return_val[0], exp_split[i].strip(), listseparator, exp_split[i+1].strip(), listseparator])
-        if int(exp_split[i].strip())>endyear :
-            return_val[1] = "".join([return_val[1], exp_split[i].strip(), listseparator, exp_split[i+1].strip(), listseparator])
-    # Trim extra list separators
-    if return_val[0][-1]==listseparator: return_val[0]=return_val[0][0:-1]
-    if len(return_val[1])>0:
-        if return_val[1][-1]==listseparator:
-            return_val[1]=return_val[1][0:-1]
-            return_val[1] = "".join([return_val[1], interp_termination])
-        else:
-            return_val[1] = "".join([return_val[1], interp_termination])
-    else:
-        return_val[1] = "".join([return_val[1], interp_termination])
-    return return_val
-
-# function that inserts LEAP data from leap_branch, leap_variable, and leap_region into the WEAP Interp expression for weap_branch and weap_variable. weap and leap are WEAP and LEAP application objects, respectively; weap_scenarios and leap_scenarios are arrays of the names of the WEAP and LEAP scenarios being calculated. The procedure assumes that the units of the LEAP and WEAP variables are compatible if LEAP values are multiplied by data_multiplier. listseparator is the currently active Windows list separator character (e.g., ",").
-def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, weap_branch, weap_variable, leap_branch, leap_variable, leap_region, data_multiplier, listseparator, procedure_title):
-    # This procedure doesn't validate branches, variables, and regions. This is assumed to happen via check_branch_var() and check_region() before the procedure is called.
-    # Add Current Accounts to local copies of weap_scenarios and leap_scenarios.
-    # Scenarios in weap_scenarios and leap_scenarios should exclude Current Accounts; add it here to ensure Current Accounts values are transcribed to WEAP
-    leap_scenarios_local=leap_scenarios.copy()
-    weap_scenarios_local=weap_scenarios.copy()
-    leap_scenarios_local.append('Current Accounts')
-    weap_scenarios_local.append('Current Accounts')
-    # Loop over scenarios and add LEAP data to WEAP expressions.
-    for i in range(0, len(leap_scenarios_local)):
-        weap.ActiveScenario = weap_scenarios_local[i]
-        logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
-        weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
-        logging.info('Current WEAP expression: ' + weap_expression)
-        if not weap_expression[0:6]=='Interp':
-            msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
-            tkmessagebox.showerror(procedure_title,msg)
-            exit()
-        startyear = leap.baseyear # Starting year for LEAP data transcribed to WEAP
-        endyear = leap.endyear # Ending year for LEAP data transcribed to WEAP
-        split_weap_expression = split_interp_ex(weap_expression, startyear, endyear, listseparator)
-        new_data = "" #New data to be inserted into target WEAP expression
-        for y in range(startyear, endyear+1):
-            new_data="".join([new_data, str(y), listseparator, str(leap.Branches(leap_branch).Variables(leap_variable).ValueRS(leap.regions(leap_region).id, leap_scenarios_local[i], y) * data_multiplier), listseparator])
-        new_weap_expression = split_weap_expression[0]
-        if new_weap_expression[-1]=="(":
-            new_weap_expression = "".join([new_weap_expression, new_data])
-        else:
-            new_weap_expression = "".join([new_weap_expression, listseparator, new_data])
-        if split_weap_expression[1][0]==")":
-            new_weap_expression = "".join([new_weap_expression[0:-1], split_weap_expression[1]])
-        else:
-            new_weap_expression = "".join([new_weap_expression, split_weap_expression[1]])
-        weap.Branches(weap_branch).Variables(weap_variable).Expression = new_weap_expression
-        logging.info('Updated WEAP expression: ' + weap.Branches(weap_branch).Variables(weap_variable).Expression)
 
 # function that returns the month number associated with the month named month_name.
 def get_month_num(month_name, procedure_title):
@@ -596,8 +447,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
             count+=1
             logging.info('Pushed ' + str(count) + ' variable(s) to WEAP')
-
-
+            
         # Calculate WEAP
         if lang == "RUS":
             msg = ["Расчет (итерация ", str(completed_iterations+1), ")." ]
