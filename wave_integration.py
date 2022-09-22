@@ -1,8 +1,3 @@
-
-# EKB thinks this list is out of date. See below
-# os, pywin32, pywingui, Tkinter, tkMessageBox, winreg, calendar, time, yaml, psutil, numpy, calendar
-# ultimate environment will need to contain these
-
 # If install via Miniconda, must then run:
 #   conda install pyyaml, numpy, psutil
 #   conda install pywin32, then run in command prompt:
