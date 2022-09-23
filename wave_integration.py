@@ -501,12 +501,9 @@ def main_integration(user_interface, tolerance, max_iterations):
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
                 if os.path.isfile(csv_path): os.remove(csv_path)
 
-                # ts= open(csv_path, 'w', newline='')
-                # writer = csv.writer(ts)
-                # ts_table=list()
                 ts = fs_obj.CreateTextFile(csv_path, True, False)
 
-                num_lines_written = 0 # Number of lines written to csv_path
+                num_lines_written = 0 # Number of lines written to CSV file
 
                 # check unit
                 weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').Unit
@@ -530,7 +527,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                     exit()
                 y_range = range(weap.BaseYear, weap.EndYear+1)
                 
-                for y in y_range: # range(weap.BaseYear, weap.EndYear):
+                for y in y_range:
                     leap_capacity_year = y
                     if leap.BaseYear > y :
                         leap_capacity_year = leap.BaseYear
@@ -548,18 +545,17 @@ def main_integration(user_interface, tolerance, max_iterations):
                         month_vals = dict()
                         for ts_name, m_num in leap_ts_info.items():
                             if m_num in month_vals:
+                                # Same value for all time slices in a month
                                 val = month_vals[m_num]
                             else:
-                                val = round(weap_hpp_gen[(y - y_range[0])*12 + m_num - 1] / 3.6 / (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path (GJ > GW)
-                                # val = round(weap_hpp_gen[y_range.index(y)*12+m_num-1] / 3.6/ (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability
+                                # Percentage availability value to be written to csv_path (Note: 1 MWh = 3.6 GJ)
+                                val = round(weap_hpp_gen[(y - y_range[0])*12 + m_num - 1] / 3.6 / (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)
                                 if val > 100 : val = 100
                                 month_vals[m_num] = val
 
                             ts.WriteLine("".join([str(y), LIST_SEPARATOR, ts_name, LIST_SEPARATOR, str(val)]))
-                            # ts_table.append([str(y), tsl.Name, str(val)])
-                            num_lines_written = num_lines_written + 1
+                            num_lines_written += 1
                     
-                # writer.writerows(ts_table)
                 ts.Close()
                 
                 if num_lines_written > 0 :
@@ -575,6 +571,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                         excel.Application.Quit()
                     if not os.path.isfile(xlsx_path):
                         logging.error('Excel file not written correctly: file does not exist')
+                        # TODO: raise exception
 
                     # Update LEAP Maximum Availability
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
@@ -590,6 +587,7 @@ def main_integration(user_interface, tolerance, max_iterations):
             del excel
             # END: Move hydropower availability information from WEAP to LEAP.
 
+        # TODO: Make this generic, not just for this application/Syr Darya
 		# BEGIN: Move Syr Darya agricultural water requirements from WEAP to LEAP.
         if lang == "RUS":
             msg = ["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", сельское хозяйство)." ]
