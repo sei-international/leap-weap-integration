@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 # Splits the Interp expression exp into two parts: before startyear and after endyear (years from startyear to endyear are omitted). Returns an array with the two parts. listseparator is the currently active Windows list separator character (e.g., ",").
 def split_interp_ex(exp, startyear, endyear, listseparator):
@@ -42,9 +43,8 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
     # Loop over scenarios and add LEAP data to WEAP expressions.
     for i in range(0, len(leap_scenarios_local)):
         weap.ActiveScenario = weap_scenarios_local[i]
-        logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
+        # logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
         weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
-        logging.info('Current WEAP expression: ' + weap_expression)
         if not weap_expression[0:6]=='Interp':
             msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
             tkmessagebox.showerror(procedure_title,msg)
@@ -65,4 +65,17 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         else:
             new_weap_expression = "".join([new_weap_expression, split_weap_expression[1]])
         weap.Branches(weap_branch).Variables(weap_variable).Expression = new_weap_expression
-        logging.info('Updated WEAP expression: ' + weap.Branches(weap_branch).Variables(weap_variable).Expression)
+
+def get_leap_timeslice_info(leap):
+    month_dict = dict(zip(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], [i+1 for i in range(12)]))
+
+    leap_ts_info = OrderedDict()
+    for tsl in leap.timeslices :
+        try:
+            leap_ts_info[tsl.Name] = month_dict[tsl.Name[:tsl.Name.index(":")]]
+        except:
+            msg = "".join["Unrecognized month (", month_name, ") in month_num function. Exiting..."]
+            logging.error(msg)
+            exit()
+            
+    return leap_ts_info
