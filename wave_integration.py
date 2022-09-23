@@ -409,10 +409,6 @@ def main_integration(user_interface, tolerance, max_iterations):
     if leap_macro:
         last_iteration_leapmacro_results = []
 
-    fs_obj = win32.Dispatch('Scripting.FileSystemObject') # Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
-    excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files
-    excel.ScreenUpdating = False
-
     #------------------------------------------------------------------------------------------------------------------------
     #
     # Start iterations
@@ -440,7 +436,9 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(20)
 
-        # Push demographic and macroeconomic key assumptions from LEAP to WEAP.
+        #------------------------------------------------------------------------------------------------------------------------
+        # Push demographic and macroeconomic key assumptions from LEAP to WEAP
+        #------------------------------------------------------------------------------------------------------------------------
         # Values from LEAP base year to end year are embedded in WEAP Interp expressions
         count = 0
         logging.info('Pushing demographic and macroeconomic drivers from LEAP to WEAP')
@@ -465,7 +463,9 @@ def main_integration(user_interface, tolerance, max_iterations):
             
         logging.info('Pushed ' + str(count) + ' variable(s) to WEAP')
             
+        #------------------------------------------------------------------------------------------------------------------------
         # Calculate WEAP
+        #------------------------------------------------------------------------------------------------------------------------
         if lang == "RUS":
             msg = ["Расчет (итерация ", str(completed_iterations+1), ")." ]
         else :
@@ -473,20 +473,26 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(30)
 
-        logging.info('Calculating WEAP (iteration ' + str(completed_iterations + 1) + ').')
+        logging.info('Calculating WEAP (iteration ' + str(completed_iterations + 1) + ')')
         weap.Calculate()
         while weap.IsCalculating :
            leap.Sleep(1000)
 
         logging.info('Finished calculating WEAP. Moving hydropower maximum availabilities from WEAP to LEAP....')
 
+        #------------------------------------------------------------------------------------------------------------------------
         # Move hydropower availability information from WEAP to LEAP.
+        #------------------------------------------------------------------------------------------------------------------------
         # Availability information saved to Excel files specific to WEAP branches and LEAP scenarios.
         #   Note: Excel used since LEAP's performance is extremely poor when reading from text files.
         if lang == "RUS" : msg = ["Перемещение доступности гидроэнергетики из WEAP в LEAP (итерация ", str(completed_iterations+1), ")."]
         else : msg = ["Moving hydropower availability from WEAP to LEAP (iteration ", str(completed_iterations+1), ")."]
         leap.ShowProgressBar(procedure_title, " ".join(msg))
         leap.SetProgressBar(40)
+
+        fs_obj = win32.Dispatch('Scripting.FileSystemObject') # Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
+        excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files
+        excel.ScreenUpdating = False
 
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
         for i in range(0, len(weap_scenarios)):
@@ -583,12 +589,17 @@ def main_integration(user_interface, tolerance, max_iterations):
                         leap.ActiveScenario = leap_scenarios[i]
                         leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
 
+        # Remove win32 objects
         if excel:
             del excel
-            # END: Move hydropower availability information from WEAP to LEAP.
+        if fs_obj:
+            del fs_obj
+        # END: Move hydropower availability information from WEAP to LEAP.
 
+        #------------------------------------------------------------------------------------------------------------------------
+        # Move Syr Darya agricultural water requirements from WEAP to LEAP.
+        #------------------------------------------------------------------------------------------------------------------------
         # TODO: Make this generic, not just for this application/Syr Darya
-		# BEGIN: Move Syr Darya agricultural water requirements from WEAP to LEAP.
         if lang == "RUS":
             msg = ["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", сельское хозяйство)." ]
         else :
@@ -612,13 +623,15 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('Region: ' + r)
+                logging.info('\tRegion: ' + r)
                 leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
 		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
 
 
+        #------------------------------------------------------------------------------------------------------------------------
         # Move industrial and domestic water requirements from WEAP to LEAP
-        logging.info('Moving industrial water requirements from WEAP to LEAP ....')
+        #------------------------------------------------------------------------------------------------------------------------
+        logging.info('Moving industrial water requirements from WEAP to LEAP')
         if lang == "RUS":
             msg = ["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", промышленное и бытовое использование)." ]
         else :
@@ -640,12 +653,13 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('Region: ' + r)
+                logging.info('\tRegion: ' + r)
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
 
 
-        # BEGIN: Calculate LEAP.
-        lst = time.time()
+        #------------------------------------------------------------------------------------------------------------------------
+        # Calculate LEAP
+        #------------------------------------------------------------------------------------------------------------------------
         if lang == "RUS":
             msg = ["Расчет площади LEAP (итерация ", str(completed_iterations+1), ")."]
         else:
@@ -653,52 +667,18 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
-        logging.info('Calculating LEAP (iteration ' + str(completed_iterations + 1) + ').')
+        logging.info('Calculating LEAP (iteration ' + str(completed_iterations + 1) + ')')
         kill_excel()
         leap.Calculate(False)
 
-    
-        # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
-        if leap_macro:
-            
-            # WEAP macro functions
-            
-            
-            logging.info('Pushing WEAP results to Macro...')
-            for leap_scenario in leap_scenarios:
-                weap_scenario = scenarios_map[leap_scenario]
-                
-                # create directory to store WEAP outputs
-                fdirmain = os.path.dirname(leap.ActiveArea.Directory)
-                fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
-                if not os.path.exists(fdirweapoutput):
-                    os.mkdir(fdirweapoutput)
-                    
-                # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
-                
-                logging.info('Processing for WEAP scenario: ' + weap_scenario)
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
-                    # set file directories for WEAP to leap-macro
-                    fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
-                    fdirmacroinput = os.path.join(fdirmain, "inputs")
-                        
-                    # process WEAP data for leap-macro
-                    weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+        # Ensure that areas are saved
+        logging.info('Saving LEAP and WEAP areas')
+        leap.SaveArea()
+        weap.SaveArea()
 
-            # LEAP-macro
-            for s in leap_scenarios:
-                logging.info('Running LEAP-Macro for scenario: ' + s)
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():
-                    logging.info('\tRegion: ' + r)
-                    macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -w -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
-                    logging.info("\tExecuting: '" + exec_string + "'")
-                    errorcode= os.system(exec_string)
-                    if errorcode != 0:
-                        raise RuntimeError("LEAP-Macro exited with an error")
-
-        # BEGIN: Record target results for this iteration.
+        #------------------------------------------------------------------------------------------------------------------------
+        # Store target results used in the convergence check
+        #------------------------------------------------------------------------------------------------------------------------
         if lang == "RUS":
             msg = ["Запись результатов и проверка сходимости (итерация ", str(completed_iterations+1),")."]
         else:
@@ -750,10 +730,12 @@ def main_integration(user_interface, tolerance, max_iterations):
                     this_iteration_weap_results[current_index] = weap.ResultValue("".join([config_params['WEAP']['Hydropower_plants'][e]['weap_path'], config_params['WEAP']['Hydropower_plants'][e]['weap_variable']]), y, 1, s, y, 12, 'Total')
                     # logging.info(this_iteration_weap_results[current_index])
                     current_index = current_index + 1
-        # END: Record target results for this iteration.
 
-        # check for convergence if necessary
-        if ((completed_iterations > 1) and (completed_iterations < max_iterations)):
+        #------------------------------------------------------------------------------------------------------------------------
+        # Check for convergence (after initial run)
+        #------------------------------------------------------------------------------------------------------------------------
+        if completed_iterations > 0:
+            logging.info('Checking whether calculations converged...')
             if lang == "RUS":
                 msg = ["Запись результатов и проверка сходимости (итерация ", str(completed_iterations+1),")."]
             else:
@@ -772,7 +754,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                     break
 
             # Only carry out LEAP-Macro convergence checks if all LEAP-macro is turned on and all LEAP checks passed
-            if (results_converged == True and leap_macro):
+            if leap_macro and results_converged:
                 for i in range(0, len(this_iteration_leapmacro_results)):
                     if ((last_iteration_leapmacro_results[i] == 0) and (this_iteration_leapmacro_results[i] != 0)):
                         results_converged = False
@@ -782,7 +764,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                         break
 
             # Only carry out WEAP convergence checks if all LEAP (and LEAP-Macro) checks passed
-            if results_converged == True :
+            if results_converged :
                 for i in range(0, len(this_iteration_weap_results)):
                     if ((last_iteration_weap_results[i] == 0) and (this_iteration_weap_results[i] != 0)):
                         results_converged = False
@@ -791,25 +773,71 @@ def main_integration(user_interface, tolerance, max_iterations):
                         results_converged = False
                         break
 
-            if results_converged == True :
+            if results_converged:
                 if lang == "RUS":
                     msg = ["Все целевые результаты WEAP и LEAP сошлись в пределах заданного допуска (", str(tolerance * 100), "%). Дополнительных итераций расчетов WEAP и LEAP не требуется."]
                 else:
                     msg = ["All target WEAP and LEAP results converged to within the specified tolerance (", str(tolerance * 100), "%). No additional iterations of WEAP and LEAP calculations are needed."]
                 leap.ShowProgressBar(procedure_title, "".join(msg))
                 leap.SetProgressBar(100)
-
-        # END: Check for convergence if necessary.
-
-        # Update WEAP and LEAP target results
+                logging.info("".join(msg))
+                break # Break out of the iteration loop
+            else:
+                if completed_iterations < max_iterations:
+                    logging.info('Results did not converge. Iterating...')
+                else:
+                    logging.info('Reached maximum number of iterations ' + str(max_iterations) + ' without converging within tolerance ' + str(tolerance * 100) + '%')
+        
+        # Update information for next iteration
         last_iteration_leap_results = this_iteration_leap_results
         last_iteration_weap_results = this_iteration_weap_results
+        last_iteration_leapmacro_results = this_iteration_leapmacro_results
 
         completed_iterations += 1
         
-        leap.SaveArea()
-        weap.SaveArea()
+        #------------------------------------------------------------------------------------------------------------------------
+        # Calculate Macro with new results from WEAP and LEAP
+        #------------------------------------------------------------------------------------------------------------------------
+        if leap_macro:
+            logging.info('Pushing WEAP results to Macro...')
+            for leap_scenario in leap_scenarios:
+                weap_scenario = scenarios_map[leap_scenario]
+                
+                # create directory to store WEAP outputs
+                fdirmain = os.path.dirname(leap.ActiveArea.Directory)
+                fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
+                if not os.path.exists(fdirweapoutput):
+                    os.mkdir(fdirweapoutput)
+                    
+                # export weap data
+                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
+                
+                logging.info('Processing for WEAP scenario: ' + weap_scenario)
+                for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
+                    # set file directories for WEAP to leap-macro
+                    fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
+                    fdirmacroinput = os.path.join(fdirmain, "inputs")
+                        
+                    # process WEAP data for leap-macro
+                    weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
+            # Run LEAP-macro
+            for s in leap_scenarios:
+                logging.info('Running LEAP-Macro for scenario: ' + s)
+                for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+                    logging.info('\tRegion: ' + r)
+                    macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -w -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations + 1) + " --load-leap-first"
+                    logging.info("\tExecuting: '" + exec_string + "'")
+                    errorcode= os.system(exec_string)
+                    if errorcode != 0:
+                        raise RuntimeError("LEAP-Macro exited with an error")
+    
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Completed iterations: wrap up
+    #
+    #------------------------------------------------------------------------------------------------------------------------
     
     if lang == "RUS":
         msg ="Заключительный шаг: Перемещение выработки гидроэлектроэнергии в WEAP и повторный запуск WEAP..."
@@ -860,5 +888,5 @@ def main_integration(user_interface, tolerance, max_iterations):
     total_elapsed_time = tet - tst
     logging.info('Total elapsed time: ' + hms_from_sec(total_elapsed_time))
 
-
-main_integration(user_interface=True, tolerance=0.1, max_iterations=1) # can later be run from VB script
+# TODO: Provide command-line interface
+main_integration(user_interface=True, tolerance=0.1, max_iterations=5)
