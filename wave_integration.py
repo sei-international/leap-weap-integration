@@ -17,7 +17,7 @@ import yaml
 import time
 from winreg import *
 from calendar import monthrange
-import os #os.path, os.system
+import os # os.path, os.system
 import psutil
 import numpy
 import re
@@ -28,9 +28,9 @@ from julia_utils import get_julia_path
 from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
 from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 
-#in julia: using LEAPMacro
-#using YAML
-#using ArgParse need to be installed
+# in julia: using LEAPMacro
+# using YAML
+# using ArgParse need to be installed
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
 #
@@ -245,7 +245,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
 
-    #validate branches
+    # validate branches
     logging.info('Validating branches in WEAP and LEAP')
     for aep in config_params:
         if (aep == 'WEAP' or aep == "LEAP"):
@@ -315,7 +315,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # Disable all scenario calculations in other app - calculations will be turned on for scenarios corresponding to calculated scenarios in runform_app
     disable_all_scenario_calcs(other_app_obj)
 
-    #Map scenarios by name first, then look in predefined_mappings if an exact name match isn't found
+    # Map scenarios by name first, then look in predefined_mappings if an exact name match isn't found
     at_least_1_calculated = False  # Indicates whether results are shown for at least one scenario in runfrom_app
     for s in runfrom_app_obj.Scenarios :
         if s.name != "Current Accounts" and s.ResultsShown == True :
@@ -323,7 +323,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
             if other_app_obj.Scenarios.Exists(s.Name) :
                 scenarios_map.update({s.name : s.name})
-            else: #look for scenario name in predefined mapping
+            else: # look for scenario name in predefined mapping
                 if runfrom_app == "LEAP":
                     if s.Name in scenarios['predefined scenarios'].keys():
                         scenarios_map.update({s.name: scenarios['predefined scenarios'][s.Name]})
@@ -352,7 +352,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         tkmessagebox.showerror(procedure_title, " ".join(msg))
         exit()
 
-    #Populate leap_scenarios and weap_scenarios
+    # Populate leap_scenarios and weap_scenarios
     if runfrom_app == "LEAP" or runfrom_app == "WEAP":
         leap_scenarios = list(scenarios_map.keys())
         weap_scenarios = list(scenarios_map.values())
@@ -427,8 +427,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(20)
 
-        #Push demographic and macroeconomic key assumptions from LEAP to WEAP.
-        #Values from LEAP base year to end year are embedded in WEAP Interp expressions
+        # Push demographic and macroeconomic key assumptions from LEAP to WEAP.
+        # Values from LEAP base year to end year are embedded in WEAP Interp expressions
         count = 0
         logging.info('Pushing demographic and macroeconomic drivers from LEAP to WEAP')
         for k in config_params['WEAP']['Branches'].keys():
@@ -487,7 +487,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
                 if os.path.isfile(csv_path): os.remove(csv_path)
 
-                #ts= open(csv_path, 'w', newline='')
+                # ts= open(csv_path, 'w', newline='')
                 # writer = csv.writer(ts)
                 # ts_table=list()
                 ts = fs_obj.CreateTextFile(csv_path, True, False)
@@ -662,13 +662,13 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             for leap_scenario in leap_scenarios:
                 weap_scenario = scenarios_map[leap_scenario]
                 
-                #create directory to store WEAP outputs
+                # create directory to store WEAP outputs
                 fdirmain = os.path.dirname(leap.ActiveArea.Directory)
                 fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
                 if not os.path.exists(fdirweapoutput):
                     os.mkdir(fdirweapoutput)
                     
-                #export weap data
+                # export weap data
                 dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, rowskip)     
                 
                 logging.info('Processing for WEAP scenario: ' + weap_scenario)
