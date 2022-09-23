@@ -4,7 +4,7 @@
 # Needs to be kept up-to-date by user
 ###############################################################
 WEAP:
-  Area: 'WAVE-SyrDarya 2022_09_13_MABIA'
+  Area: 'WAVE-SyrDarya 2022_09_19_MABIA'
   Branches:
     Population_KAZ:
       path: Key\Demographic\KAZ\National population
@@ -251,7 +251,7 @@ WEAP:
 
 
 LEAP:
-  Area: 'wave central asia v41'
+  Area: 'wave central asia v42'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   Branches: 
     GDP:
