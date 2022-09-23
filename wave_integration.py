@@ -186,15 +186,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     shell = win32.Dispatch("WScript.Shell")
     shell.AppActivate("LEAP: ")
 
-    # Initiate parameters
-    completed_iterations = 0
-    results_converged = False
-    lang = None
-    leap_macro = False
-    if 'LEAP-Macro' in config_params.keys():
-        leap_macro = True
+    # Check whether leap_macro is being run
+    leap_macro = 'LEAP-Macro' in config_params.keys()
 
     # Set run time language
+    lang = None
     if user_interface :
         lines = ["Would you like Russian language prompts? / Хотите подсказки на русском языке?", "Select Language / Выберите язык"]
         msg = "\n".join(lines)
@@ -405,7 +401,13 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         else : tkmessagebox.showerror(procedure_title,  "The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...")
         exit()
 
-
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Start iterations
+    #
+    #------------------------------------------------------------------------------------------------------------------------
+    completed_iterations = 0
+    results_converged = False
     while completed_iterations < max_iterations :
         logging.info('Completed iterations: ' + str(completed_iterations))
         if lang == "RUS":
