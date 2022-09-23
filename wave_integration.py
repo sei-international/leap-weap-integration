@@ -222,7 +222,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             leap.ShowProgressBar(procedure_title, msg)
             exit()
 
-    weap.ActiveArea = config_params['WEAP']['Area'] # needs to be  put in a yaml file
+    weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
     leap.ActiveArea = config_params['LEAP']['Area']
     wait_apps(leap, weap)
@@ -258,15 +258,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 for r in config_params[aep]['Agricultural regions']:
                     for key in config_params[aep]['Agricultural regions'][r]:
                         check_branch_var(weap, config_params[aep]['Agricultural regions'][r][key]['weap_path'], config_params[aep]['Agricultural regions'][r][key]['variable'], config_params[aep]['Agricultural regions'][r][key]['unit'])
-                        # logging.info('Does this path exist? ' + config_params[aep]['Agricultural regions'][r][key]['weap_path'])
                 for r in config_params[aep]['Industrial and domestic regions']:
                     for key in config_params[aep]['Industrial and domestic regions'][r]:
                         check_branch_var(weap, config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'], config_params[aep]['Industrial and domestic regions'][r][key]['variable'], config_params[aep]['Industrial and domestic regions'][r][key]['unit'])
-                        # logging.info('Does this path exist? ' + config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'])
-
-    # validate hydropower plants in leap
-    for b in config_params['LEAP']['Hydropower_plants'] :
-        check_branch_var(leap, config_params['LEAP']['Hydropower_plants'][b]['leap_path'], "Maximum Availability", "Percent")
 
     # validate regions
     logging.info('Calculating for regions: ')
@@ -275,8 +269,14 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         logging.info('\t' + r)
         check_region(leap, r)
 
+    # validate hydropower plants in leap
+    logging.info('Including LEAP hydropower plants: ')
+    for b in config_params['LEAP']['Hydropower_plants'] :
+        logging.info('\t' + b)
+        check_branch_var(leap, config_params['LEAP']['Hydropower_plants'][b]['leap_path'], "Maximum Availability", "Percent")
+
     # validate hydropower reservoirs in weap
-    logging.info('Including reservoirs: ')
+    logging.info('Including WEAP hydropower reservoirs: ')
     for b in config_params['WEAP']['Hydropower_plants'] :
         logging.info('\t' + b)
         check_branch_var(weap, config_params['WEAP']['Hydropower_plants'][b]['weap_path'], "Hydropower Generation", "GJ")
@@ -285,7 +285,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     # set up target results for convergence checks during iterative calculations
     value = []
     list_leap_keys = list(config_params['LEAP']['Hydropower_plants'].keys())
-    target_leap_results  = {list_leap_keys[i]: value for i in range(len(list_leap_keys))} # did not
+    target_leap_results  = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
 
     list_weap_keys = list(config_params['WEAP']['Hydropower_plants'].keys())
     target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
@@ -294,8 +294,18 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         list_leapmacro_keys = (config_params['LEAP-Macro']['LEAP']['target_variables'])
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
-    # BEGIN: Determine which scenarios are calculated.
-    # Logic in this section: 1) look at all scenarios in runfrom_app for which results are shown; 2) try to find corresponding scenarios in other_app, looking for exact name matches and checking predefined_mappings; 3) calculate a) scenarios from 1 with a corresponding scenario from 2; and b) corresponding scenarios from 2. Disable calculations for all other scenarios.
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Find the scenarios being calculated
+    #
+    #------------------------------------------------------------------------------------------------------------------------
+    # Logic in this section:
+    #   1) Look at all scenarios in runfrom_app for which results are shown;
+    #   2) Try to find corresponding scenarios in other_app, looking for exact name matches and checking predefined_mappings;
+    #   3) Calculate:
+    #       a) Scenarios from 1 with a corresponding scenario from 2;
+    #       b) Corresponding scenarios from 2;
+    #   4) Disable calculations for all other scenarios.
     if lang == "RUS": msg = "Определение сценариев для расчета."
     else : msg = "Identifying scenarios to calculate."
     leap.ShowProgressBar(procedure_title, msg)
