@@ -283,7 +283,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                         check_branch_var(weap, config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'], config_params[aep]['Industrial and domestic regions'][r][key]['variable'], config_params[aep]['Industrial and domestic regions'][r][key]['unit'])
 
     # validate regions
-    logging.info('Calculating for regions: ')
+    logging.info('Running the model for regions: ')
     calculated_leap_regions = config_params['LEAP']['Regions']
     for r in calculated_leap_regions :
         logging.info('\t' + r)
@@ -433,7 +433,6 @@ def main_integration(user_interface, tolerance, max_iterations):
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
     while completed_iterations < max_iterations :
-        logging.info('Completed iterations: ' + str(completed_iterations))
         if lang == "RUS":
             msg = ["Перемещение демографических и макроэкономических предположений из LEAP в WEAP (итерация ", str(completed_iterations+1), ")." ]
         else :
@@ -474,15 +473,16 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(30)
 
-        logging.info('Calculating WEAP...')
+        logging.info('Calculating WEAP (iteration ' + str(completed_iterations + 1) + ').')
         weap.Calculate()
         while weap.IsCalculating :
            leap.Sleep(1000)
 
-        logging.info('Finished calculating WEAP. Moving Hydropower Maximum Availabilities from WEAP to LEAP....')
+        logging.info('Finished calculating WEAP. Moving hydropower maximum availabilities from WEAP to LEAP....')
 
         # Move hydropower availability information from WEAP to LEAP.
-        # Availability information saved to Excel files specific to WEAP branches and LEAP scenarios. Excel pathway used since LEAP's performance is extremely poor when reading from text files.
+        # Availability information saved to Excel files specific to WEAP branches and LEAP scenarios.
+        #   Note: Excel used since LEAP's performance is extremely poor when reading from text files.
         if lang == "RUS" : msg = ["Перемещение доступности гидроэнергетики из WEAP в LEAP (итерация ", str(completed_iterations+1), ")."]
         else : msg = ["Moving hydropower availability from WEAP to LEAP (iteration ", str(completed_iterations+1), ")."]
         leap.ShowProgressBar(procedure_title, " ".join(msg))
@@ -494,9 +494,9 @@ def main_integration(user_interface, tolerance, max_iterations):
             for wb in weap_hydro_branches:
                 logging.info('\tWEAP hydropower reservoir: ' + wb)
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap.Scenarios(leap_scenarios[i]).Id), ".xlsx" ]) # Name of XLSX file being written
-                xlsx_path = "".join([leap.ActiveArea.Directory, xlsx_file])  # Full path to XLSX file being written
+                xlsx_path = os.path.join(leap.ActiveArea.Directory, xlsx_file)  # Full path to XLSX file being written
                 xlsx_path = fr"{xlsx_path}"
-                csv_path = "".join([leap.ActiveArea.Directory, "temp.csv"])  # Temporary CSV file used to expedite creation of XLSX files
+                csv_path = os.path.join(leap.ActiveArea.Directory, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
 
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
                 if os.path.isfile(csv_path): os.remove(csv_path)
@@ -655,7 +655,7 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
-        logging.info('Running LEAP...')
+        logging.info('Calculating LEAP (iteration ' + str(completed_iterations + 1) + ').')
         kill_excel()
         leap.Calculate(False)
 
