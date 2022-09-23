@@ -146,9 +146,26 @@ def kill_excel():
 #==================================================================================================#
 #                                         MAIN ROUTINE                                             #
 #==================================================================================================#
-def main_integration(user_interface, tolerance, max_iterations): # add tolerance, max_iterations as inputs
-# takes binary value for leap macro and whether user interface including message boxes is required
+def main_integration(user_interface, tolerance, max_iterations):
 
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Define constants
+    #
+    #------------------------------------------------------------------------------------------------------------------------
+    LIST_SEPARATOR = get_list_separator() # Windows list separator character (e.g., ",")
+    if not len(LIST_SEPARATOR) == 1 :
+        if lang == "RUS" : tkmessagebox.showerror(procedure_title, "Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой интеграции WEAP-LEAP. Выход...")
+        else : tkmessagebox.showerror(procedure_title,  "The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...")
+        exit()
+
+    CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
+
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Initialize
+    #
+    #------------------------------------------------------------------------------------------------------------------------
     # load user configured parameters
     with open(r'config.yml') as file:
         config_params = yaml.full_load(file)
@@ -238,8 +255,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if messagebox != True :
         exit()
     
-
-    # Validate leap and weap areas
+    #------------------------------------------------------------------------------------------------------------------------
+    #
+    # Validate LEAP and WEAP areas
+    #
+    #------------------------------------------------------------------------------------------------------------------------
     if lang == "RUS" : msg = "Валидирование областей WEAP и LEAP."
     else : msg = "Validating WEAP and LEAP areas."
     leap.ShowProgressBar(procedure_title, msg)
@@ -282,18 +302,6 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         check_branch_var(weap, config_params['WEAP']['Hydropower_plants'][b]['weap_path'], "Hydropower Generation", "GJ")
 
 
-    # set up target results for convergence checks during iterative calculations
-    value = []
-    list_leap_keys = list(config_params['LEAP']['Hydropower_plants'].keys())
-    target_leap_results  = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
-
-    list_weap_keys = list(config_params['WEAP']['Hydropower_plants'].keys())
-    target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
-
-    if leap_macro:
-        list_leapmacro_keys = (config_params['LEAP-Macro']['LEAP']['target_variables'])
-        target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
-
     #------------------------------------------------------------------------------------------------------------------------
     #
     # Find the scenarios being calculated
@@ -312,7 +320,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     leap.SetProgressBar(10)
 
     scenarios_map = dict()
-    # Disable all scenario calculations in other app - calculations will be turned on for scenarios corresponding to calculated scenarios in runform_app
+    # Disable all scenario calculations in other app - calculations will be turned on for scenarios corresponding to calculated scenarios in runfrom_app
     disable_all_scenario_calcs(other_app_obj)
 
     # Map scenarios by name first, then look in predefined_mappings if an exact name match isn't found
@@ -382,7 +390,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
                 weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = ""
 
-    # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
+    # Initial LEAP-Macro run, to provide macro-economic variables to LEAP
     if leap_macro:
         for s in leap_scenarios:
             logging.info('Running LEAP-Macro for scenario: ' + s)
@@ -401,15 +409,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     if leap_macro:
         last_iteration_leapmacro_results = []
 
-    fs_obj = win32.Dispatch('Scripting.FileSystemObject') # ' Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
-    excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files and query Windows list separator
+    fs_obj = win32.Dispatch('Scripting.FileSystemObject') # Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
+    excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files
     excel.ScreenUpdating = False
-
-    listseparator = get_list_separator() # Windows list separator character (e.g., ",")
-    if not len(listseparator) == 1 :
-        if lang == "RUS" : tkmessagebox.showerror(procedure_title, "Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой интеграции WEAP-LEAP. Выход...")
-        else : tkmessagebox.showerror(procedure_title,  "The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...")
-        exit()
 
     #------------------------------------------------------------------------------------------------------------------------
     #
@@ -418,6 +420,18 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     #------------------------------------------------------------------------------------------------------------------------
     completed_iterations = 0
     results_converged = False
+    # set up target results for convergence checks during iterative calculations
+    value = []
+    list_leap_keys = list(config_params['LEAP']['Hydropower_plants'].keys())
+    target_leap_results  = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
+
+    list_weap_keys = list(config_params['WEAP']['Hydropower_plants'].keys())
+    target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
+
+    if leap_macro:
+        list_leapmacro_keys = (config_params['LEAP-Macro']['LEAP']['target_variables'])
+        target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
+
     while completed_iterations < max_iterations :
         logging.info('Completed iterations: ' + str(completed_iterations))
         if lang == "RUS":
@@ -446,7 +460,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 msg = 'Unit multiplier for this variable is unknown. Exiting....'
                 tkmessagebox.showerror("WAVE integration", msg)
                 exit()
-            add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, listseparator,procedure_title)
+            add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR,procedure_title)
 
             count += 1
             
@@ -541,7 +555,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                                 if val > 100 : val = 100
                                 month_vals[m_num] = val
 
-                            ts.WriteLine("".join([str(y), listseparator, ts_name, listseparator, str(val)]))
+                            ts.WriteLine("".join([str(y), LIST_SEPARATOR, ts_name, LIST_SEPARATOR, str(val)]))
                             # ts_table.append([str(y), tsl.Name, str(val)])
                             num_lines_written = num_lines_written + 1
                     
@@ -594,7 +608,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     val = 0  # Value that will be written into expr for y
                     for wb in region_ag_demand_map[r]:
                         val = val + weap.ResultValue("".join([region_ag_demand_map[r][wb]['weap_path'], ":Supply Requirement[m^3]"]), y, 1, weap_scenarios[i], y, 12, 'Total')
-                    expr = "".join([expr,str(y),listseparator,str(val),listseparator])
+                    expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
 
 
                 expr = "".join([expr[0:-1], ")"])
@@ -623,7 +637,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     val = 0  # Value that will be written into expr for y
                     for wb in region_inddom_demand_map[r]:
                         val = val + weap.ResultValue("".join([region_inddom_demand_map[r][wb]['weap_path'], ":Supply Requirement[m^3]"]), y, 1, weap_scenarios[i], y, 12, 'Total')
-                    expr = "".join([expr,str(y),listseparator,str(val),listseparator])
+                    expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
 
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
@@ -649,14 +663,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         # BEGIN: Calculate LEAP Macro with new results from WEAP and LEAP.
         if leap_macro:
             
-            # ++++++++++++++++++
-            # +++++ NOTE: script from Emily added here, will get results from WEAP)
-            # ++++++++++++++++++
-            
-
             # WEAP macro functions
             
-            rowskip = 3 # number of rows to skip in weap csv outputs
             
             logging.info('Pushing WEAP results to Macro...')
             for leap_scenario in leap_scenarios:
@@ -669,7 +677,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     os.mkdir(fdirweapoutput)
                     
                 # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, rowskip)     
+                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
                 
                 logging.info('Processing for WEAP scenario: ' + weap_scenario)
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
@@ -830,8 +838,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
                         weap_branch_energydemand +=leap.Branches(leap_path).Variables('Energy Generation').ValueRS(leap.regions(leap_region).id, leap_scenarios[i], y, 'GWh') 
-                    new_data ="".join([new_data, str(y), listseparator, str(weap_branch_energydemand), listseparator])
-                new_data ="".join([new_data[0:-1], ")"]) # remove last listseparator and close bracket
+                    new_data ="".join([new_data, str(y), LIST_SEPARATOR, str(weap_branch_energydemand), LIST_SEPARATOR])
+                new_data ="".join([new_data[0:-1], ")"]) # remove last list separator and close bracket
                 weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = weap_branch_energydemand # Cannot specify unit, but is GWh in WEAP
 
     logging.info('Calculating WEAP one last time...')
