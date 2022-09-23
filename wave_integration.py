@@ -846,6 +846,7 @@ def main_integration(user_interface, tolerance, max_iterations):
     leap.ShowProgressBar(procedure_title, "".join(msg))
     leap.SetProgressBar(95)
     
+    # TODO: Make this generic -- right now assumes "Run of River" is present in path with that capitalization
     logging.info("Final Step: Moving hydropower generation to WEAP and rerunning WEAP...")
     weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
     for i in range(0, len(weap_scenarios)):
@@ -858,15 +859,15 @@ def main_integration(user_interface, tolerance, max_iterations):
             else:
                 new_data = 'Interp('
                 for y in range(weap.BaseYear, weap.EndYear):
-                    weap_branch_energydemand = 0 
+                    weap_branch_energydemand = 0.0
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
                     for lb in leap_hpps:
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
-                        weap_branch_energydemand +=leap.Branches(leap_path).Variables('Energy Generation').ValueRS(leap.regions(leap_region).id, leap_scenarios[i], y, 'GWh') 
+                        weap_branch_energydemand += leap.Branches(leap_path).Variables('Energy Generation').ValueRS(leap.regions(leap_region).id, leap_scenarios[i], y, 'GWh') 
                     new_data ="".join([new_data, str(y), LIST_SEPARATOR, str(weap_branch_energydemand), LIST_SEPARATOR])
                 new_data ="".join([new_data[0:-1], ")"]) # remove last list separator and close bracket
-                weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = weap_branch_energydemand # Cannot specify unit, but is GWh in WEAP
+                weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = new_data # Cannot specify unit, but is GWh in WEAP
 
     logging.info('Calculating WEAP one last time...')
     weap.Calculate()
