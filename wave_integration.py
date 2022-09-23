@@ -132,7 +132,7 @@ def disable_all_scenario_calcs(app):
 
 # function that returns an array of years calculated in LEAP.
 def get_leap_calc_years(app) :
-    leap_calculated_years=[]
+    leap_calculated_years = []
     last_index = -1
     for y in range(app.FirstScenarioYear, app.EndYear+1) :
         if y%app.resultsEvery == 0:
@@ -195,14 +195,14 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     completed_iterations = 0
     results_converged = False
     lang = None
-    leap_macro=False
+    leap_macro = False
     if 'LEAP-Macro' in config_params.keys():
-        leap_macro=True
+        leap_macro = True
 
     # Set run time language
     if user_interface :
-        lines=["Would you like Russian language prompts? / Хотите подсказки на русском языке?", "Select Language / Выберите язык"]
-        msg="\n".join(lines)
+        lines = ["Would you like Russian language prompts? / Хотите подсказки на русском языке?", "Select Language / Выберите язык"]
+        msg = "\n".join(lines)
         result = ask_multiple_choice_question(
             msg,
             [
@@ -225,9 +225,9 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
     # get Julia install location path
     if leap_macro:
-        juliapath=get_julia_path(shell)
-        if juliapath==None:
-            msg="Could not locate the Julia executable. Try adding the path to the executable to the Windows environment variable named 'Path'."
+        juliapath = get_julia_path(shell)
+        if juliapath == None:
+            msg = "Could not locate the Julia executable. Try adding the path to the executable to the Windows environment variable named 'Path'."
             leap.ShowProgressBar(procedure_title, msg)
             exit()
 
@@ -243,7 +243,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     else :
         title = "Open LEAP Area"
         msg = ["Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run." , "NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten."]
-    messagebox=tkmessagebox.askokcancel(title, "\n".join(msg))
+    messagebox = tkmessagebox.askokcancel(title, "\n".join(msg))
     if messagebox != True :
         exit()
     
@@ -257,7 +257,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     #validate branches
     logging.info('Validating branches in WEAP and LEAP')
     for aep in config_params:
-        if (aep == 'WEAP' or aep=="LEAP"):
+        if (aep == 'WEAP' or aep == "LEAP"):
             for key in config_params[aep]['Branches']:
                 if aep== 'WEAP' :
                     check_branch_var(weap, config_params[aep]['Branches'][key]['path'], config_params[aep]['Branches'][key]['variable'], config_params[aep]['Branches'][key]['unit'])
@@ -300,17 +300,17 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
 
     if leap_macro:
-        list_leapmacro_keys=(config_params['LEAP-Macro']['LEAP']['target_variables'])
+        list_leapmacro_keys = (config_params['LEAP-Macro']['LEAP']['target_variables'])
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
     # BEGIN: Determine which scenarios are calculated.
     # Logic in this section: 1) look at all scenarios in runfrom_app for which results are shown; 2) try to find corresponding scenarios in other_app, looking for exact name matches and checking predefined_mappings; 3) calculate a) scenarios from 1 with a corresponding scenario from 2; and b) corresponding scenarios from 2. Disable calculations for all other scenarios.
-    if lang=="RUS": msg = "Определение сценариев для расчета."
+    if lang == "RUS": msg = "Определение сценариев для расчета."
     else : msg = "Identifying scenarios to calculate."
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(10)
 
-    scenarios_map=dict()
+    scenarios_map = dict()
     # Disable all scenario calculations in other app - calculations will be turned on for scenarios corresponding to calculated scenarios in runform_app
     disable_all_scenario_calcs(other_app_obj)
 
@@ -323,11 +323,11 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             if other_app_obj.Scenarios.Exists(s.Name) :
                 scenarios_map.update({s.name : s.name})
             else: #look for scenario name in predefined mapping
-                if runfrom_app=="LEAP":
+                if runfrom_app == "LEAP":
                     if s.Name in scenarios['predefined scenarios'].keys():
                         scenarios_map.update({s.name: scenarios['predefined scenarios'][s.Name]})
                 elif runfrom_app == "WEAP":
-                    corr_leap_scenario_predef = [i for i in scenarios['predefined scenarios'] if scenarios['predefined scenarios'][i]==s.name]
+                    corr_leap_scenario_predef = [i for i in scenarios['predefined scenarios'] if scenarios['predefined scenarios'][i] == s.name]
                     if corr_leap_scenario_predef:
                         scenarios_map.update({corr_leap_scenario_predef[0] : s.name})
 
@@ -335,13 +335,13 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     if s.Name in scenarios_map.keys():
                         other_app_obj.Scenarios(scenarios_map[s.Name]).ResultsShown = True
                 elif runfrom_app == "WEAP" :
-                    corr_leap_scenario = [i for i in scenarios_map if scenarios_map[i]==s.Name]
+                    corr_leap_scenario = [i for i in scenarios_map if scenarios_map[i] == s.Name]
                     if corr_leap_scenario:
                         other_app_obj.Scenarios(corr_leap_scenario[0]).ResultsShown = True
 
 
     if not at_least_1_calculated :
-        if lang=="RUS": msg = ["Хотя бы один сценарий должен быть рассчитан в активной области", runfrom_app, ". Выход..."]
+        if lang == "RUS": msg = ["Хотя бы один сценарий должен быть рассчитан в активной области", runfrom_app, ". Выход..."]
         else : msg = ["At least one scenario must be calculated in the active " ,runfrom_app, " area. Exiting..."]
         tkmessagebox.showerror(procedure_title, " ".join(msg))
         exit()
@@ -352,7 +352,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         exit()
 
     #Populate leap_scenarios and weap_scenarios
-    if runfrom_app == "LEAP" or runfrom_app=="WEAP":
+    if runfrom_app == "LEAP" or runfrom_app == "WEAP":
         leap_scenarios = list(scenarios_map.keys())
         weap_scenarios = list(scenarios_map.values())
     else :
@@ -368,17 +368,17 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
         leap.SetProgressBar(10)
 
     # get calculated years in leap
-    leap_calc_years=get_leap_calc_years(leap)
+    leap_calc_years = get_leap_calc_years(leap)
 
     # Clear hydropower reservoir energy demand from WEAP scenarios
     logging.info('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.')
     weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
     for s in weap_scenarios:
-        weap.ActiveScenario=s
+        weap.ActiveScenario = s
         for wb in weap_hydro_branches:
-            weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+            weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
             if not 'Run of River' in weap_path: 
-                weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+                weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
                 weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = ""
 
     # run initial LEAP-Macro run, to retrieve macro-economic variables for LEAP
@@ -395,10 +395,10 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     raise RuntimeError("LEAP-Macro exited with an error")
 
     # start iterative calculations
-    last_iteration_leap_results=[]
-    last_iteration_weap_results=[]
+    last_iteration_leap_results = []
+    last_iteration_weap_results = []
     if leap_macro:
-        last_iteration_leapmacro_results=[]
+        last_iteration_leapmacro_results = []
 
     fs_obj = win32.Dispatch('Scripting.FileSystemObject') # ' Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
     excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files and query Windows list separator
@@ -422,26 +422,26 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
         #Push demographic and macroeconomic key assumptions from LEAP to WEAP.
         #Values from LEAP base year to end year are embedded in WEAP Interp expressions
-        count=0
+        count = 0
         logging.info('Pushing demographic and macroeconomic drivers from LEAP to WEAP')
         for k in config_params['WEAP']['Branches'].keys():
             logging.info('\t' + k)
-            leap_path=config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
-            leap_variable=config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
+            leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
+            leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
             leap_region = config_params['WEAP']['Branches'][k]['leap_region']
-            if config_params['WEAP']['Branches'][k]['leap_branch']=='Population':
-                unit_multiplier=1
-            elif config_params['WEAP']['Branches'][k]['leap_branch']=='GDP':
-                unit_multiplier =1e-9
-            elif config_params['WEAP']['Branches'][k]['leap_branch']=='Industrial_VA_fraction':
-                unit_multiplier =100
+            if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
+                unit_multiplier = 1
+            elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
+                unit_multiplier = 1e-9
+            elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
+                unit_multiplier = 100
             else:
-                msg='Unit multiplier for this variable is unknown. Exiting....'
+                msg = 'Unit multiplier for this variable is unknown. Exiting....'
                 tkmessagebox.showerror("WAVE integration", msg)
                 exit()
             add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, listseparator,procedure_title)
 
-            count+=1
+            count += 1
             
         logging.info('Pushed ' + str(count) + ' variable(s) to WEAP')
             
@@ -489,25 +489,25 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
                 # check unit
                 weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').Unit
-                if not weap_unit=='GJ':
-                    if lang=='RUS':
-                        msg="Выработка энергии в WEAP должна быть в гигаджоулях. Выход..."
+                if not weap_unit == 'GJ':
+                    if lang == 'RUS':
+                        msg = "Выработка энергии в WEAP должна быть в гигаджоулях. Выход..."
                     else:
-                        msg="Energy Generation in WEAP has to be in Gigajoules. Exiting..."
+                        msg = "Energy Generation in WEAP has to be in Gigajoules. Exiting..."
                     tkmessagebox.showerror("WAVE integration", msg)
                     exit()
                 # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
                 weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
 
                 # check that there are values for every month
-                if not len(weap_hpp_gen)%12==0:
-                    if lang=='RUS':
-                        msg="Выработка энергии в WEAP не является ежемесячной или не доступна для каждого месяца моделирования. Выход...."
+                if not len(weap_hpp_gen)%12 == 0:
+                    if lang == 'RUS':
+                        msg = "Выработка энергии в WEAP не является ежемесячной или не доступна для каждого месяца моделирования. Выход...."
                     else:
-                        msg="Energy generation in WEAP is not monthly or not available for every simulation month. Exiting..."
+                        msg = "Energy generation in WEAP is not monthly or not available for every simulation month. Exiting..."
                     tkmessagebox.showerror("WAVE integration", msg)
                     exit()
-                y_range=range(weap.BaseYear, weap.EndYear+1)
+                y_range = range(weap.BaseYear, weap.EndYear+1)
                 
                 for y in y_range: # range(weap.BaseYear, weap.EndYear):
                     leap_capacity_year = y
@@ -527,7 +527,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                         month_vals = dict()
                         for ts_name, m_num in leap_ts_info.items():
                             if m_num in month_vals:
-                                val=month_vals[m_num]
+                                val = month_vals[m_num]
                             else:
                                 val = round(weap_hpp_gen[(y - y_range[0])*12 + m_num - 1] / 3.6 / (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability value to be written to csv_path (GJ > GW)
                                 # val = round(weap_hpp_gen[y_range.index(y)*12+m_num-1] / 3.6/ (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)  # Percentage availability
@@ -541,7 +541,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                 # writer.writerows(ts_table)
                 ts.Close()
                 
-                if num_lines_written>0 :
+                if num_lines_written > 0 :
                     # Convert csv_path into an XLSX file
                     logging.info('\t\tSaving as Excel with filename "' + xlsx_file + '"')
                     try:
@@ -561,8 +561,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                         logging.info('\t\tAssigning to LEAP hydropower plant: ' + lhpp)
                         lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
                         lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
-                        leap.ActiveRegion=lhpp_region
-                        leap.ActiveScenario=leap_scenarios[i]
+                        leap.ActiveRegion = lhpp_region
+                        leap.ActiveScenario = leap_scenarios[i]
                         leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
 
         if excel:
@@ -591,8 +591,8 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
 
 
                 expr = "".join([expr[0:-1], ")"])
-                leap.ActiveRegion=r
-                leap.ActiveScenario=leap_scenarios[i]
+                leap.ActiveRegion = r
+                leap.ActiveScenario = leap_scenarios[i]
                 logging.info('Region: ' + r)
                 leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
 		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
@@ -619,14 +619,14 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
                     expr = "".join([expr,str(y),listseparator,str(val),listseparator])
 
                 expr = "".join([expr[0:-1], ")"])
-                leap.ActiveRegion=r
-                leap.ActiveScenario=leap_scenarios[i]
+                leap.ActiveRegion = r
+                leap.ActiveScenario = leap_scenarios[i]
                 logging.info('Region: ' + r)
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
 
 
         # BEGIN: Calculate LEAP.
-        lst=time.time()
+        lst = time.time()
         if lang == "RUS":
             msg = ["Расчет площади LEAP (итерация ", str(completed_iterations+1), ")."]
         else:
@@ -761,7 +761,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             # Only carry out LEAP-Macro convergence checks if all LEAP-macro is turned on and all LEAP checks passed
             if (results_converged == True and leap_macro):
                 for i in range(0, len(this_iteration_leapmacro_results)):
-                    if ((last_iteration_leapmacro_results[i] == 0) and (this_iteration_leapmacro_results[i]!=0)):
+                    if ((last_iteration_leapmacro_results[i] == 0) and (this_iteration_leapmacro_results[i] != 0)):
                         results_converged = False
                         break
                     elif (abs(this_iteration_leapmacro_results[i] / last_iteration_leapmacro_results[i] - 1) > tolerance):
@@ -771,7 +771,7 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
             # Only carry out WEAP convergence checks if all LEAP (and LEAP-Macro) checks passed
             if results_converged == True :
                 for i in range(0, len(this_iteration_weap_results)):
-                    if ((last_iteration_weap_results[i] == 0) and (this_iteration_weap_results[i]!=0)):
+                    if ((last_iteration_weap_results[i] == 0) and (this_iteration_weap_results[i] != 0)):
                         results_converged = False
                         break
                     elif (abs(this_iteration_weap_results[i] / last_iteration_weap_results[i] - 1) > tolerance):
@@ -810,12 +810,12 @@ def main_integration(user_interface, tolerance, max_iterations): # add tolerance
     for i in range(0, len(weap_scenarios)):
         weap.ActiveScenario = weap_scenarios[i]
         for wb in weap_hydro_branches:
-            weap_path=config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+            weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
             logging.info('WEAP hydropower reservoir: ' + wb)
             if 'Run of River' in weap_path: 
                 logging.info('This is a Run of River hydropower plant, ignoring....')
             else:
-                new_data='Interp('
+                new_data = 'Interp('
                 for y in range(weap.BaseYear, weap.EndYear):
                     weap_branch_energydemand = 0 
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
