@@ -611,6 +611,7 @@ def main_integration(user_interface, tolerance, max_iterations):
         logging.info('Moving water pumping information from WEAP to LEAP')
         region_ag_demand_map = config_params['WEAP']['Agricultural regions']
         for i in range(0, len(weap_scenarios)):
+            logging.info('\tScenario: ' + weap_scenarios[i] + ' (WEAP)/' + leap_scenarios[i] + ' (LEAP)')
             for r in region_ag_demand_map:
                 expr = "Interp("  # Expression that will be set for Demand\Agriculture\Syr Darya\Water demand:Activity Level in LEAP
 
@@ -624,7 +625,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\tRegion: ' + r + ', WEAP scenario: ' + weap_scenarios[i])
+                logging.info('\t\tRegion: ' + r)
                 leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
 		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
 
@@ -641,6 +642,7 @@ def main_integration(user_interface, tolerance, max_iterations):
 
         region_inddom_demand_map = config_params['WEAP']['Industrial and domestic regions']
         for i in range(0, len(weap_scenarios)):
+            logging.info('\tScenario: ' + weap_scenarios[i] + ' (WEAP)/' + leap_scenarios[i] + ' (LEAP)')
             for r in region_inddom_demand_map:
                 expr = "Interp("  # Expression that will be set for Demand\Industry\Syr Darya\Water demand:Activity Level in LEAP
 
@@ -653,7 +655,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\tRegion: ' + r + ', WEAP scenario: ' + weap_scenarios[i])
+                logging.info('\t\tRegion: ' + r)
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
 
 
