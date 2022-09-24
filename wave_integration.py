@@ -895,4 +895,4 @@ def main_integration(user_interface, tolerance, max_iterations):
     logging.info('Total elapsed time: ' + hms_from_sec(total_elapsed_time))
 
 # TODO: Provide command-line interface
-main_integration(user_interface=True, tolerance=0.1, max_iterations=5)
+main_integration(user_interface=True, tolerance=0.1, max_iterations=3)
