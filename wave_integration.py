@@ -624,7 +624,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\tRegion: ' + r)
+                logging.info('\tRegion: ' + r + ', WEAP scenario: ' + weap_scenarios[i])
                 leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
 		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
 
@@ -653,7 +653,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 expr = "".join([expr[0:-1], ")"])
                 leap.ActiveRegion = r
                 leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\tRegion: ' + r)
+                logging.info('\tRegion: ' + r + ', WEAP scenario: ' + weap_scenarios[i])
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
 
 
