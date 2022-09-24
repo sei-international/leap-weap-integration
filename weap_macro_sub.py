@@ -92,7 +92,7 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     return dfcov, dfcovdmd, dfcrop, dfcropprice
 
 #WEAP RESULTS PROCESSING 
-def weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
+def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
 
     #Process coverage data
     coverage = pd.DataFrame()

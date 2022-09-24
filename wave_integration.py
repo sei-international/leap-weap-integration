@@ -824,7 +824,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                     fdirmacroinput = os.path.join(fdirmain, "inputs")
                         
                     # process WEAP data for leap-macro
-                    weaptomacroprocessing(weap, weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weaptomacroprocessing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # Run LEAP-macro
             for s in leap_scenarios:
