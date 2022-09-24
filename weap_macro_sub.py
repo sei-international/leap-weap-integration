@@ -24,6 +24,9 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     
     loadweapscen(WEAP, weap_scenario)
     
+    #------------------------------------
+    # Coverage (for utilization calculation)
+    #------------------------------------
     #Coverage
     favname = "WEAP Macro\Demand Site Coverage"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Coverage_Percent.csv")
@@ -36,15 +39,8 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     exportcsv(WEAP, fname, favname)
     dfcovdmd = pd.read_csv(fname, skiprows=rowskip) 
     
-    #Crop production
-    # favname = "WEAP Macro\Annual Crop Production"
-    # fname = os.path.join(fdirweapoutput, weap_scenario + "_Annual_Crop_Production.csv")
-    # exportcsv(WEAP, fname, favname)
-    # dfcrop = pd.read_csv(fname, skiprows=rowskip)
-    # dfcrop = dfcrop.replace(r'^\s*$', 0, regex=True) #fill in blanks with 0
-    
     #------------------------------------
-    # Potential crop production
+    # Potential crop production (for real and price series)
     #------------------------------------
     favname = "WEAP Macro\Area"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Area.csv")
@@ -61,12 +57,14 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     # The tables pull a lot of irrelevant branches -- the intersection is what we want
     common_branches = set(dfcroparea['Branch']).intersection(set(dfcroppotyld['Branch']))
     dfcroparea = dfcroparea[dfcroparea['Branch'].isin(common_branches)]
+    dfcroparea = dfcroparea.set_index('Branch')
     dfcroppotyld = dfcroppotyld[dfcroppotyld['Branch'].isin(common_branches)]
+    dfcroppotyld = dfcroppotyld.set_index('Branch')
+    # Ensure that they are aligned
+    dfcroppotyld.reindex_like(dfcroparea)
     # Compute total potential yield based on area
-    dfcrop = dfcroparea # Make a copy
-    for dfcndx, dfcrow in dfcrop.iterrows():
-        curr_branch = dfcrow[0]
-        dfcrop.iloc[dfcndx,1:] = dfcroparea[dfcroparea['Branch'] == curr_branch].iloc[0,1:] * dfcroppotyld[dfcroppotyld['Branch'] == curr_branch].iloc[0,1:]
+    dfcrop = dfcroparea * dfcroppotyld
+    dfcrop.reset_index(inplace=True)
 
     #Water demand in order to figure out crop production for each country
     #favname = "WEAP Macro\Water Demand Annual Total - Level 2"
