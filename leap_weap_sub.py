@@ -71,8 +71,9 @@ def get_leap_timeslice_info(leap):
 
     leap_ts_info = OrderedDict()
     for tsl in leap.timeslices :
+        month_name = tsl.Name[:tsl.Name.index(":")]
         try:
-            leap_ts_info[tsl.Name] = month_dict[tsl.Name[:tsl.Name.index(":")]]
+            leap_ts_info[tsl.Name] = month_dict[month_name]
         except:
             msg = "".join["Unrecognized month (", month_name, ") in month_num function. Exiting..."]
             logging.error(msg)

@@ -188,8 +188,6 @@ def main_integration(user_interface, tolerance, max_iterations):
         logging.error("WAVE integration: Cannot start LEAP and WEAP. Exiting...")
         exit()
         
-    leap_ts_info = get_leap_timeslice_info(leap)
-
     # leap.Verbose = 1
 
     if runfrom_app == "LEAP" :
@@ -244,6 +242,8 @@ def main_integration(user_interface, tolerance, max_iterations):
     wait_apps(weap, leap)
     leap.ActiveArea = config_params['LEAP']['Area']
     wait_apps(leap, weap)
+
+    leap_ts_info = get_leap_timeslice_info(leap)
 
     # open correct leap area and select scenarios and years to be calculated
     if lang == "RUS" :
