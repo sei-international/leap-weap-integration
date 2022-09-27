@@ -121,9 +121,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             wtcovtop = wtcovtop.groupby('country').sum() #add up numerator for each country
             wtcovbot = dfcovdmdsec.groupby('country').sum() #weighted average calculation - denominator by country
             coveragetemp = wtcovtop.div(wtcovbot) #weighted average calculation
-            for x in coveragetemp.index: 
-                if x == 'other': 
-                    coveragetemp = coveragetemp.drop('other') 
+            coveragetemp = coveragetemp.drop('other', errors='ignore') # Drop 'other' if it is present
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
             coverage = coverage.append(coveragetemp)
     fname = os.path.join(fdirmacroinput, leap_scenario + "_max_util.csv") # After conversion, this is max utilization
@@ -159,9 +157,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 dfcropsec = dfcropsec.apply(pd.to_numeric) #convert all columns to numeric
                 #crop = dfcropsec.groupby(['country','crop category']).sum()
                 croptemp = dfcropsec.groupby(['country']).sum()
-                for x in croptemp.index: 
-                    if x == 'other': 
-                        croptemp = croptemp.drop('other') 
+                croptemp = croptemp.drop('other', errors='ignore') # Drop 'other' if it is present
                 croptemp = croptemp.rename(index={countries[0]: subsector})
                 cropprod = cropprod.append(croptemp)
         except:
@@ -214,9 +210,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 prodvaluetemp = dfcropsecgrp * dfcropprice
             #    prodvaluetemp = prodvaluetemp.groupby(['country', 'crop category']).sum()
                 prodvaluetemp = prodvaluetemp.groupby(['country']).sum()
-                for x in prodvaluetemp.index: 
-                    if x == 'other': 
-                        prodvaluetemp = prodvaluetemp.drop('other') 
+                prodvaluetemp = prodvaluetemp.drop('other', errors='ignore') # Drop 'other' if it is present
                 prodvaluetemp = prodvaluetemp.rename(index={countries[0]: subsector})
                 prodvalue = prodvalue.append(prodvaluetemp)
         except:
