@@ -498,9 +498,10 @@ def main_integration(user_interface, tolerance, max_iterations):
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
         for i in range(0, len(weap_scenarios)):
             logging.info('WEAP scenario: ' + weap_scenarios[i])
+            leap_scenario_id = leap.Scenarios(leap_scenarios[i]).Id
             for wb in weap_hydro_branches:
                 logging.info('\tWEAP hydropower reservoir: ' + wb)
-                xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap.Scenarios(leap_scenarios[i]).Id), ".xlsx" ]) # Name of XLSX file being written
+                xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
                 xlsx_path = os.path.join(leap.ActiveArea.Directory, xlsx_file)  # Full path to XLSX file being written
                 xlsx_path = fr"{xlsx_path}"
                 csv_path = os.path.join(leap.ActiveArea.Directory, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
@@ -540,12 +541,16 @@ def main_integration(user_interface, tolerance, max_iterations):
                         leap_capacity_year = leap.BaseYear
                     if leap.EndYear < y :
                         leap_capacity_year = leap.EndYear
-                    weap_branch_capacity = 0  # Exogenous capacity in LEAP corresponding to WEAP branch [MW]
+                    weap_branch_capacity = 0  # Capacity in LEAP corresponding to WEAP branch [MW]
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
                     for lb in leap_hpps:
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
-                        weap_branch_capacity += leap.Branches(leap_path).Variable("Exogenous Capacity").ValueRS(leap.Regions(leap_region).Id, leap.Scenarios(leap_scenarios[i]).Id, leap_capacity_year)  # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
+                        leap_region_id = leap.Regions(leap_region).Id
+                        # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
+                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
+                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
+                        weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
 
                     # Don't bother writing values for years where capacity = 0
                     if weap_branch_capacity > 0 :
@@ -730,7 +735,7 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.SetProgressBar(85)
 
         logging.info('Checking WEAP results...')
-        this_iteration_weap_results= numpy.empty(len(target_weap_results)*len(weap_scenarios)*(weap.EndYear - weap.BaseYear + 1), dtype=object)  # Array of target WEAP result values obtained in this iteration. Contains one set of result values for each scenario in weap_scenarios and year calculated in WEAP; results are ordered by scenario, year, and result in target_weap_results
+        this_iteration_weap_results = numpy.empty(len(target_weap_results)*len(weap_scenarios)*(weap.EndYear - weap.BaseYear + 1), dtype=object)  # Array of target WEAP result values obtained in this iteration. Contains one set of result values for each scenario in weap_scenarios and year calculated in WEAP; results are ordered by scenario, year, and result in target_weap_results
         current_index = 0  # Index currently being written to this_iteration_leap_results/this_iteration_weap_results
 
         for e in target_weap_results:
