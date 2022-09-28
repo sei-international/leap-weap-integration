@@ -107,9 +107,10 @@ def check_branch_var(app, branch_path, variable, unit) :
                 if app.Branch(branch_path).Variable(variable).ScaleUnit == unit :
                     check_passed = True
     if not check_passed :
-        msg= [" The active ", app_name, " area does not contain the required variable ", branch_path ,":" ,variable," with unit " , unit, ". Please check the area and try again. Exiting..."]
+        msg = " ".join([" The active ", app_name, " area does not contain the required variable ", branch_path ,":" ,variable," with unit " , unit, ". Please check the area and try again. Exiting..."])
         tkmessagebox.showerror("WAVE integration", " ".join(msg))
-        exit()
+        logging.error(msg)
+        sys.exit(msg)
 
 # function that checks whether region (this argument should be a region name) exists in the active LEAP area. If it does, enables calculations for region.
 def check_region(leap, region) :
@@ -156,9 +157,13 @@ def main_integration(user_interface, tolerance, max_iterations):
     #------------------------------------------------------------------------------------------------------------------------
     LIST_SEPARATOR = get_list_separator() # Windows list separator character (e.g., ",")
     if not len(LIST_SEPARATOR) == 1 :
-        if lang == "RUS" : tkmessagebox.showerror(procedure_title, "Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой интеграции WEAP-LEAP. Выход...")
-        else : tkmessagebox.showerror(procedure_title,  "The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...")
-        exit()
+        if lang == "RUS" :
+            msg = "Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой интеграции WEAP-LEAP. Выход..."
+        else :
+            msg = "The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting..."
+        tkmessagebox.showerror(procedure_title, msg)
+        logging.error(msg)
+        sys.exit(msg)
 
     CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
 
@@ -185,8 +190,9 @@ def main_integration(user_interface, tolerance, max_iterations):
     wait_apps(weap, leap)
 
     if not leap or not weap:
-        logging.error("WAVE integration: Cannot start LEAP and WEAP. Exiting...")
-        exit()
+        msg = "WAVE integration: Cannot start LEAP and WEAP. Exiting..."
+        logging.error(msg)
+        sys.exit(msg)
         
     # leap.Verbose = 1
 
@@ -234,9 +240,9 @@ def main_integration(user_interface, tolerance, max_iterations):
     if leap_macro:
         juliapath = get_julia_path(shell)
         if juliapath == None:
-            msg = "Could not locate the Julia executable. Try adding the path to the executable to the Windows environment variable named 'Path'."
-            leap.ShowProgressBar(procedure_title, msg)
-            exit()
+            msg = "Could not locate the Julia executable. Try adding the path to the executable to the Windows PATH environment variable."
+            logging.error(msg)
+            sys.exit(msg)
 
     weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
@@ -254,7 +260,8 @@ def main_integration(user_interface, tolerance, max_iterations):
         msg = ["Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run." , "NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten."]
     messagebox = tkmessagebox.askokcancel(title, "\n".join(msg))
     if messagebox != True :
-        exit()
+        logging.error("Request to open WAVE model area in LEAP declined. Exiting...")
+        sys.exit("Request to open WAVE model area in LEAP declined. Exiting...")
     
     #------------------------------------------------------------------------------------------------------------------------
     #
@@ -351,15 +358,17 @@ def main_integration(user_interface, tolerance, max_iterations):
 
 
     if not at_least_1_calculated :
-        if lang == "RUS": msg = ["Хотя бы один сценарий должен быть рассчитан в активной области", runfrom_app, ". Выход..."]
-        else : msg = ["At least one scenario must be calculated in the active " ,runfrom_app, " area. Exiting..."]
-        tkmessagebox.showerror(procedure_title, " ".join(msg))
-        exit()
+        if lang == "RUS": msg = " ".join(["Хотя бы один сценарий должен быть рассчитан в активной области", runfrom_app, ". Выход..."])
+        else : msg = " ".join(["At least one scenario must be calculated in the active " ,runfrom_app, " area. Exiting..."])
+        tkmessagebox.showerror(procedure_title, msg)
+        logging.error(msg)
+        sys.exit(msg)
     elif len(scenarios_map)== 0:
-        if lang == "RUS": msg= ["Не удалось найти сценарии в активной области", other_app, "соответствующие сценариям, рассчитанным в активной области", runfrom_app, ". Выход..."]
-        else : msg = ["Could not find scenarios in the active ", other_app, " area corresponding to the scenarios calculated in the active ", runfrom_app , " area. Exiting..."]
-        tkmessagebox.showerror(procedure_title, " ".join(msg))
-        exit()
+        if lang == "RUS": msg = " ".join(["Не удалось найти сценарии в активной области", other_app, "соответствующие сценариям, рассчитанным в активной области", runfrom_app, ". Выход..."])
+        else : msg = " ".join(["Could not find scenarios in the active ", other_app, " area corresponding to the scenarios calculated in the active ", runfrom_app , " area. Exiting..."])
+        tkmessagebox.showerror(procedure_title, msg)
+        logging.error(msg)
+        sys.exit(msg)
 
     # Populate leap_scenarios and weap_scenarios
     if runfrom_app == "LEAP" or runfrom_app == "WEAP":
@@ -402,7 +411,10 @@ def main_integration(user_interface, tolerance, max_iterations):
                 logging.info("\tExecuting: '" + exec_string + "'")
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
-                    raise RuntimeError("LEAP-Macro exited with an error")
+                    msg = "LEAP-Macro exited with an error"
+                    logging.error(msg)
+                    sys.exit(msg)
+                    
 
     # start iterative calculations
     last_iteration_leap_results = []
@@ -455,9 +467,10 @@ def main_integration(user_interface, tolerance, max_iterations):
             elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
                 unit_multiplier = 100
             else:
-                msg = 'Unit multiplier for this variable is unknown. Exiting....'
+                msg = 'Unit multiplier for variable "' + leap_variable + '" is unknown. Exiting...'
                 tkmessagebox.showerror("WAVE integration", msg)
-                exit()
+                logging.error(msg)
+                sys.exit(msg)
             add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR,procedure_title)
 
             count += 1
@@ -521,7 +534,8 @@ def main_integration(user_interface, tolerance, max_iterations):
                     else:
                         msg = "Energy Generation in WEAP has to be in Gigajoules. Exiting..."
                     tkmessagebox.showerror("WAVE integration", msg)
-                    exit()
+                    logging.error(msg)
+                    sys.exit(msg)
                 # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
                 weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
 
@@ -532,7 +546,8 @@ def main_integration(user_interface, tolerance, max_iterations):
                     else:
                         msg = "Energy generation in WEAP is not monthly or not available for every simulation month. Exiting..."
                     tkmessagebox.showerror("WAVE integration", msg)
-                    exit()
+                    logging.error(msg)
+                    sys.exit(msg)
                 y_range = range(weap.BaseYear, weap.EndYear+1)
                 
                 for y in y_range:
@@ -583,18 +598,18 @@ def main_integration(user_interface, tolerance, max_iterations):
                     finally:
                         excel.Application.Quit()
                     if not os.path.isfile(xlsx_path):
-                        logging.error('Excel file not written correctly: file does not exist')
-                        # TODO: raise exception
-
-                    # Update LEAP Maximum Availability
-                    leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
-                    for lhpp in leap_hpps:
-                        logging.info('\t\tAssigning to LEAP hydropower plant: ' + lhpp)
-                        lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
-                        lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
-                        leap.ActiveRegion = lhpp_region
-                        leap.ActiveScenario = leap_scenarios[i]
-                        leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
+                        msg = 'Excel file "' + xlsx_file + '" not written correctly: file does not exist. Will use existing expression.'
+                        logging.warning(msg)
+                    else:
+                        # Update LEAP Maximum Availability expression
+                        leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
+                        for lhpp in leap_hpps:
+                            logging.info('\t\tAssigning to LEAP hydropower plant: ' + lhpp)
+                            lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
+                            lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
+                            leap.ActiveRegion = lhpp_region
+                            leap.ActiveScenario = leap_scenarios[i]
+                            leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_file , ", A1:C", str(num_lines_written), ")"])
 
         # Remove win32 objects
         if excel:
@@ -848,7 +863,9 @@ def main_integration(user_interface, tolerance, max_iterations):
                     logging.info("\tExecuting: '" + exec_string + "'")
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
-                        raise RuntimeError("LEAP-Macro exited with an error")
+                        msg = "LEAP-Macro exited with an error"
+                        logging.error(msg)
+                        sys.exit(msg)
     
     #------------------------------------------------------------------------------------------------------------------------
     #
@@ -900,7 +917,7 @@ def main_integration(user_interface, tolerance, max_iterations):
     leap.SetProgressBar(100)
     leap.CloseProgressBar()
     
-    # TODO: This should not be needed
+    # This should not be needed, but being thorough
     weap.SaveArea()
     leap.SaveArea()
 
