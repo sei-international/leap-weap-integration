@@ -26,6 +26,10 @@ function parse_commandline()
         "--load-leap-first", "-l"
             help = "load results from LEAP before running Macro"
             action = :store_true
+        "--use-leap-version", "-u"
+            help = "If load-leap-first is set, pull results from this version"
+            arg_type = Int64
+            default = 0
         "--only-push-leap-results", "-p"
             help = "only push results to LEAP and do not run LEAP from Macro"
             action = :store_true
@@ -80,9 +84,16 @@ if parsed_args["init_run_number"] != 0
 end
 YAML.write_file(cfg_file, cfg_yaml)
 
+if parsed_args["use_leap_version"] == 0
+	use_leap_version = nothing
+else
+	use_leap_version = parsed_args["use_leap_version"]
+end
+
 LEAPMacro.run(parsed_args["config_file"],
               dump_err_stack = parsed_args["verbose_errors"],
 			  load_leap_first = parsed_args["load_leap_first"],
+              get_results_from_leap_version = use_leap_version, 
 			  only_push_leap_results = parsed_args["only_push_leap_results"],
               run_number_start = parsed_args["init_run_number"],
               include_energy_sectors = parsed_args["include_energy_sectors"],

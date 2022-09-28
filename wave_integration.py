@@ -111,7 +111,7 @@ def check_branch_var(app, branch_path, variable, unit) :
         tkmessagebox.showerror("WAVE integration", " ".join(msg))
         exit()
 
-# function that hecks whether region (this argument should be a region name) exists in the active LEAP area. If it does, enables calculations for region.
+# function that checks whether region (this argument should be a region name) exists in the active LEAP area. If it does, enables calculations for region.
 def check_region(leap, region) :
     check_passed = False
     if leap.Regions.Exists(region) :
@@ -683,8 +683,9 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.SaveArea()
         weap.SaveArea()
         logging.info('Saving versions for iteration ' + str(completed_iterations + 1))
-        leap.SaveVersion('Iteration ' + str(completed_iterations + 1))
-        weap.SaveVersion('Iteration ' + str(completed_iterations + 1), True) # With WEAP, can save results
+        leap.SaveVersion('Iteration ' + str(completed_iterations + 1), True) # Save results
+        latest_calculated_leap_version = leap.Versions.Count
+        weap.SaveVersion('Iteration ' + str(completed_iterations + 1), True) # Save results
 
         #------------------------------------------------------------------------------------------------------------------------
         # Store target results used in the convergence check
@@ -837,7 +838,12 @@ def main_integration(user_interface, tolerance, max_iterations):
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                     logging.info('\tRegion: ' + r)
                     macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -w -v -y " + str(leap_calc_years[-1]) + " -r " + str(completed_iterations) + " --load-leap-first"
+                    exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
+                                    " -c -p -w -v" + \
+                                    " -y " + str(leap_calc_years[-1]) + \
+                                    " -u " + str(latest_calculated_leap_version) + \
+                                    " -r " + str(completed_iterations) + \
+                                    " --load-leap-first"
                     logging.info("\tExecuting: '" + exec_string + "'")
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
@@ -881,7 +887,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 # weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = new_data # Cannot specify unit, but is GWh in WEAP
 
     # logging.info('Calculating WEAP one last time...')
-    # weap.Calculate()
+    # weap.Calculate(0, 0, False) # Only calculate if needed
     # while weap.IsCalculating :
         # leap.Sleep(1000)
 
@@ -902,4 +908,4 @@ def main_integration(user_interface, tolerance, max_iterations):
     logging.info('Total elapsed time: ' + hms_from_sec(total_elapsed_time))
 
 # TODO: Provide command-line interface
-main_integration(user_interface=True, tolerance=0.1, max_iterations=3)
+main_integration(user_interface=True, tolerance=0.1, max_iterations=5)
