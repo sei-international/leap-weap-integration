@@ -475,7 +475,7 @@ def main_integration(user_interface, tolerance, max_iterations):
         leap.SetProgressBar(30)
 
         logging.info('Calculating WEAP (iteration ' + str(completed_iterations + 1) + ')')
-        weap.Calculate()
+        weap.Calculate(0, 0, False) # Only calculate what needs calculation
         while weap.IsCalculating :
            leap.Sleep(1000)
 
@@ -547,6 +547,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
                         leap_region_id = leap.Regions(leap_region).Id
+                        # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
                         leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
