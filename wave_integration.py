@@ -7,6 +7,7 @@
 # If install via pip:
 #   pip install pyyaml, pywin32, psutil, numpy
 
+import sys
 from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
