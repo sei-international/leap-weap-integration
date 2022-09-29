@@ -1,0 +1,352 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2022-09-29 10:40-0400\n"
+"PO-Revision-Date: 2022-09-29 15:47-0400\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.1.1\n"
+
+#: wave_integration.py:49
+msgid "Sending to log file \"{f}\""
+msgstr "Отправка в файл журнала \"{f}\""
+
+#: wave_integration.py:118
+msgid ""
+"The active {a} area does not contain the required variable {b}:{v} with unit "
+"{v}. Please check the area and try again. Exiting..."
+msgstr ""
+"Активная область {a} не содержит требуемой переменной {b}:{v} с единицей "
+"измерения {v}. Пожалуйста, проверьте область и повторите попытку. Выход..."
+
+#: wave_integration.py:130
+msgid ""
+"Could not enable calculations for region {r} in the active LEAP area. Please "
+"check the area and try again. Exiting..."
+msgstr ""
+"Не удалось включить расчеты для региона {r} в активной области LEAP. "
+"Пожалуйста, проверьте область и повторите попытку. Выход..."
+
+#: wave_integration.py:183
+msgid ""
+"The Windows list separator is longer than 1 character, which is incompatible "
+"with the WEAP-LEAP integration procedure. Exiting..."
+msgstr ""
+"Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой "
+"интеграции WEAP-LEAP. Выход..."
+
+#: wave_integration.py:213
+msgid "WAVE integration: Cannot start LEAP and WEAP. Exiting..."
+msgstr "Интеграция WAVE: Невозможно запустить LEAP и WEAP. Выход..."
+
+#: wave_integration.py:253
+msgid "WEAP-LEAP Integration Procedure"
+msgstr "Процедура интеграции WEAP-LEAP"
+
+#: wave_integration.py:254
+msgid "Initiating integration procedure..."
+msgstr "Инициирование процедуры интеграции..."
+
+#: wave_integration.py:263
+msgid ""
+"Could not locate the Julia executable. Try adding the path to the executable "
+"to the Windows PATH environment variable."
+msgstr ""
+"Не удалось найти исполняемый файл Julia. Попробуйте добавить путь к "
+"исполняемому файлу в переменную окружения Windows PATH."
+
+#: wave_integration.py:281
+msgid "Open LEAP Area"
+msgstr "Открытая зона LEAP"
+
+#: wave_integration.py:282
+msgid ""
+"Please open the WAVE model (area) in LEAP (the same as defined in config."
+"yml) and select the scenarios and years you would like to run."
+msgstr ""
+"Пожалуйста, откройте модель (область) WAVE в LEAP (такую же, как определена "
+"в config.yml) и выберите сценарии и годы, которые вы хотели бы запустить."
+
+#: wave_integration.py:283
+msgid ""
+"NOTE: LEAP settings determine calculated scenarios. Scenario selection in "
+"WEAP will be overwritten."
+msgstr ""
+"ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария "
+"в WEAP будет переписан."
+
+#: wave_integration.py:287
+msgid "Request to open WAVE model area in LEAP declined. Exiting..."
+msgstr "Запрос на открытие области модели WAVE в LEAP отклонен. Выход..."
+
+#: wave_integration.py:297
+msgid "Validating WEAP and LEAP areas"
+msgstr "Валидирование областей WEAP и LEAP"
+
+#: wave_integration.py:302
+msgid "Validating branches in WEAP and LEAP"
+msgstr "Проверка ветвей в WEAP и LEAP"
+
+#: wave_integration.py:319
+msgid "Running the model for regions:"
+msgstr "Запуск модели для регионов:"
+
+#: wave_integration.py:326
+msgid "Including LEAP hydropower plants:"
+msgstr "Включая гидроэлектростанции LEAP:"
+
+#: wave_integration.py:332
+msgid "Including WEAP hydropower reservoirs:"
+msgstr "Включая гидроэнергетические водохранилища WEAP:"
+
+#: wave_integration.py:351
+msgid "Identifying scenarios to calculate"
+msgstr "Определение сценариев для расчета"
+
+#: wave_integration.py:387
+msgid ""
+"At least one scenario must be calculated in the active {a} area. Exiting..."
+msgstr ""
+"В активной области {a} должен быть рассчитан хотя бы один сценарий. Выход..."
+
+#: wave_integration.py:393
+msgid ""
+"Could not find scenarios in the active {a2} area corresponding to the "
+"scenarios calculated in the active {a1} area. Exiting..."
+msgstr ""
+"Не удалось найти сценарии в активной области {a2}, соответствующие "
+"сценариям, рассчитанным в активной области {a1}. Выход..."
+
+#: wave_integration.py:407
+msgid "Calculating the following scenarios:"
+msgstr "Расчет следующих сценариев:"
+
+#: wave_integration.py:421
+msgid ""
+"Clearing hydropower reservoir energy demand from WEAP scenarios to avoid "
+"forcing model with results from past integration runs."
+msgstr ""
+"Очистка спроса на энергию гидроэнергетических водохранилищ от сценариев "
+"WEAP, чтобы не заставлять модель использовать результаты прошлых "
+"интеграционных прогонов."
+
+#: wave_integration.py:434 wave_integration.py:895
+msgid "Running LEAP-Macro for scenario: {s}"
+msgstr "Запуск LEAP-Macro для сценария: {s}"
+
+#: wave_integration.py:436 wave_integration.py:677 wave_integration.py:707
+#: wave_integration.py:897
+msgid "Region: {r}"
+msgstr "Регион: {r}"
+
+#: wave_integration.py:439 wave_integration.py:905
+msgid "Executing: {e}"
+msgstr "Выполняется: {e}"
+
+#: wave_integration.py:442 wave_integration.py:908
+msgid "LEAP-Macro exited with an error"
+msgstr "LEAP-Macro завершился с ошибкой"
+
+#: wave_integration.py:476
+msgid ""
+"Moving demographic and macroeconomic assumptions from LEAP to WEAP "
+"(iteration {i})"
+msgstr ""
+"Перемещение демографических и макроэкономических предположений из LEAP в "
+"WEAP (итерация {i})"
+
+#: wave_integration.py:485
+msgid "Pushing demographic and macroeconomic drivers from LEAP to WEAP"
+msgstr ""
+"Перемещение демографических и макроэкономических факторов из LEAP в WEAP"
+
+#: wave_integration.py:498
+msgid "Unit multiplier for variable \"{v}\" is unknown. Exiting..."
+msgstr "Множитель единицы для переменной \"{v}\" неизвестен. Выход..."
+
+#: wave_integration.py:506
+msgid "Pushed {n} variable(s) to WEAP"
+msgstr "Передано {n} переменной(ых) в WEAP"
+
+#: wave_integration.py:514 wave_integration.py:518
+msgid "Calculating WEAP (iteration {i})"
+msgstr "Вычисление WEAP (итерация {i})"
+
+#: wave_integration.py:523
+msgid ""
+"Finished calculating WEAP. Moving hydropower maximum availabilities from "
+"WEAP to LEAP...."
+msgstr ""
+"Закончен расчет WEAP. Перемещение максимальных возможностей гидроэнергетики "
+"из WEAP в LEAP...."
+
+#: wave_integration.py:531
+msgid "Moving hydropower availability from WEAP to LEAP (iteration {i})"
+msgstr "Перемещение доступности гидроэнергетики из WEAP в LEAP (итерация {i})"
+
+#: wave_integration.py:541
+msgid "WEAP scenario: {s}"
+msgstr "Сценарий WEAP: {s}"
+
+#: wave_integration.py:544
+msgid "WEAP hydropower reservoir: {r}"
+msgstr "Водохранилище гидроэлектростанции WEAP: {r}"
+
+#: wave_integration.py:563
+msgid "Energy Generation in WEAP has to be in Gigajoules. Exiting..."
+msgstr "Выработка энергии в WEAP должна быть в гигаджоулях. Выход..."
+
+#: wave_integration.py:575
+msgid ""
+"Energy generation in WEAP is not monthly or not available for every "
+"simulation month. Exiting..."
+msgstr ""
+"Выработка энергии в WEAP не является ежемесячной или не доступна для каждого "
+"месяца моделирования. Выход..."
+
+#: wave_integration.py:619
+msgid "Saving as Excel with filename \"{f}\""
+msgstr "Сохранение в формате Excel с именем файла \"{f}\""
+
+#: wave_integration.py:625
+msgid "Could not save to Excel: {e}"
+msgstr "Не удалось сохранить в Excel: {e}"
+
+#: wave_integration.py:629
+msgid ""
+"Excel file \"{f}\" not written correctly: file does not exist. Will use "
+"existing expression."
+msgstr ""
+"Excel файл \"{f}\" записан неправильно: файл не существует. Будет "
+"использовано существующее выражение."
+
+#: wave_integration.py:635
+msgid "Assigning to LEAP hydropower plant: {h}"
+msgstr "Присвоение гидроэлектростанции LEAP: {h}"
+
+#: wave_integration.py:656
+msgid ""
+"Moving water pumping information from WEAP to LEAP (iteration {i}), "
+"agricultural use"
+msgstr ""
+"Перемещение информации о перекачке воды из WEAP в LEAP (итерация {i}), "
+"сельскохозяйственное использование"
+
+#: wave_integration.py:660
+msgid "Moving water pumping information from WEAP to LEAP"
+msgstr "Перемещение информации о перекачке воды из WEAP в LEAP"
+
+#: wave_integration.py:663 wave_integration.py:694
+msgid "Scenario: {w} (WEAP)/{l} (LEAP)"
+msgstr "Сценарий: {w} (WEAP)/{l} (LEAP)"
+
+#: wave_integration.py:684
+msgid "Moving industrial water requirements from WEAP to LEAP"
+msgstr "Перемещение требований к промышленной воде из WEAP в LEAP"
+
+#: wave_integration.py:688
+msgid ""
+"Moving water pumping information from WEAP to LEAP (iteration {i}), "
+"industrial and domestic use"
+msgstr ""
+"Перемещение информации о перекачке воды из WEAP в LEAP (итерация {i}), "
+"промышленное и бытовое использование"
+
+#: wave_integration.py:717
+msgid "Calculating LEAP area (iteration {i})"
+msgstr "Вычисление площади LEAP (итерация {i})"
+
+#: wave_integration.py:726
+msgid "Saving LEAP and WEAP areas"
+msgstr "Сохранение областей LEAP и WEAP"
+
+#: wave_integration.py:729
+msgid "Saving versions for iteration {i}"
+msgstr "Сохранение версий для итерации {i}"
+
+#: wave_integration.py:730
+msgid "Iteration {i}"
+msgstr "Итерация {i}"
+
+#: wave_integration.py:741 wave_integration.py:818
+msgid "Recording results and checking for convergence (iteration {i})"
+msgstr "Запись результатов и проверка сходимости (итерация {i})"
+
+#: wave_integration.py:745
+msgid "Checking LEAP results..."
+msgstr "Проверка результатов LEAP..."
+
+#: wave_integration.py:763
+msgid "LEAP did not return a value for \"{e}\" in year {y} of scenario {s}"
+msgstr "LEAP не вернул значение для \"{e}\" в год {y} сценария {s}"
+
+#: wave_integration.py:769
+msgid "Checking Macro results..."
+msgstr "Проверка результатов макросъемки..."
+
+#: wave_integration.py:787
+msgid ""
+"LEAP did not return a value for Macro result \"{e}\" in year {y} of scenario "
+"{s} for {r}"
+msgstr ""
+"LEAP не вернул значение для макрорезультата \"{e}\" в год {y} сценария {s} "
+"для {r}"
+
+#: wave_integration.py:791
+msgid "Checking WEAP results..."
+msgstr "Проверка результатов WEAP..."
+
+#: wave_integration.py:806
+msgid "WEAP did not return a value for \"{e}\" in year {y} of scenario {s}"
+msgstr "WEAP не вернул значение для \"{e}\" в год {y} сценария {s}"
+
+#: wave_integration.py:814
+msgid "Checking whether calculations converged..."
+msgstr "Проверка сходимости расчетов..."
+
+#: wave_integration.py:849
+msgid ""
+"All target WEAP and LEAP results converged to within the specified tolerance "
+"({t}%). No additional iterations of WEAP and LEAP calculations are needed."
+msgstr ""
+"Все целевые результаты WEAP и LEAP сошлись в пределах заданного допуска "
+"({t}%). Дополнительных итераций расчетов WEAP и LEAP не требуется."
+
+#: wave_integration.py:856
+msgid "Results did not converge. Iterating..."
+msgstr "Результаты не сходятся. Итерация..."
+
+#: wave_integration.py:858
+msgid ""
+"Reached maximum number of iterations {m} without converging within tolerance "
+"{t}%"
+msgstr ""
+"Достигнуто максимальное число итераций {m} без сходимости в пределах допуска "
+"{t}%"
+
+#: wave_integration.py:871
+msgid "Pushing WEAP results to Macro..."
+msgstr "Передача результатов WEAP в макрос..."
+
+#: wave_integration.py:884
+msgid "Processing for WEAP scenario: {s}"
+msgstr "Обработка для сценария WEAP: {s}"
+
+#: wave_integration.py:957
+msgid "Completed WEAP-LEAP integration procedure"
+msgstr "Завершение процедуры интеграции WEAP-LEAP"
+
+#: wave_integration.py:969
+msgid "Total elapsed time: {t}"
+msgstr "Общее прошедшее время: {t}"
