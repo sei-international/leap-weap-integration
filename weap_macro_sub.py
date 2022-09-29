@@ -99,22 +99,22 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: #subsector data is the same across a given sector
             dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)] #removes strings not related to sector
-            conditions = list(map(dfcovsec.loc['Demand Site'].str.contains, countries)) #figure out which row is associated with which country
-            dfcovsec.loc['country'] = np.select(conditions, countries, 'other') #new column for countries
+            conditions = list(map(dfcovsec.loc[:,'Demand Site'].str.contains, countries)) #figure out which row is associated with which country
+            dfcovsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovsec) #list of columns
             cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
-            dfcovsec = dfcovsec.loc[cols] #reorder columns in dataframe
+            dfcovsec = dfcovsec.loc[:,cols] #reorder columns in dataframe
             dfcovsec.set_index(['Demand Site', 'country'], inplace=True) #sets first two columns as index  
             dfcovsec.columns = dfcovsec.columns.str[4:] #removes month name
             dfcovsec = dfcovsec.groupby(level=0, axis=1).mean() #averages coverage for each year
             dfcovsec = dfcovsec/100 #indexes to 1
          
             dfcovdmdsec = dfcovdmd[dfcovdmd['Branch'].str.contains(sector)] #removes strings not related to sector
-            conditions = list(map(dfcovdmdsec.loc['Branch'].str.contains, countries)) #figure out which row is associated with which country
-            dfcovdmdsec.loc['country'] = np.select(conditions, countries, 'other') #new column for countries
+            conditions = list(map(dfcovdmdsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
+            dfcovdmdsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovdmdsec) #list of columns
             cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
-            dfcovdmdsec = dfcovdmdsec.loc[cols] #reorder columns in dataframe
+            dfcovdmdsec = dfcovdmdsec.loc[:,cols] #reorder columns in dataframe
             dfcovdmdsec.set_index(['Branch', 'country'], inplace=True) #sets first two columns as index  
         
             wtcovtop = dfcovsec * dfcovdmdsec #weighted average calculation - numerator
@@ -144,15 +144,15 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: #subsector data is the same across a given sector
                 dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)] #removes strings not related to sector  
-                conditions = list(map(dfcropsec.loc['Branch'].str.contains, countries)) #figure out which row is associated with which country
-                dfcropsec.loc['country'] = np.select(conditions, countries, 'other') #new column for countries
-                dfcropsec.loc['crop']= dfcropsec.loc['Branch'].str.rsplit('\\', n=1).str.get(1)
-                dfcropsec.loc['crop category'] = dfcropsec.loc['crop'].map(config_params['LEAP-Macro']['crop_categories']['WEAP_to_Macro'])
+                conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
+                dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
+                dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
+                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(config_params['LEAP-Macro']['crop_categories']['WEAP_to_Macro'])
                 cols = list(dfcropsec) #list of columns
                 cols.insert(1, cols.pop(cols.index('country'))) #move the country column to specified index location
                 cols.insert(2, cols.pop(cols.index('crop'))) #move the country column to specified index location
                 cols.insert(3, cols.pop(cols.index('crop category'))) #move the country column to specified index location
-                dfcropsec = dfcropsec.loc[cols] #reorder columns in dataframe
+                dfcropsec = dfcropsec.loc[:,cols] #reorder columns in dataframe
                 dfcropsec.set_index(['Branch', 'country', 'crop', 'crop category'], inplace=True) #sets first two columns as index  
                 dfcropsec = dfcropsec.apply(pd.to_numeric) #convert all columns to numeric
                 #crop = dfcropsec.groupby(['country','crop category']).sum()
@@ -187,7 +187,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfcropprice_cols = dfcropprice.columns #column names for dfcropprice
         dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()] #keeps if column header has digits (years)
         dfcropprice_cols.sort() # sort column names
-        dfcropprice = dfcropprice.loc[dfcropprice_cols] #sorted columns
+        dfcropprice = dfcropprice.loc[:,dfcropprice_cols] #sorted columns
         
         ## makes sure number of rows in the prices matrix is same as the crop production matrix
         dfcropsecgrp = dfcropsec.groupby(['country','crop','crop category']).sum()
