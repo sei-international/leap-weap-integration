@@ -48,7 +48,7 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         if not weap_expression[0:6] == 'Interp':
             msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
             tkmessagebox.showerror(procedure_title,msg)
-            exit()
+            sys.exit(msg)
         startyear = leap.baseyear # Starting year for LEAP data transcribed to WEAP
         endyear = leap.endyear # Ending year for LEAP data transcribed to WEAP
         split_weap_expression = split_interp_ex(weap_expression, startyear, endyear, listseparator)
@@ -77,6 +77,6 @@ def get_leap_timeslice_info(leap):
         except:
             msg = "".join["Unrecognized month (", month_name, ") in month_num function. Exiting..."]
             logging.error(msg)
-            exit()
+            sys.exit(msg)
             
     return leap_ts_info
