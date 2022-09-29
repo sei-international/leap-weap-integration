@@ -145,16 +145,16 @@ def get_leap_calc_years(app) :
             last_index += 1
     return leap_calculated_years
     
-def get_leap_region_ids(leap, regions) :
+def get_leap_region_ids(leap) :
     leap_region_ids = {}
-    for r in regions:
-        leap_region_ids[r] = leap.Regions(r).ID
+    for r in leap.Regions:
+        leap_region_ids[r.Name] = r.ID
     return leap_region_ids
     
-def get_leap_scenario_ids(leap, scenarios) :
+def get_leap_scenario_ids(leap) :
     leap_scenario_ids = {}
-    for s in scenarios:
-        leap_scenario_ids[s] = leap.Scenarios(s).ID
+    for s in leap.Scenarios:
+        leap_scenario_ids[s.Name] = s.ID
     return leap_scenario_ids
     
 # function to clear out any running instances of Excel (no return value)
