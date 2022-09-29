@@ -796,7 +796,7 @@ def main_integration(user_interface, tolerance, max_iterations):
         for e in target_weap_results:
             weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants'][e]['weap_path'], config_params['WEAP']['Hydropower_plants'][e]['weap_variable']])
             for s in weap_scenarios:
-                for y in range(weap.BaseYear, weap.EndYear):
+                for y in range(weap.BaseYear, weap.EndYear + 1):
                     # Elements in target_weap_results: full branch-variable-unit path
                     val = weap.ResultValue(weap_pathvar, y, 1, s, y, 12, 'Total')
                     if val is None:
