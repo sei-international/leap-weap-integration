@@ -171,7 +171,8 @@ def get_leap_scenario_ids(leap) :
     for s in leap.Scenarios:
         leap_scenario_ids[s.Name] = s.ID
     return leap_scenario_ids
-    
+
+# Convert a "long" index based on looping over multiple lists into corresponding elements from the different lists
 def index_to_elements(i, *lists_tuple):
     lists = list(reversed(list(lists_tuple)))
     elements = []
@@ -188,11 +189,17 @@ def kill_excel():
         if ps_re.search(proc.name()) is not None:
             proc.kill()
 
-# function that returns an array whose length is length argument; allows creating an array based on an expression for the length.
 #==================================================================================================#
 #                                         MAIN ROUTINE                                             #
 #==================================================================================================#
-def main_integration(user_interface, tolerance, max_iterations):
+def main_integration(tolerance, max_iterations):
+    """Main code: call to run the integrated models
+    
+    Input arguments:
+        tolerance: A number less than 1 (e.g., 0.1, 0.05) that sets the tolerance for discrepancies between values in subsequent runs
+        max_iterations: Maximum iterations if results do not converge
+    Returns: Nothing    
+    """
 
     #------------------------------------------------------------------------------------------------------------------------
     #
