@@ -26,9 +26,6 @@ import re
 import uuid
 import logging
 from collections import OrderedDict
-from julia_utils import get_julia_path
-from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
-from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 
 # TODO: Replace function below with gettext
 # Use gettext for translations, and install the standard alias _() for gettext function
@@ -39,6 +36,11 @@ if gettext.find('wave_integration', localedir='locale', languages=[language]) is
     transl.install()
 else:
     gettext.install('wave_integration')
+
+# Specify language before loading others
+from julia_utils import get_julia_path
+from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
+from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 
 #_ = gettext.gettext
 # def _(s: str) -> str:
