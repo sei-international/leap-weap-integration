@@ -98,7 +98,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
     coverage = pd.DataFrame()
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: #subsector data is the same across a given sector
-            dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)] #removes strings not related to sector
+            dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)].copy() #removes strings not related to sector
             conditions = list(map(dfcovsec.loc[:,'Demand Site'].str.contains, countries)) #figure out which row is associated with which country
             dfcovsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovsec) #list of columns
@@ -109,7 +109,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             dfcovsec = dfcovsec.groupby(level=0, axis=1).mean() #averages coverage for each year
             dfcovsec = dfcovsec/100 #indexes to 1
          
-            dfcovdmdsec = dfcovdmd[dfcovdmd['Branch'].str.contains(sector)] #removes strings not related to sector
+            dfcovdmdsec = dfcovdmd[dfcovdmd['Branch'].str.contains(sector)].copy() #removes strings not related to sector
             conditions = list(map(dfcovdmdsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
             dfcovdmdsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
             cols = list(dfcovdmdsec) #list of columns
@@ -143,7 +143,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: #subsector data is the same across a given sector
-                dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)] #removes strings not related to sector  
+                dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)].copy() #removes strings not related to sector  
                 conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries)) #figure out which row is associated with which country
                 dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other') #new column for countries
                 dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
