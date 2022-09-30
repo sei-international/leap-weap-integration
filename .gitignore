@@ -51,9 +51,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
-# Translations
-*.mo
-*.pot
+# Translations -- NOT automatically generating, so commit
+# *.mo
+# *.pot
 
 # Django stuff:
 *.log
