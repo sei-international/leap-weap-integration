@@ -1,8 +1,15 @@
 import logging
 from collections import OrderedDict
 
-# Splits the Interp expression exp into two parts: before startyear and after endyear (years from startyear to endyear are omitted). Returns an array with the two parts. listseparator is the currently active Windows list separator character (e.g., ",").
 def split_interp_ex(exp, startyear, endyear, listseparator):
+    """Extract and return from Interp expression expression the part before the startyear and the part after the endyear
+    
+    Input arguments:
+        exp is an Interp expression
+        startyear, endyear are integers
+        listseparator is the currently active Windows list separator character (e.g., "," or ";")
+    Returns: A list of the form [before_startyear_expression, after_endyear_expression]
+    """
     return_val = []
     return_val.append("Interp(")
     return_val.append("")
@@ -31,11 +38,22 @@ def split_interp_ex(exp, startyear, endyear, listseparator):
         return_val[1] = "".join([return_val[1], interp_termination])
     return return_val
 
-# function that inserts LEAP data from leap_branch, leap_variable, and leap_region into the WEAP Interp expression for weap_branch and weap_variable. weap and leap are WEAP and LEAP application objects, respectively; weap_scenarios and leap_scenarios are arrays of the names of the WEAP and LEAP scenarios being calculated. The procedure assumes that the units of the LEAP and WEAP variables are compatible if LEAP values are multiplied by data_multiplier. listseparator is the currently active Windows list separator character (e.g., ",").
-def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, weap_branch, weap_variable, leap_branch, leap_variable, leap_region, data_multiplier, listseparator, procedure_title):
-    # This procedure doesn't validate branches, variables, and regions. This is assumed to happen via check_branch_var() and check_region() before the procedure is called.
-    # Add Current Accounts to local copies of weap_scenarios and leap_scenarios.
-    # Scenarios in weap_scenarios and leap_scenarios should exclude Current Accounts; add it here to ensure Current Accounts values are transcribed to WEAP
+def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, weap_branch, weap_variable, leap_branch, leap_variable, leap_region, data_multiplier, listseparator):
+    """Insert LEAP data from specified branch, variable, and region into a WEAP Interp expression for a specified branch and variable
+    
+    Input arguments:
+        weap and leap are WEAP and LEAP application objects
+        weap_scenarios and leap_scenarios are arrays of the names of the WEAP and LEAP scenarios being calculated
+        weap_branch and weap_variable are strings specifying a WEAP branch and variable
+        leap_branch, leap_variable, and leap_region are strings specifying LEAP branch, variable, and region
+        data_multiplier corrects for different units: Set the value so that LEAP and WEAP units are compatible when LEAP values are multiplied by data_multiplier
+        listseparator is the currently active Windows list separator character (e.g., "," or ";")
+    Returns: Nothing
+    
+    Notes:
+        This procedure doesn't validate branches, variables, and regions: use check_branch_var() and check_region() before the procedure is called.
+        The variables weap_scenarios and leap_scenarios should exclude Current Accounts: The procedure adds Current Accounts to local copies of weap_scenarios and leap_scenarios.
+    """
     leap_scenarios_local = leap_scenarios.copy()
     weap_scenarios_local = weap_scenarios.copy()
     leap_scenarios_local.append('Current Accounts')
@@ -46,8 +64,7 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         # logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
         weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
         if not weap_expression[0:6] == 'Interp':
-            msg = ["Cannot update the expression for ", weap_branch , ":" , weap_variable , " with data from LEAP. The expression must be an Interp() expression. Exiting..."]
-            tkmessagebox.showerror(procedure_title,msg)
+            msg = _('The expression for {b}:{v} is not an Interp() expression: Cannot update with data from LEAP. Exiting...').format(b = weap_branch, v = weap_variable)
             sys.exit(msg)
         startyear = leap.baseyear # Starting year for LEAP data transcribed to WEAP
         endyear = leap.endyear # Ending year for LEAP data transcribed to WEAP

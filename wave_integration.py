@@ -535,7 +535,7 @@ def main_integration(user_interface, tolerance, max_iterations):
                 tkmessagebox.showerror(procedure_title, msg)
                 logging.error(msg)
                 sys.exit(msg)
-            add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR,procedure_title)
+            add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
 
             count += 1
             
