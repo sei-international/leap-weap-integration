@@ -123,7 +123,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             coveragetemp = wtcovtop.div(wtcovbot) #weighted average calculation
             coveragetemp = coveragetemp.drop('other', errors='ignore') # Drop 'other' if it is present
             coveragetemp = coveragetemp.rename(index={countries[0]: subsector})
-            coverage = pd.concat(coverage, coveragetemp)
+            coverage = pd.concat([coverage, coveragetemp])
     fname = os.path.join(fdirmacroinput, leap_scenario + "_max_util.csv") # After conversion, this is max utilization
     coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent'] # If exponent = 0, max_util = 1.0; if = 1, then max_util = coverage
     coverage.index = coverage.index.astype('int64') # After transpose, the index is years
@@ -159,7 +159,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 croptemp = dfcropsec.groupby(['country']).sum()
                 croptemp = croptemp.drop('other', errors='ignore') # Drop 'other' if it is present
                 croptemp = croptemp.rename(index={countries[0]: subsector})
-                cropprod = pd.concat(cropprod, croptemp)
+                cropprod = pd.concat([cropprod, croptemp])
         except:
             pass
 
@@ -212,7 +212,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 prodvaluetemp = prodvaluetemp.groupby(['country']).sum()
                 prodvaluetemp = prodvaluetemp.drop('other', errors='ignore') # Drop 'other' if it is present
                 prodvaluetemp = prodvaluetemp.rename(index={countries[0]: subsector})
-                prodvalue = pd.concat(prodvalue, prodvaluetemp)
+                prodvalue = pd.concat([prodvalue, prodvaluetemp])
         except:
             pass
      
@@ -268,7 +268,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                         realtemp = realtemp.drop('other')
                 for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]['All crops']: 
                     realtemp = realtemp.rename(index={countries[0]: macrocrop})
-                    realtemp2 = pd.concat(realtemp2, realtemp)
+                    realtemp2 = pd.concat([realtemp2, realtemp])
                 realtemp2 = realtemp2.drop_duplicates()
             else:
                 realtemp = realtemp.groupby(['country', 'crop category']).sum()
