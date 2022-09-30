@@ -21,6 +21,23 @@ def exportcsv(WEAP, fname, favname):
 
 # WEAP favorites to export
 def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
+    """Export WEAP favorites so they can be converted to Macro inputs using weaptomacroprocessing()
+    
+    Input arguments:
+        fdirweapoutput: the folder for WEAP outputs as prepared by exportcsvmodule()
+        fdirmain: the LEAP-Macro subfolder under the LEAP directory
+        weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
+        WEAP: WEAP object
+        rowskip: Number of rows to skip in WEAP favorites export files
+        
+    Returns: Pandas dataframes for weaptomacroprocessing():
+        dfcov: Demand site coverage at detailed level
+        dfcovdmd: Water demand used as weights to calculate average coverage
+        dfcrop: Potential crop production using MABIA potential yields and crop areas
+        dfcropprice: Crop prices
+    
+    TODO: Specify list_separator
+    """
     
     loadweapscen(WEAP, weap_scenario)
     
@@ -66,22 +83,48 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     dfcrop = dfcroparea * dfcroppotyld
     dfcrop.reset_index(inplace=True)
 
+    #------------------------------------
     # Crop prices
+    #------------------------------------
     fname = os.getcwd() + "\\Prices_v2.csv"
     dfcropprice = pd.read_csv(fname, skiprows=rowskip)
     dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index 
         
+    #------------------------------------
     # Investment
+    #------------------------------------
+    # TODO: Investment not currently implemented
+    
+    # RESERVOIR NAMES NOT BY COUNTRY; 
+    # UNSURE IF NEW RESERVOIR; currently only historical scenario is active
+    # OTHER SOURCES OF INVESTMENT: pipes/canals, boreholes, pumping stations, treatment plants
+    
     # favname = "WEAP Macro\Reservoir Storage Capacity"
     # fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Reservoir_Capacity_" + weap_scenario + ".csv"
     # exportcsv(weap_scenario, fname, favname)
     
     return dfcov, dfcovdmd, dfcrop, dfcropprice
 
-# WEAP RESULTS PROCESSING 
 def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
-
+    """Process WEAP results and generate CSV files for Macro
+    
+    Input arguments:
+        weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
+        config_params: the configuration data structure for the integration program
+        region: the LEAP region to prepare CSV files for
+        countries: the WEAP countries that corresponds to the region
+        fdirmain: the LEAP-Macro subfolder under the LEAP directory
+        fdirmacroinput: the input folder for LEAP-Macro (where the files are placed)
+        fdirweapoutput: the folder for WEAP outputs as prepared by exportcsvmodule()
+        dfcov, dfcovdmd, dfcrop, dfcropprice: the Pandas dataframes returned by exportcsvmodule()
+    Returns: Nothing
+    
+    TODO: Specify list_separator
+    """
+    
+    #------------------------------------
     # Process coverage data
+    #------------------------------------
     coverage = pd.DataFrame()
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: # subsector data is the same across a given sector
@@ -120,7 +163,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
     coverage.to_csv(fname, index=True, index_label = "year") # final output to csv
         
 
+    #------------------------------------
     # Crop production
+    #------------------------------------
     cropprod = pd.DataFrame()
     prodvalue = pd.DataFrame()
     realtemp2 = pd.DataFrame()
@@ -150,7 +195,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         except:
             pass
 
-        ## makes sure number of columns in the prices matrix is same as the crop production matrix
+        ## ensure number of columns in the prices matrix is same as the crop production matrix
         dfcrop_cols = dfcrop.columns # column names for dfcrop
         dfcropprice_cols = dfcropprice.columns # column names for dfcropprice
         diff_cols = dfcropprice_cols.difference(dfcrop_cols) # checks for differences between columns
@@ -176,7 +221,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfcropprice_cols.sort() # sort column names
         dfcropprice = dfcropprice.loc[:,dfcropprice_cols] # sorted columns
         
-        ## makes sure number of rows in the prices matrix is same as the crop production matrix
+        ## ensure number of rows in the prices matrix is same as the crop production matrix
         dfcropsecgrp = dfcropsec.groupby(['country','crop','crop category']).sum()
     #       dfcrop_rows = dfcrop.rows # column names for dfcrop
         dfcropsecgrp = dfcropsecgrp.reset_index()
@@ -191,7 +236,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfcropsecgrp.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index  
         dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index  
 
-        ## production value
+        #------------------------------------
+        # production value
+        #------------------------------------
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
                 prodvaluetemp = dfcropsecgrp * dfcropprice
@@ -203,7 +250,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         except:
             pass
      
-        ## price inflation (change in crop price)
+        #------------------------------------
+        # price inflation (change in crop price)
+        #------------------------------------
         dfinflation = dfcropprice
         dfinflation = dfinflation.drop(columns = min(dfcropprice_cols))
         for x in dfcropprice_cols:
@@ -215,7 +264,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             dfinflation[str(year2)] = dfcropprice[str(year2)] - dfcropprice[str(year1)]
             dfinflation[str(year2)] = dfinflation[str(year2)].div(dfcropprice[str(year1)])
         
-        ## change in production 
+        #------------------------------------
+        # change in production 
+        #------------------------------------
         dfcrop_cols = [x for x in dfcrop_cols if x.isdigit()] # keeps if column header has digits (years)
         dfcropchange = dfcropsecgrp
         dfcropchange = dfcropchange.drop(columns = min(dfcrop_cols))
@@ -230,7 +281,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         
     #       dfcropsecgrp = dfcropsecgrp.reset_index()
        
-        ## share of production
+        #------------------------------------
+        # share of production
+        #------------------------------------
         dfnum = dfcropsecgrp * dfcropprice
         dfdom = dfnum.groupby(['country']).sum()
         dfnum = dfnum.reset_index()
@@ -243,7 +296,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfshare = dfshare.drop(columns = min(dfcrop_cols))
         
         
-        ## real output growth
+        #------------------------------------
+        # real output growth
+        #------------------------------------
         realtemp = dfshare * (1 + dfinflation) * dfcropchange   
         try:
             macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]
@@ -274,7 +329,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             pass
         
         
-        ## convert real output growth to indices
+        # convert real output growth to indices
         for x in realtemp2:
             if x == min(realtemp2):
                 real[x] = 1*(1+(realtemp2[x]))
@@ -283,7 +338,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 real[x] = y*(1+(realtemp2[x]))
                 y = real[x]
                     
-        ## price growth
+        #------------------------------------
+        # price growth
+        #------------------------------------
         pricegrowthtemp = dfinflation * dfshare
         try:
             macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]
@@ -313,7 +370,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         except:
             pass    
 
-        ## convert price growth to indices
+        # convert price growth to indices
         for x in pricegrowthtemp2:
             if x == min(pricegrowthtemp2):
                 pricegrowth[x] = 1*(1+(pricegrowthtemp2[x]))
@@ -323,6 +380,9 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 y = pricegrowth[x]
                     
                 
+    #------------------------------------
+    # Write out Macro input files
+    #------------------------------------
     fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
     real = real.transpose()
     real.index = real.index.astype('int64') # After transpose, the index is years
@@ -340,8 +400,4 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
     pricegrowth.sort_index(inplace=True)
     pricegrowth.to_csv(fname, index=True, index_label = "year") # final output to csv
     
-    # Investment parameters
-    # RESERVOIR NAMES NOT BY COUNTRY; 
-    # UNSURE IF NEW RESERVOIR; currently only historical scenario is active
-    # OTHER SOURCES OF INVESTMENT: pipes/canals, boreholes, pumping stations, treatment plants
-    
+    # TODO: Investment parameters
