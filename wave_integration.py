@@ -169,10 +169,8 @@ def index_to_elements(i, *lists_tuple):
     elements = []
     i_rem = i
     for (l, llen) in zip(lists, [len(l) for l in lists]):
-        print(str(llen) + '\t' + ",".join(l))
         elements.append(l[i_rem % llen])
         i_rem //= llen
-    print(elements)
     return list(reversed(elements))
         
     
@@ -748,8 +746,6 @@ def main_integration(user_interface, tolerance, max_iterations):
                 leap.ActiveScenario = leap_scenarios[i]
                 logging.info('\t\t' + _('Region: {r}').format(r = r))
                 leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
-
-        sys.exit("TESTING") # TODO: Delete after testing
 
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate LEAP
