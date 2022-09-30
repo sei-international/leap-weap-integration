@@ -205,7 +205,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()] # keeps if column header has digits (years)
         diff_cols = dfcrop_cols.difference(dfcropprice_cols)
         diff_cols = [x for x in diff_cols if x.isdigit()]
-    #       diff_cols = ['1994', '2021'] # test code
         for x in diff_cols: 
             minyr = min(dfcropprice_cols)
             maxyr = max(dfcropprice_cols)
@@ -223,7 +222,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         
         ## ensure number of rows in the prices matrix is same as the crop production matrix
         dfcropsecgrp = dfcropsec.groupby(['country','crop','crop category']).sum()
-    #       dfcrop_rows = dfcrop.rows # column names for dfcrop
         dfcropsecgrp = dfcropsecgrp.reset_index()
         dfcropsecgrp['key'] = dfcropsecgrp['country']+dfcropsecgrp['crop'] # helper column
         dfcropprice = dfcropprice.reset_index()
@@ -242,7 +240,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         try:
             for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
                 prodvaluetemp = dfcropsecgrp * dfcropprice
-            #    prodvaluetemp = prodvaluetemp.groupby(['country', 'crop category']).sum()
                 prodvaluetemp = prodvaluetemp.groupby(['country']).sum()
                 prodvaluetemp = prodvaluetemp.drop('other', errors='ignore') # Drop 'other' if it is present
                 prodvaluetemp = prodvaluetemp.rename(index={countries[0]: subsector})
@@ -279,8 +276,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             dfcropchange[str(year2)] = dfcropsecgrp[str(year2)] - dfcropsecgrp[str(year1)]
             dfcropchange[str(year2)] = dfcropchange[str(year2)].div(dfcropsecgrp[str(year1)])
         
-    #       dfcropsecgrp = dfcropsecgrp.reset_index()
-       
         #------------------------------------
         # share of production
         #------------------------------------
@@ -294,7 +289,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         dfdom.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index  
         dfshare = dfnum.div(dfdom)
         dfshare = dfshare.drop(columns = min(dfcrop_cols))
-        
         
         #------------------------------------
         # real output growth
@@ -327,7 +321,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                         realtemp2 = pd.concat([realtemp2, realtemp.loc[macrocrop]])
         except:
             pass
-        
         
         # convert real output growth to indices
         for x in realtemp2:
@@ -378,7 +371,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
             else:
                 pricegrowth[x] = y*(1+(pricegrowthtemp2[x]))
                 y = pricegrowth[x]
-                    
                 
     #------------------------------------
     # Write out Macro input files
