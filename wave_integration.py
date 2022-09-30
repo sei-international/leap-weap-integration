@@ -64,6 +64,12 @@ logging.basicConfig(filename=logfile,
 
 tst = time.time()
 # List of functions to be defined
+
+##############################################################
+#
+# Functions used by the main routine
+#
+##############################################################
 # Convert number of seconds into HH::MM::SS
 def hms_from_sec(dt):
     dtn = round(dt)
@@ -174,7 +180,6 @@ def index_to_elements(i, *lists_tuple):
         elements.append(l[i_rem % llen])
         i_rem //= llen
     return list(reversed(elements))
-        
     
 # function to clear out any running instances of Excel (no return value)
 def kill_excel():
