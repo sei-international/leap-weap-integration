@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2022-09-30 09:58-0400\n"
-"PO-Revision-Date: 2022-09-30 09:58-0400\n"
+"POT-Creation-Date: 2022-09-30 13:58-0400\n"
+"PO-Revision-Date: 2022-09-30 13:59-0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "X-Generator: Poedit 3.1.1\n"
 
-#: leap_weap_sub.py:57
+#: leap_weap_sub.py:56
 msgid ""
 "The expression for {b}:{v} is not an Interp() expression: Cannot update with "
 "data from LEAP. Exiting..."
@@ -26,7 +26,7 @@ msgstr ""
 "Выражение для {b}:{v} не является выражением Interp(): Невозможно обновить "
 "данные из LEAP. Выход..."
 
-#: leap_weap_sub.py:87
+#: leap_weap_sub.py:84
 msgid "Unrecognized month \"{m}\" in month_num function. Exiting..."
 msgstr "Нераспознанный месяц \"{m}\" в функции month_num. Выход..."
 
@@ -149,20 +149,20 @@ msgstr ""
 "WEAP, чтобы не заставлять модель использовать результаты прошлых "
 "интеграционных прогонов."
 
-#: wave_integration.py:466 wave_integration.py:949
+#: wave_integration.py:466 wave_integration.py:943
 msgid "Running LEAP-Macro for scenario: {s}"
 msgstr "Запуск LEAP-Macro для сценария: {s}"
 
 #: wave_integration.py:468 wave_integration.py:715 wave_integration.py:746
-#: wave_integration.py:951
+#: wave_integration.py:945
 msgid "Region: {r}"
 msgstr "Регион: {r}"
 
-#: wave_integration.py:471 wave_integration.py:959
+#: wave_integration.py:471 wave_integration.py:953
 msgid "Executing: {e}"
 msgstr "Выполняется: {e}"
 
-#: wave_integration.py:474 wave_integration.py:962
+#: wave_integration.py:474 wave_integration.py:956
 msgid "LEAP-Macro exited with an error"
 msgstr "LEAP-Macro завершился с ошибкой"
 
@@ -323,31 +323,32 @@ msgstr "WEAP не вернул значение для \"{e}\" в год {y} с�
 msgid "Checking whether calculations converged..."
 msgstr "Проверка сходимости расчетов..."
 
-#: wave_integration.py:869
+#: wave_integration.py:870
 msgid ""
-"Difference exceeded tolerance for LEAP result {i}: previous value = {p}, "
-"current value = {c}"
+"Difference exceeded tolerance for LEAP result \"{e}\" in year {y} of "
+"scenario {s}: previous value = {p}, current value = {c}"
 msgstr ""
-"Разница превысила допуск для результата LEAP {i}: предыдущее значение = {p}, "
-"текущее значение = {c}"
+"Разница превысила допустимое значение для результата LEAP \"{e}\" в год {y} "
+"сценария {s}: предыдущее значение = {p}, текущее значение = {c}"
 
-#: wave_integration.py:882
+#: wave_integration.py:879
 msgid ""
-"Difference exceeded tolerance for LEAP-Macro result {i}: previous value = "
-"{p}, current value = {c}"
+"Difference exceeded tolerance for LEAP-Macro result \"{e}\" in year {y} of "
+"scenario {s} for region {r}: previous value = {p}, current value = {c}"
 msgstr ""
-"Разница превысила допуск для результата LEAP-Macro {i}: предыдущее значение "
-"= {p}, текущее значение = {c}"
+"Разница превысила допустимое значение для результата LEAP-Macro \"{e}\" в "
+"год {y} сценария {s} для региона {r}: предыдущее значение = {p}, текущее "
+"значение = {c}"
 
-#: wave_integration.py:892
+#: wave_integration.py:888
 msgid ""
-"Difference exceeded tolerance for WEAP result {i}: previous value = {p}, "
-"current value = {c}"
+"Difference exceeded tolerance for WEAP result \"{e}\" in year {y} of "
+"scenario {s}: previous value = {p}, current value = {c}"
 msgstr ""
-"Разница превысила допуск для результата WEAP {i}: предыдущее значение = {p}, "
-"текущее значение = {c}"
+"Разница превысила допустимое значение для результата WEAP \"{e}\" в год {y} "
+"сценария {s}: предыдущее значение = {p}, текущее значение = {c}"
 
-#: wave_integration.py:903
+#: wave_integration.py:897
 msgid ""
 "All target WEAP and LEAP results converged to within the specified tolerance "
 "({t}%). No additional iterations of WEAP and LEAP calculations are needed."
@@ -355,11 +356,11 @@ msgstr ""
 "Все целевые результаты WEAP и LEAP сошлись в пределах заданного допуска "
 "({t}%). Дополнительных итераций расчетов WEAP и LEAP не требуется."
 
-#: wave_integration.py:910
+#: wave_integration.py:904
 msgid "Results did not converge. Iterating..."
 msgstr "Результаты не сходятся. Итерация..."
 
-#: wave_integration.py:912
+#: wave_integration.py:906
 msgid ""
 "Reached maximum number of iterations {m} without converging within tolerance "
 "{t}%"
@@ -367,19 +368,19 @@ msgstr ""
 "Достигнуто максимальное число итераций {m} без сходимости в пределах допуска "
 "{t}%"
 
-#: wave_integration.py:925
+#: wave_integration.py:919
 msgid "Pushing WEAP results to Macro..."
 msgstr "Передача результатов WEAP в макрос..."
 
-#: wave_integration.py:938
+#: wave_integration.py:932
 msgid "Processing for WEAP scenario: {s}"
 msgstr "Обработка для сценария WEAP: {s}"
 
-#: wave_integration.py:1012
+#: wave_integration.py:1006
 msgid "Completed WEAP-LEAP integration procedure"
 msgstr "Завершение процедуры интеграции WEAP-LEAP"
 
-#: wave_integration.py:1024
+#: wave_integration.py:1018
 msgid "Total elapsed time: {t}"
 msgstr "Общее прошедшее время: {t}"
 
