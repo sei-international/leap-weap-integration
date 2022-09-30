@@ -66,18 +66,6 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     dfcrop = dfcroparea * dfcroppotyld
     dfcrop.reset_index(inplace=True)
 
-    #Water demand in order to figure out crop production for each country
-    #favname = "WEAP Macro\Water Demand Annual Total - Level 2"
-    #fname = "C:\\Users\\emily\\Documents\\GitHub\\WAVE\\WEAP Outputs\\Water_Demand_Lvl2_" + weap_scenario + ".csv"
-    #exportcsv(weap_scenario, fname, favname)
-    #dfcropdmd = pd.read_csv(fname, skiprows=rowskip) 
-    
-    #Crop list categorization
-    #fname = fdirmain + "\\Crop_Categorization.csv"
-    #dfcropcat = pd.read_csv(fname, usecols=['WEAP Category','Macro Category']) #reads in list for specific columns
-    #dfcropcat = dfcropcat.drop_duplicates() #removes duplicate rows
-    #dfcropcat.set_index(['WEAP Category'], inplace=True) #sets first two columns as index  
-    #cropcat = dfcropcat.to_dict()
     # Crop prices
     fname = os.getcwd() + "\\Prices_v2.csv"
     dfcropprice = pd.read_csv(fname, skiprows=rowskip)
