@@ -282,7 +282,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
                         realtemp = realtemp.rename(index={crop: macrocrop})
-                        realtemp2 = realtemp2.append(realtemp.loc[macrocrop])
+                        realtemp2 = pd.concat([realtemp2, realtemp.loc[macrocrop]])
         except:
             pass
         
@@ -308,7 +308,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                         pricegrowthtemp = pricegrowthtemp.drop('other') 
                 for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]['All crops']: 
                     pricegrowthtemp = pricegrowthtemp.rename(index={countries[0]: macrocrop})
-                    pricegrowthtemp2 = pricegrowthtemp2.append(pricegrowthtemp.loc[macrocrop])
+                    pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop]])
                 pricegrowthtemp2 = pricegrowthtemp2.drop_duplicates()
             else:
                 pricegrowthtemp = pricegrowthtemp.groupby(['country', 'crop category']).sum()
@@ -322,7 +322,7 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
-                        pricegrowthtemp2 = pricegrowthtemp2.append(pricegrowthtemp.loc[macrocrop])
+                        pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop]])
         except:
             pass    
 
