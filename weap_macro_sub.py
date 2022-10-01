@@ -345,7 +345,8 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                         pricegrowthtemp = pricegrowthtemp.drop('other') 
                 for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]['All crops']: 
                     pricegrowthtemp = pricegrowthtemp.rename(index={countries[0]: macrocrop})
-                    pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop]])
+                    # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
+                    pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
                 pricegrowthtemp2 = pricegrowthtemp2.drop_duplicates()
             else:
                 pricegrowthtemp = pricegrowthtemp.groupby(['country', 'crop category']).sum()
@@ -359,7 +360,8 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
                 for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
                     for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
-                        pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop]])
+                        # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
+                        pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
         except:
             pass    
 
