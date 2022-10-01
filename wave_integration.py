@@ -27,8 +27,6 @@ import uuid
 import logging
 from collections import OrderedDict
 
-# TODO: Replace function below with gettext
-# Use gettext for translations, and install the standard alias _() for gettext function
 import gettext, locale, ctypes
 language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
 if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
@@ -37,18 +35,11 @@ if gettext.find('wave_integration', localedir='locale', languages=[language]) is
 else:
     gettext.install('wave_integration')
 
-# Specify language before loading others
+# Load gettext and install translator before importing other local scripts
 from julia_utils import get_julia_path
 from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
 from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 
-#_ = gettext.gettext
-# def _(s: str) -> str:
-    # return s
-
-# in julia: using LEAPMacro
-# using YAML
-# using ArgParse need to be installed
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
 #
