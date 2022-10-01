@@ -298,7 +298,7 @@ def main_integration(tolerance, max_iterations):
     leap.ActiveArea = config_params['LEAP']['Area']
     wait_apps(leap, weap)
 
-    leap_ts_info = get_leap_timeslice_info(leap)
+    leap_ts_info = get_leap_timeslice_info(leap, config_params['LEAP']['Months'])
     leap_region_ids = get_leap_region_ids(leap)
     leap_scenario_ids = get_leap_scenario_ids(leap)
 

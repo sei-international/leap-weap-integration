@@ -83,8 +83,8 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
             new_weap_expression = "".join([new_weap_expression, split_weap_expression[1]])
         weap.Branches(weap_branch).Variables(weap_variable).Expression = new_weap_expression
 
-def get_leap_timeslice_info(leap):
-    month_dict = dict(zip(['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], [i+1 for i in range(12)]))
+def get_leap_timeslice_info(leap, months):
+    month_dict = dict(zip(months, [i+1 for i in range(len(months))]))
 
     leap_ts_info = OrderedDict()
     for tsl in leap.timeslices :
@@ -92,7 +92,7 @@ def get_leap_timeslice_info(leap):
         try:
             leap_ts_info[tsl.Name] = month_dict[month_name]
         except:
-            msg = "".join["Unrecognized month (", month_name, ") in month_num function. Exiting..."]
+            msg = _('Unrecognized month "{m}" in month_num function. Exiting...').format(m = month_name)
             logging.error(msg)
             sys.exit(msg)
             
