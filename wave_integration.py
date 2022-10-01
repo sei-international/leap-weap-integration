@@ -1,18 +1,8 @@
-# If install via Miniconda, must then run:
-#   conda install pyyaml, numpy, psutil
-#   conda install pywin32, then run in command prompt:
-#      cd "C:\ProgramData\Miniconda3\Scripts"
-#      python pywin32_postinstall.py -install
-
-# If install via pip:
-#   pip install pyyaml, pywin32, psutil, numpy
-
 import sys
 from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
 import win32gui
-from tkinter import Tk, Label, Button, Radiobutton, IntVar
 from tkinter import messagebox as tkmessagebox
 import yaml
 import time
@@ -54,7 +44,6 @@ logging.basicConfig(filename=logfile,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 tst = time.time()
-# List of functions to be defined
 
 ##############################################################
 #
@@ -93,19 +82,6 @@ def wait_apps(wait_app, sleep_app):
     while not wait_app.ProgramStarted:
         sleep_app.Sleep(1000)
 
-# Message box that asks multiple choice question
-def ask_multiple_choice_question(prompt, options):
-    root = Tk()
-    if prompt:
-        Label(root, text=prompt).pack()
-    v = IntVar()
-    for i, option in enumerate(options):
-        Radiobutton(root, text=option, variable=v, value=i).pack(anchor="w")
-    Button(text="Submit", command=root.destroy).pack()
-    root.mainloop()
-    if v.get() == 0: return None
-    return options[v.get()]
-
 # function that checks branch-variable-unit combination exists in app (WEAP or LEAP)
 def check_branch_var(app, branch_path, variable, unit) :
     check_passed = False
@@ -122,7 +98,6 @@ def check_branch_var(app, branch_path, variable, unit) :
                     check_passed = True
     if not check_passed :
         msg = _('The active {a} area does not contain the required variable {b}:{v} with unit {v}. Please check the area and try again. Exiting...').format(a = app_name, b = branch_path, v = variable, u = unit)
-        tkmessagebox.showerror("WAVE integration", msg)
         logging.error(msg)
         sys.exit(msg)
 
@@ -134,7 +109,8 @@ def check_region(leap, region) :
         check_passed = True
     if not check_passed :
         msg = _('Could not enable calculations for region {r} in the active LEAP area. Please check the area and try again. Exiting...').format(r = region)
-        tkmessagebox.showerror("WAVE integration", msg)
+        logging.error(msg)
+        sys.exit(msg)
 
 # function that disables all scenarios in current area in app (which should be a LEAP or WEAP application object).
 def disable_all_scenario_calcs(app):
@@ -199,12 +175,7 @@ def main_integration(tolerance, max_iterations):
     #------------------------------------------------------------------------------------------------------------------------
     LIST_SEPARATOR = get_list_separator() # Windows list separator character (e.g., ",")
     if not len(LIST_SEPARATOR) == 1 :
-        # if lang == "RUS" :
-            # msg = "Разделитель списка Windows длиннее 1 символа, что несовместимо с процедурой интеграции WEAP-LEAP. Выход..."
-        # else :
-            # msg = _('The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...')
         msg = _('The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...')
-        tkmessagebox.showerror(procedure_title, msg)
         logging.error(msg)
         sys.exit(msg)
 
@@ -254,31 +225,6 @@ def main_integration(tolerance, max_iterations):
     # Check whether leap_macro is being run
     leap_macro = 'LEAP-Macro' in config_params.keys()
 
-    # Set run time language
-    # lang = None
-    # if user_interface :
-        # lines = ["Would you like Russian language prompts? / Хотите подсказки на русском языке?", "Select Language / Выберите язык"]
-        # msg = "\n".join(lines)
-        # result = ask_multiple_choice_question(
-            # msg,
-            # [
-                # "English/Английский язык",
-                # "Russian/Русский"
-            # ]
-        # )
-        # if result == 'Russian/Русский' :
-            # lang = "RUS"
-
-    # if lang == "RUS" :
-        # russian.install()
-
-    # if lang == "RUS" :
-        # procedure_title = "Процедура интеграции WEAP-LEAP"
-        # msg = "Инициирование процедуры интеграции."
-    # else :
-        # procedure_title = _('WEAP-LEAP Integration Procedure')
-        # msg = _('Initiating integration procedure...')
-
     procedure_title = _('WEAP-LEAP Integration Procedure')
     msg = _('Initiating integration procedure...')
 
@@ -303,14 +249,6 @@ def main_integration(tolerance, max_iterations):
     leap_scenario_ids = get_leap_scenario_ids(leap)
 
     # open correct leap area and select scenarios and years to be calculated
-    # if lang == "RUS" :
-        # msg = ["Пожалуйста, откройте модель WAVE (область) в LEAP (такую же, как определена в config.yml) и выберите сценарии и годы, которые вы хотели бы запустить.", "ПРИМЕЧАНИЕ: Настройки LEAP определяют рассчитанные сценарии. Выбор сценария в WEAP будет переписан."]
-        # title = "Открытая область LEAP"
-    # else :
-        # title = _('Open LEAP Area')
-        # msg1 = _('Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run.')
-        # msg2 = _('NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten.')
-        # msg = msg1 + "\n" + msg2
     title = _('Open LEAP Area')
     msg1 = _('Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run.')
     msg2 = _('NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten.')
@@ -418,17 +356,11 @@ def main_integration(tolerance, max_iterations):
 
 
     if not at_least_1_calculated :
-        # if lang == "RUS": msg = " ".join(["Хотя бы один сценарий должен быть рассчитан в активной области", runfrom_app, ". Выход..."])
-        # else : msg = _('At least one scenario must be calculated in the active {a} area. Exiting...').format(a = runfrom_app)
         msg = _('At least one scenario must be calculated in the active {a} area. Exiting...').format(a = runfrom_app)
-        tkmessagebox.showerror(procedure_title, msg)
         logging.error(msg)
         sys.exit(msg)
     elif len(scenarios_map)== 0:
-        # if lang == "RUS": msg = " ".join(["Не удалось найти сценарии в активной области", other_app, "соответствующие сценариям, рассчитанным в активной области", runfrom_app, ". Выход..."])
-        # else : msg = _('Could not find scenarios in the active {a2} area corresponding to the scenarios calculated in the active {a1} area. Exiting...').format(a1 = runfrom_app, a2 = other_app)
         msg = _('Could not find scenarios in the active {a2} area corresponding to the scenarios calculated in the active {a1} area. Exiting...').format(a1 = runfrom_app, a2 = other_app)
-        tkmessagebox.showerror(procedure_title, msg)
         logging.error(msg)
         sys.exit(msg)
 
@@ -436,12 +368,11 @@ def main_integration(tolerance, max_iterations):
     if runfrom_app == "LEAP" or runfrom_app == "WEAP":
         leap_scenarios = list(scenarios_map.keys())
         weap_scenarios = list(scenarios_map.values())
-    else : # TODO: Get this string into the .po file
-        if lang == "RUS" : tkmessagebox.showerror(procedure_title, "Неподдерживаемый runfrom_app в интеграционной модели.")
-        else : tkmessagebox.showerror(procedure_title, "Unsupported runfrom_app in run_wave_model().")
+    else :
+        msg = _('Unsupported application: "{a}". Exiting...').format(a = runfrom_app)
+        logging.error(msg)
+        sys.exit(msg)
 
-    # if lang == "RUS" : msg1 = "Расчет следующих сценариев:"
-    # else:  msg1 = _('Calculating the following scenarios:')
     msg1 = _('Calculating the following scenarios:')
     logging.info(msg1)
 
@@ -498,7 +429,7 @@ def main_integration(tolerance, max_iterations):
     # set up target results for convergence checks during iterative calculations
     value = []
     list_leap_keys = list(config_params['LEAP']['Hydropower_plants'].keys())
-    target_leap_results  = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
+    target_leap_results = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
 
     list_weap_keys = list(config_params['WEAP']['Hydropower_plants'].keys())
     target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
@@ -508,10 +439,6 @@ def main_integration(tolerance, max_iterations):
         target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
 
     while completed_iterations < max_iterations :
-        # if lang == "RUS":
-            # msg = ["Перемещение демографических и макроэкономических предположений из LEAP в WEAP (итерация ", str(completed_iterations+1), ")." ]
-        # else :
-            # msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
         msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(20)
@@ -535,7 +462,6 @@ def main_integration(tolerance, max_iterations):
                 unit_multiplier = 100
             else:
                 msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
-                tkmessagebox.showerror(procedure_title, msg)
                 logging.error(msg)
                 sys.exit(msg)
             add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
@@ -547,10 +473,6 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate WEAP
         #------------------------------------------------------------------------------------------------------------------------
-        # if lang == "RUS":
-            # msg = "".join(["Расчет (итерация ", str(completed_iterations+1), ")." ])
-        # else :
-            # msg = _('Calculating WEAP (iteration {i})').format(i = completed_iterations+1)
         msg = _('Calculating WEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(30)
@@ -567,8 +489,6 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Availability information saved to Excel files specific to WEAP branches and LEAP scenarios.
         #   Note: Excel used since LEAP's performance is extremely poor when reading from text files.
-        # if lang == "RUS" : msg = " ".join(["Перемещение доступности гидроэнергетики из WEAP в LEAP (итерация ", str(completed_iterations+1), ")."])
-        # else : msg = _('Moving hydropower availability from WEAP to LEAP (iteration {i})').format(i = completed_iterations+1)
         msg = _('Moving hydropower availability from WEAP to LEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(40)
@@ -598,12 +518,7 @@ def main_integration(tolerance, max_iterations):
                 # check unit
                 weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
-                    # if lang == 'RUS':
-                        # msg = "Выработка энергии в WEAP должна быть в гигаджоулях. Выход..."
-                    # else:
-                        # msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
                     msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
-                    tkmessagebox.showerror(procedure_title, msg)
                     logging.error(msg)
                     sys.exit(msg)
                 # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
@@ -611,12 +526,7 @@ def main_integration(tolerance, max_iterations):
 
                 # check that there are values for every month
                 if not len(weap_hpp_gen)%12 == 0:
-                    # if lang == 'RUS':
-                        # msg = "Выработка энергии в WEAP не является ежемесячной или не доступна для каждого месяца моделирования. Выход...."
-                    # else:
-                        # msg = _('Energy generation in WEAP is not monthly or not available for every simulation month. Exiting...')
                     msg = _('Energy generation in WEAP is not monthly or not available for every simulation month. Exiting...')
-                    tkmessagebox.showerror(procedure_title, msg)
                     logging.error(msg)
                     sys.exit(msg)
                 y_range = range(weap.BaseYear, weap.EndYear+1)
@@ -693,10 +603,6 @@ def main_integration(tolerance, max_iterations):
         # Move Syr Darya agricultural water requirements from WEAP to LEAP.
         #------------------------------------------------------------------------------------------------------------------------
         # TODO: Make this generic, not just for this application/Syr Darya
-        # if lang == "RUS":
-            # msg = ["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", сельское хозяйство)." ]
-        # else :
-            # msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), agricultural use').format(i = completed_iterations+1)
         msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), agricultural use').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
@@ -726,10 +632,6 @@ def main_integration(tolerance, max_iterations):
         # Move industrial and domestic water requirements from WEAP to LEAP
         #------------------------------------------------------------------------------------------------------------------------
         logging.info(_('Moving industrial water requirements from WEAP to LEAP'))
-        # if lang == "RUS":
-            # msg = "".join(["Перемещение информации о перекачке воды из WEAP в LEAP (итерация ", str(completed_iterations+1), ", промышленное и бытовое использование)." ])
-        # else :
-            # msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), industrial and domestic use').format(i = completed_iterations+1)
         msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), industrial and domestic use').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(55)
@@ -755,10 +657,6 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate LEAP
         #------------------------------------------------------------------------------------------------------------------------
-        # if lang == "RUS":
-            # msg = "".join(["Расчет площади LEAP (итерация ", str(completed_iterations+1), ")."])
-        # else:
-            # msg = _('Calculating LEAP area (iteration {i})').format(i = completed_iterations+1)
         msg = _('Calculating LEAP area (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(50)
@@ -780,10 +678,6 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Store target results used in the convergence check
         #------------------------------------------------------------------------------------------------------------------------
-        # if lang == "RUS":
-            # msg = "".join(["Запись результатов и проверка сходимости (итерация ", str(completed_iterations+1),")."])
-        # else:
-            # msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
         msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(80)
@@ -858,10 +752,6 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         if completed_iterations > 0:
             logging.info(_('Checking whether calculations converged...'))
-            # if lang == "RUS":
-                # msg = "".join(["Запись результатов и проверка сходимости (итерация ", str(completed_iterations+1),")."])
-            # else:
-                # msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
             msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
             leap.ShowProgressBar(procedure_title, msg)
             leap.SetProgressBar(95)
@@ -872,9 +762,8 @@ def main_integration(tolerance, max_iterations):
             
             for i in range(0, len(this_iteration_leap_results)):
                 if abs(this_iteration_leap_results[i] - last_iteration_leap_results[i]) > abs(last_iteration_leap_results[i]) * tolerance + float_info.epsilon:
-                    logging.info(_('Difference exceeded tolerance for LEAP result {i}: previous value = {p}, current value = {c}').format(i = i, p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
-                    for e in index_to_elements(i, target_leap_results, leap_scenarios, leap_calc_years):
-                        logging.info('\t' + e)
+                    diff_loc = index_to_elements(i, list(target_leap_results.keys()), leap_scenarios, leap_calc_years)
+                    logging.info(_('Difference exceeded tolerance for LEAP result "{e}" in year {y} of scenario "{s}": previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], s = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
                     results_converged = False
                     break
 
@@ -882,9 +771,8 @@ def main_integration(tolerance, max_iterations):
             if leap_macro and results_converged:
                 for i in range(0, len(this_iteration_leapmacro_results)):
                     if abs(this_iteration_leapmacro_results[i] - last_iteration_leapmacro_results[i]) > abs(last_iteration_leapmacro_results[i]) * tolerance + float_info.epsilon:
-                        logging.info(_('Difference exceeded tolerance for LEAP-Macro result {i}: previous value = {p}, current value = {c}').format(i = i, p = last_iteration_leapmacro_results[i], c = this_iteration_leapmacro_results[i]))
-                        for e in index_to_elements(i, target_leap_results, config_params['LEAP-Macro']['regions'].keys(), leap_scenarios, leap_calc_years):
-                            logging.info('\t' + e)
+                        diff_loc = index_to_elements(i, list(target_leapmacro_results.keys()), list(config_params['LEAP-Macro']['regions'].keys()), leap_scenarios, leap_calc_years)
+                        logging.info(_('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} of scenario "{s}" for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[3], s = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
                         results_converged = False
                         break
 
@@ -892,17 +780,12 @@ def main_integration(tolerance, max_iterations):
             if results_converged :
                 for i in range(0, len(this_iteration_weap_results)):
                     if abs(this_iteration_weap_results[i] - last_iteration_weap_results[i]) > abs(last_iteration_weap_results[i]) * tolerance + float_info.epsilon:
-                        logging.info(_('Difference exceeded tolerance for WEAP result {i}: previous value = {p}, current value = {c}').format(i = i, p = last_iteration_weap_results[i], c = this_iteration_weap_results[i]))
-                        for e in index_to_elements(i, target_weap_results, weap_scenarios, weap.EndYear - weap.BaseYear + 1):
-                            logging.info('\t' + e)
+                        diff_loc = index_to_elements(i, list(target_weap_results.keys()), weap_scenarios, weap.EndYear - weap.BaseYear + 1)
+                        logging.info(_('Difference exceeded tolerance for WEAP result "{e}" in year {y} of scenario "{s}": previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], s = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
                         results_converged = False
                         break
 
             if results_converged:
-                # if lang == "RUS":
-                    # msg = "".join(["Все целевые результаты WEAP и LEAP сошлись в пределах заданного допуска (", str(tolerance * 100), "%). Дополнительных итераций расчетов WEAP и LEAP не требуется."])
-                # else:
-                    # msg = _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed.').format(t = tolerance * 100)
                 msg = _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed.').format(t = tolerance * 100)
                 leap.ShowProgressBar(procedure_title, msg)
                 leap.SetProgressBar(100)
@@ -913,6 +796,7 @@ def main_integration(tolerance, max_iterations):
                     logging.info(_('Results did not converge. Iterating...'))
                 else:
                     logging.info(_('Reached maximum number of iterations {m} without converging within tolerance {t}%').format(m = max_iterations, t = tolerance * 100))
+                    break # Break out of the iteration loop
         
         # Update information for next iteration
         last_iteration_leap_results = this_iteration_leap_results
@@ -973,6 +857,7 @@ def main_integration(tolerance, max_iterations):
     #------------------------------------------------------------------------------------------------------------------------
     
     # TODO: Provide monthly values and bring them into the iteration to allow WEAP to release water for other purposes if not needed for hydropower
+    # TODO: Replace older style of translation with gettext strings
     # if lang == "RUS":
         # msg ="Заключительный шаг: Перемещение выработки гидроэлектроэнергии в WEAP и повторный запуск WEAP..."
     # else :
@@ -1008,10 +893,6 @@ def main_integration(tolerance, max_iterations):
     # while weap.IsCalculating :
         # leap.Sleep(1000)
 
-    # if lang == "RUS":
-        # msg ="Завершена процедура интеграции WEAP-LEAP."
-    # else :
-        # msg = _('Completed WEAP-LEAP integration procedure')
     msg = _('Completed WEAP-LEAP integration procedure')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(100)
@@ -1027,4 +908,4 @@ def main_integration(tolerance, max_iterations):
     logging.info(_('Total elapsed time: {t}').format(t = hms_from_sec(total_elapsed_time)))
 
 # TODO: Provide command-line interface
-main_integration(user_interface=True, tolerance=0.1, max_iterations=5)
+main_integration(tolerance=0.1, max_iterations=5)
