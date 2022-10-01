@@ -253,6 +253,8 @@ WEAP:
 LEAP:
   Area: 'wave central asia v43'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
+  # These are month names as specified in time slices; they should start with January and go through December
+  Months: [January, February, March, April, May, June, July, August, September, October, November, December]
   Branches: 
     GDP:
       path: Key\Macroeconomic\Gross Domestic Product
