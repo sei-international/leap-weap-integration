@@ -25,7 +25,7 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     
     Input arguments:
         fdirweapoutput: the folder for WEAP outputs as prepared by exportcsvmodule()
-        fdirmain: the LEAP-Macro subfolder under the LEAP directory
+        fdirmain: the folder containing LEAP_Macro models
         weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
         WEAP: WEAP object
         rowskip: Number of rows to skip in WEAP favorites export files
@@ -105,7 +105,7 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     
     return dfcov, dfcovdmd, dfcrop, dfcropprice
 
-def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, countries, fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
+def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, countries, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice):
     """Process WEAP results and generate CSV files for Macro
     
     Input arguments:
@@ -113,7 +113,6 @@ def weaptomacroprocessing(weap_scenario, leap_scenario, config_params, region, c
         config_params: the configuration data structure for the integration program
         region: the LEAP region to prepare CSV files for
         countries: the WEAP countries that corresponds to the region
-        fdirmain: the LEAP-Macro subfolder under the LEAP directory
         fdirmacroinput: the input folder for LEAP-Macro (where the files are placed)
         fdirweapoutput: the folder for WEAP outputs as prepared by exportcsvmodule()
         dfcov, dfcovdmd, dfcrop, dfcropprice: the Pandas dataframes returned by exportcsvmodule()

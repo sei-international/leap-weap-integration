@@ -231,13 +231,15 @@ def main_integration(tolerance, max_iterations):
     shell.AppActivate("LEAP: ")
     leap.ShowProgressBar(procedure_title, msg)
 
-    # get Julia install location path
     if leap_macro:
+        # get Julia install location path
         juliapath = get_julia_path(shell)
         if juliapath == None:
             msg = _('Could not locate the Julia executable. Try adding the path to the executable to the Windows PATH environment variable.')
             logging.error(msg)
             sys.exit(msg)
+        # Get Macro models folder path
+        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['folder']))
 
     weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
@@ -403,7 +405,7 @@ def main_integration(tolerance, max_iterations):
             logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
             for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                 logging.info('\t' + _('Region: {r}').format(r = r))
-                macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
+                macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                 exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
                 logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                 errorcode= os.system(exec_string)
@@ -678,6 +680,7 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Store target results used in the convergence check
         #------------------------------------------------------------------------------------------------------------------------
+        # TODO: Track scenarios separately: Have different results, stored in a dict, with scenarios for keys
         msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(80)
@@ -759,6 +762,7 @@ def main_integration(tolerance, max_iterations):
             results_converged = True # Tentative; may be overwritten during following convergence checks
 
             # For each check, allow for deviations within precision, as given by system "epsilon"
+            # TODO: Check for convergence by scenario -- if a scenario has converged, delete it from the list of scenarios and of convergence results
             
             for i in range(0, len(this_iteration_leap_results)):
                 if abs(this_iteration_leap_results[i] - last_iteration_leap_results[i]) > abs(last_iteration_leap_results[i]) * tolerance + float_info.epsilon:
@@ -814,7 +818,7 @@ def main_integration(tolerance, max_iterations):
                 weap_scenario = scenarios_map[leap_scenario]
                 
                 # create directory to store WEAP outputs
-                fdirmain = os.path.dirname(leap.ActiveArea.Directory)
+                fdirmain = macromodelspath
                 fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
                 if not os.path.exists(fdirweapoutput):
                     os.mkdir(fdirweapoutput)
@@ -824,19 +828,18 @@ def main_integration(tolerance, max_iterations):
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
-                    # set file directories for WEAP to leap-macro
-                    fdirmain = os.path.join(leap.ActiveArea.Directory, rinfo['directory_name'])
-                    fdirmacroinput = os.path.join(fdirmain, "inputs")
+                    # set file directories for WEAP to LEAP-Macro
+                    fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
                         
-                    # process WEAP data for leap-macro
-                    weaptomacroprocessing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmain, fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    # process WEAP data for LEAP-Macro
+                    weaptomacroprocessing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
-            # Run LEAP-macro
+            # Run LEAP-Macro
             for s in leap_scenarios:
                 logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():
                     logging.info('\t' + _('Region: {r}').format(r = r))
-                    macrodir = os.path.join(leap.ActiveArea.Directory,  rinfo['directory_name'], rinfo['script'])
+                    macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                     exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
                                     " -c -p -w -v" + \
                                     " -y " + str(leap_calc_years[-1]) + \
