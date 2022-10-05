@@ -11,7 +11,7 @@ from calendar import monthrange
 import os # os.path, os.system
 from sys import float_info
 import psutil
-import numpy
+import numpy as np
 import re
 import uuid
 import logging
@@ -684,7 +684,7 @@ def main_integration(tolerance, max_iterations):
             logging.info('\t' + _('Checking LEAP results...'))
             # Create an array of target LEAP result values obtained in this iteration
             leap_results_size = len(target_leap_results) * len(leap_calc_years)
-            this_iteration_leap_results[sl] = numpy.empty(leap_results_size, dtype=object)
+            this_iteration_leap_results[sl] = np.empty(leap_results_size, dtype=object)
             
             current_index = 0
             for e in target_leap_results:
@@ -703,7 +703,7 @@ def main_integration(tolerance, max_iterations):
                 logging.info('\t' + _('Checking Macro results...'))
                 # Create an array of target Macro result values obtained in this iteration and stored in LEAP
                 leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['regions'].keys()) * len(leap_calc_years)
-                this_iteration_leapmacro_results[sl] = numpy.empty(leapmacro_results_size, dtype=object)
+                this_iteration_leapmacro_results[sl] = np.empty(leapmacro_results_size, dtype=object)
                 
                 current_index = 0
                 for e in target_leapmacro_results:
@@ -720,7 +720,7 @@ def main_integration(tolerance, max_iterations):
             logging.info('\t' + _('Checking WEAP results...'))
             # Create an array of target WEAP result values obtained in this iteration
             weap_results_size = len(target_weap_results) * (weap.EndYear - weap.BaseYear + 1)
-            this_iteration_weap_results[sw] = numpy.empty(weap_results_size, dtype=object)
+            this_iteration_weap_results[sw] = np.empty(weap_results_size, dtype=object)
             
             current_index = 0
             for e in target_weap_results:
