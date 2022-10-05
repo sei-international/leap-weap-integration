@@ -413,13 +413,6 @@ def main_integration(tolerance, max_iterations):
                     msg = _('LEAP-Macro exited with an error')
                     logging.error(msg)
                     sys.exit(msg)
-                    
-
-    # start iterative calculations
-    last_iteration_leap_results = []
-    last_iteration_weap_results = []
-    if leap_macro:
-        last_iteration_leapmacro_results = []
 
     #------------------------------------------------------------------------------------------------------------------------
     #
@@ -428,17 +421,12 @@ def main_integration(tolerance, max_iterations):
     #------------------------------------------------------------------------------------------------------------------------
     completed_iterations = 0
     results_converged = False
-    # set up target results for convergence checks during iterative calculations
-    value = []
-    list_leap_keys = list(config_params['LEAP']['Hydropower_plants'].keys())
-    target_leap_results = {list_leap_keys[i]: value for i in range(len(list_leap_keys))}
-
-    list_weap_keys = list(config_params['WEAP']['Hydropower_plants'].keys())
-    target_weap_results  = {list_weap_keys[i]: value for i in range(len(list_weap_keys))}
-
+    # set up target results for convergence checks during iterative calculations, by scenario
+    
+    target_leap_results = list(config_params['LEAP']['Hydropower_plants'].keys())
+    target_weap_results = list(config_params['WEAP']['Hydropower_plants'].keys())
     if leap_macro:
-        list_leapmacro_keys = (config_params['LEAP-Macro']['LEAP']['target_variables'])
-        target_leapmacro_results = {list_leapmacro_keys[i]: value for i in range(len(list_leapmacro_keys))}
+        target_leapmacro_results = config_params['LEAP-Macro']['LEAP']['target_variables']
 
     while completed_iterations < max_iterations :
         msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
@@ -680,74 +668,68 @@ def main_integration(tolerance, max_iterations):
         #------------------------------------------------------------------------------------------------------------------------
         # Store target results used in the convergence check
         #------------------------------------------------------------------------------------------------------------------------
-        # TODO: Track scenarios separately: Have different results, stored in a dict, with scenarios for keys
         msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(80)
-
-        logging.info(_('Checking LEAP results...'))
-        # Create an array of target LEAP result values obtained in this iteration
-        #  'this_iteration_leap_results' contains one set of result values for each scenario in leap_scenarios and year calculated in LEAP
-        #  Results are ordered by scenario, year, and result in target_leap_results
-        leap_results_size = len(target_leap_results) * len(leap_scenarios) * len(leap_calc_years)
-        this_iteration_leap_results = numpy.empty(leap_results_size, dtype=object)
         
-        current_index = 0
-        for e in target_leap_results:
-            leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable'])
-            leap_unit = config_params['LEAP']['Hydropower_plants'][e]['leap_unit']
-            leap_region_id = leap_region_ids[config_params['LEAP']['Hydropower_plants'][e]['leap_region']]
-            for s in leap_scenarios:
-                leap_scenario_id = leap_scenario_ids[s]
+        this_iteration_leap_results = {}
+        this_iteration_leapmacro_results = {}
+        this_iteration_weap_results = {}
+
+        for sl in leap_scenarios:
+            leap_scenario_id = leap_scenario_ids[sl]
+            sw = scenarios_map[sl]
+            logging.info(_('Checking results for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
+            
+            logging.info('\t' + _('Checking LEAP results...'))
+            # Create an array of target LEAP result values obtained in this iteration
+            leap_results_size = len(target_leap_results) * len(leap_calc_years)
+            this_iteration_leap_results[sl] = numpy.empty(leap_results_size, dtype=object)
+            
+            current_index = 0
+            for e in target_leap_results:
+                leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable'])
+                leap_unit = config_params['LEAP']['Hydropower_plants'][e]['leap_unit']
+                leap_region_id = leap_region_ids[config_params['LEAP']['Hydropower_plants'][e]['leap_region']]
                 for y in leap_calc_years:
-                    # Elements in target_leap_results: Array(branch full name, variable name, region name, unit name)
                     val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y, leap_unit)
                     if val is None:
-                        logging.error(_('LEAP did not return a value for "{e}" in year {y} of scenario {s}'))
-                    this_iteration_leap_results[current_index] = val
+                        logging.error(_('LEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sl))
+                    this_iteration_leap_results[sl][current_index] = val
                     current_index += 1
 
 
-        if leap_macro:
-            logging.info(_('Checking Macro results...'))
-            # Create an array of target Macro result values obtained in this iteration and stored in LEAP
-            #  'this_iteration_leapmacro_results' contains one set of result values for each scenario and region calculated by LEAP-Macro
-            #  Results are ordered by scenario, year, and result in target_leapmacro_results
-            leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['regions'].keys()) * len(leap_scenarios) * len(leap_calc_years)
-            this_iteration_leapmacro_results = numpy.empty(leapmacro_results_size, dtype=object)
-            
-            current_index = 0
-            for e in target_leapmacro_results:
-                leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
-                for r in config_params['LEAP-Macro']['regions']:
-                    leap_region_id = leap_region_ids[r]
-                    for s in leap_scenarios:
-                        leap_scenario_id = leap_scenario_ids[s]
+            if leap_macro:
+                logging.info('\t' + _('Checking Macro results...'))
+                # Create an array of target Macro result values obtained in this iteration and stored in LEAP
+                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['regions'].keys()) * len(leap_calc_years)
+                this_iteration_leapmacro_results[sl] = numpy.empty(leapmacro_results_size, dtype=object)
+                
+                current_index = 0
+                for e in target_leapmacro_results:
+                    leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
+                    for r in config_params['LEAP-Macro']['regions']:
+                        leap_region_id = leap_region_ids[r]
                         for y in leap_calc_years:
-                            # Elements in target_leap_results: Array(branch full name, variable name, region name, unit name)
                             val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y)
                             if val is None:
-                                logging.error(_('LEAP did not return a value for Macro result "{e}" in year {y} of scenario {s} for {r}'))
-                            this_iteration_leapmacro_results[current_index] = val
+                                logging.error(_('LEAP did not return a value for Macro result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
+                            this_iteration_leapmacro_results[sl][current_index] = val
                             current_index += 1
 
-        logging.info(_('Checking WEAP results...'))
-        # Create an array of target WEAP result values obtained in this iteration
-        #  'this_iteration_weap_results' contains one set of result values for each scenario in weap_scenarios and year calculated in WEAP
-        #  Results are ordered by scenario, year, and result in target_weap_results
-        weap_results_size = len(target_weap_results) * len(weap_scenarios) * (weap.EndYear - weap.BaseYear + 1)
-        this_iteration_weap_results = numpy.empty(weap_results_size, dtype=object)
-        
-        current_index = 0
-        for e in target_weap_results:
-            weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants'][e]['weap_path'], config_params['WEAP']['Hydropower_plants'][e]['weap_variable']])
-            for s in weap_scenarios:
+            logging.info('\t' + _('Checking WEAP results...'))
+            # Create an array of target WEAP result values obtained in this iteration
+            weap_results_size = len(target_weap_results) * (weap.EndYear - weap.BaseYear + 1)
+            this_iteration_weap_results[sw] = numpy.empty(weap_results_size, dtype=object)
+            
+            current_index = 0
+            for e in target_weap_results:
+                weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants'][e]['weap_path'], config_params['WEAP']['Hydropower_plants'][e]['weap_variable']])
                 for y in range(weap.BaseYear, weap.EndYear + 1):
-                    # Elements in target_weap_results: full branch-variable-unit path
-                    val = weap.ResultValue(weap_pathvar, y, 1, s, y, 12, 'Total')
+                    val = weap.ResultValue(weap_pathvar, y, 1, sw, y, 12, 'Total')
                     if val is None:
-                        logging.error(_('WEAP did not return a value for "{e}" in year {y} of scenario {s}'))
-                    this_iteration_weap_results[current_index] = val
+                        logging.error(_('WEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sw))
+                    this_iteration_weap_results[sw][current_index] = val
                     current_index += 1
 
         #------------------------------------------------------------------------------------------------------------------------
@@ -759,49 +741,70 @@ def main_integration(tolerance, max_iterations):
             leap.ShowProgressBar(procedure_title, msg)
             leap.SetProgressBar(95)
 
-            results_converged = True # Tentative; may be overwritten during following convergence checks
+            for sl in leap_scenarios:
+                sw = scenarios_map[sl]
+                
+                logging.info('\t' + _('Checking convergence for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
 
-            # For each check, allow for deviations within precision, as given by system "epsilon"
-            # TODO: Check for convergence by scenario -- if a scenario has converged, delete it from the list of scenarios and of convergence results
-            
-            for i in range(0, len(this_iteration_leap_results)):
-                if abs(this_iteration_leap_results[i] - last_iteration_leap_results[i]) > abs(last_iteration_leap_results[i]) * tolerance + float_info.epsilon:
-                    diff_loc = index_to_elements(i, list(target_leap_results.keys()), leap_scenarios, leap_calc_years)
-                    logging.info(_('Difference exceeded tolerance for LEAP result "{e}" in year {y} of scenario "{s}": previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], s = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
-                    results_converged = False
-                    break
+                results_converged = True # Tentative; may be overwritten during following convergence checks
 
-            # Only carry out LEAP-Macro convergence checks if all LEAP-Macro is turned on and all LEAP checks passed
-            if leap_macro and results_converged:
-                for i in range(0, len(this_iteration_leapmacro_results)):
-                    if abs(this_iteration_leapmacro_results[i] - last_iteration_leapmacro_results[i]) > abs(last_iteration_leapmacro_results[i]) * tolerance + float_info.epsilon:
-                        diff_loc = index_to_elements(i, list(target_leapmacro_results.keys()), list(config_params['LEAP-Macro']['regions'].keys()), leap_scenarios, leap_calc_years)
-                        logging.info(_('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} of scenario "{s}" for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[3], s = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
+                # For each check, allow for deviations within machine precision, as given by system "epsilon"
+                
+                for i in range(0, len(this_iteration_leap_results[sl])):
+                    if abs(this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i]) > abs(last_iteration_leap_results[sl][i]) * tolerance + float_info.epsilon:
+                        diff_loc = index_to_elements(i, target_leap_results, leap_calc_years)
+                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
                         results_converged = False
                         break
 
-            # Only carry out WEAP convergence checks if all LEAP (and LEAP-Macro) checks passed
-            if results_converged :
-                for i in range(0, len(this_iteration_weap_results)):
-                    if abs(this_iteration_weap_results[i] - last_iteration_weap_results[i]) > abs(last_iteration_weap_results[i]) * tolerance + float_info.epsilon:
-                        diff_loc = index_to_elements(i, list(target_weap_results.keys()), weap_scenarios, weap.EndYear - weap.BaseYear + 1)
-                        logging.info(_('Difference exceeded tolerance for WEAP result "{e}" in year {y} of scenario "{s}": previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], s = diff_loc[1], p = last_iteration_leap_results[i], c = this_iteration_leap_results[i]))
-                        results_converged = False
-                        break
+                # Only carry out LEAP-Macro convergence checks if all LEAP-Macro is turned on and all LEAP checks passed
+                if leap_macro and results_converged:
+                    for i in range(0, len(this_iteration_leapmacro_results[sl])):
+                        if abs(this_iteration_leapmacro_results[sl][i] - last_iteration_leapmacro_results[sl][i]) > abs(last_iteration_leapmacro_results[sl][i]) * tolerance + float_info.epsilon:
+                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['regions'].keys()), leap_calc_years)
+                            logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
+                            results_converged = False
+                            break
 
-            if results_converged:
-                msg = _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed.').format(t = tolerance * 100)
+                # Only carry out WEAP convergence checks if all LEAP (and LEAP-Macro) checks passed
+                if results_converged :
+                    for i in range(0, len(this_iteration_weap_results[sw])):
+                        if abs(this_iteration_weap_results[sw][i] - last_iteration_weap_results[sw][i]) > abs(last_iteration_weap_results[sw][i]) * tolerance + float_info.epsilon:
+                            diff_loc = index_to_elements(i, target_weap_results, weap.EndYear - weap.BaseYear + 1)
+                            logging.info('\t\t' + _('Difference exceeded tolerance for WEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_weap_results[sw][i], c = this_iteration_weap_results[sw][i]))
+                            results_converged = False
+                            break
+
+                if results_converged:
+                    msg = '\t\t' + _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed for this scenario.').format(t = tolerance * 100)
+                    logging.info(msg)
+                    # Remove this scenario from lists
+                    del scenarios_map[sl]
+                    del this_iteration_leap_results[sl]
+                    del this_iteration_leapmacro_results[sl]
+                    del this_iteration_weap_results[sw]
+                    continue # Go to next scenario, if any
+                else:
+                    logging.info('\t\t' + _('Results did not converge for this scenario.'))
+        
+            # Are any scenarios left?
+            if len(scenarios_map) == 0:
+                msg = _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%) for all scenarios.').format(t = tolerance * 100)
                 leap.ShowProgressBar(procedure_title, msg)
                 leap.SetProgressBar(100)
                 logging.info(msg)
                 break # Break out of the iteration loop
             else:
                 if completed_iterations < max_iterations:
-                    logging.info(_('Results did not converge. Iterating...'))
+                    logging.info(_('Results have not converged in at least one scenario. Iterating...'))
                 else:
-                    logging.info(_('Reached maximum number of iterations {m} without converging within tolerance {t}%').format(m = max_iterations, t = tolerance * 100))
+                    logging.info(_('Reached maximum number of iterations {m} without converging within tolerance {t}% for at least one scenario').format(m = max_iterations, t = tolerance * 100))
                     break # Break out of the iteration loop
-        
+
+        # Re-populate leap_scenarios and weap_scenarios
+        leap_scenarios = list(scenarios_map.keys())
+        weap_scenarios = list(scenarios_map.values())
+
         # Update information for next iteration
         last_iteration_leap_results = this_iteration_leap_results
         last_iteration_weap_results = this_iteration_weap_results
