@@ -1,5 +1,5 @@
 import logging
-from collections import OrderedDict
+from collections import OrderedDict # Not necessary with Python 3.7+
 
 def split_interp_ex(exp, startyear, endyear, listseparator):
     """Extract and return from Interp expression expression the part before the startyear and the part after the endyear

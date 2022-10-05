@@ -15,7 +15,7 @@ import numpy as np
 import re
 import uuid
 import logging
-from collections import OrderedDict
+from collections import OrderedDict # Not necessary with Python 3.7+
 
 import gettext, locale, ctypes
 language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
