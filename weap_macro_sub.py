@@ -59,6 +59,7 @@ def exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     #------------------------------------
     # Potential crop production (for real and price series)
     #------------------------------------
+    # TODO: Pull in actual crop production & use to construct a physically-based max utilization measure for ag
     favname = "WEAP Macro\Area"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Area.csv")
     exportcsv(WEAP, fname, favname)
