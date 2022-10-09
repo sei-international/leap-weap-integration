@@ -569,6 +569,7 @@ def main_integration(tolerance, max_iterations):
                     finally:
                         excel.Application.Quit()
                     if not os.path.isfile(xlsx_path):
+                        # TODO: This should be default expression, not existing expression, in case this is a second iteration
                         msg = _('Excel file "{f}" not written correctly: file does not exist. Will use existing expression.').format(f = xlsx_file)
                         logging.warning(msg)
                     else:
@@ -662,7 +663,6 @@ def main_integration(tolerance, max_iterations):
         logging.info(_('Saving versions for iteration {i}').format(i = completed_iterations + 1))
         version_comment = _('Iteration {i}').format(i = completed_iterations + 1)
         leap.SaveVersion(version_comment, True) # Save results
-        latest_calculated_leap_version = leap.Versions.Count
         weap.SaveVersion(version_comment, True) # Save results
 
         #------------------------------------------------------------------------------------------------------------------------
@@ -846,7 +846,7 @@ def main_integration(tolerance, max_iterations):
                     exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
                                     " -c -p -w -v" + \
                                     " -y " + str(leap_calc_years[-1]) + \
-                                    " -u " + str(latest_calculated_leap_version) + \
+                                    " -u \"" + version_comment + "\"" + \
                                     " -r " + str(completed_iterations) + \
                                     " --load-leap-first"
                     logging.info('\t' + _('Executing: {e}').format(e = exec_string))
