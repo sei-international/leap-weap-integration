@@ -35,7 +35,8 @@ from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 #
 # Copyright © 2022: Stockholm Environment Institute U.S.
 #==================================================================================================#
-logfile = "wave_integration_" + str(uuid.uuid4().hex) + ".log"
+run_uuid = str(uuid.uuid4().hex)
+logfile = "wave_integration_" + run_uuid + ".log"
 print('Sending to log file "{f}"'.format(f = logfile), flush = True)
 logging.basicConfig(filename=logfile,
                     format='[%(asctime)s.%(msecs)03d]%(levelname)s:%(message)s',
@@ -661,7 +662,7 @@ def main_integration(tolerance, max_iterations):
         leap.SaveArea()
         weap.SaveArea()
         logging.info(_('Saving versions for iteration {i}').format(i = completed_iterations + 1))
-        version_comment = _('Iteration {i}').format(i = completed_iterations + 1)
+        version_comment = _('Iteration {i} - {u}').format(i = completed_iterations + 1, u = run_uuid)
         leap.SaveVersion(version_comment, True) # Save results
         weap.SaveVersion(version_comment, True) # Save results
 
