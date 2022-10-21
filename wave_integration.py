@@ -245,7 +245,7 @@ def main_integration(tolerance, max_iterations):
             os.makedirs(macromodelspath)
 
     # Get path for storing Excel files and create it if it doesn't exist
-    hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Hydropower_plants']['Folder']))
+    hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
     if not os.path.exists(hydroexcelpath):
         os.makedirs(hydroexcelpath)
 
