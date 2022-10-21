@@ -290,6 +290,9 @@ LEAP:
       unit: Cubic Meter/No Data
   
   Hydropower_plants: # LEAP results to be checked for convergence
+    # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
+    # Should be at the same level as the "LEAP Areas" folder -- it will be discovered by starting with the LEAP Areas folder
+    Folder: WAVE_Hydro
     AKHANGARAN:
       leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
       leap_region: Uzbekistan

@@ -239,8 +239,15 @@ def main_integration(tolerance, max_iterations):
             msg = _('Could not locate the Julia executable. Try adding the path to the executable to the Windows PATH environment variable.')
             logging.error(msg)
             sys.exit(msg)
-        # Get Macro models folder path
+        # Get Macro models folder path and create it if it doesn't exist
         macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['folder']))
+        if not os.path.exists(macromodelspath):
+            os.makedirs(macromodelspath)
+
+    # Get path for storing Excel files and create it if it doesn't exist
+    hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Hydropower_plants']['Folder']))
+    if not os.path.exists(hydroexcelpath):
+        os.makedirs(hydroexcelpath)
 
     weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
@@ -495,9 +502,9 @@ def main_integration(tolerance, max_iterations):
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
-                xlsx_path = os.path.join(leap.ActiveArea.Directory, xlsx_file)  # Full path to XLSX file being written
-                xlsx_path = fr"{xlsx_path}"
-                csv_path = os.path.join(leap.ActiveArea.Directory, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
+                xlsx_path = os.path.join(hydroexcelpath, xlsx_file)  # Full path to XLSX file being written
+                xlsx_path = fr"{xlsx_path}" # TODO: Is this needed with os.path.join?
+                csv_path = os.path.join(hydroexcelpath, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
 
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
                 if os.path.isfile(csv_path): os.remove(csv_path)
