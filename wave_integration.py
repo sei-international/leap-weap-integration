@@ -3,7 +3,6 @@ from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
 import win32gui
-from tkinter import messagebox as tkmessagebox
 import yaml
 import time
 from winreg import *
@@ -268,12 +267,7 @@ def main_integration(tolerance, max_iterations):
     title = _('Open LEAP Area')
     msg1 = _('Please open the WAVE model (area) in LEAP (the same as defined in config.yml) and select the scenarios and years you would like to run.')
     msg2 = _('NOTE: LEAP settings determine calculated scenarios. Scenario selection in WEAP will be overwritten.')
-    msg = msg1 + "\n" + msg2
-    messagebox = tkmessagebox.askokcancel(title, msg)
-    if messagebox != True :
-        msg = _('Request to open WAVE model area in LEAP declined. Exiting...')
-        logging.error(msg)
-        sys.exit(msg)
+    print('{t}:\n• {m1}\n •{m2}'.format(t = title, m1 = msg1, m2=msg2), flush = True)
     
     #------------------------------------------------------------------------------------------------------------------------
     #
