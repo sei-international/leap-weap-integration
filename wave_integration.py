@@ -18,7 +18,13 @@ import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 
 import gettext, locale, ctypes
-language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
+# Allow a user to "short-circuit" the system language with an environment variable
+if os.environ.get('LANG') is not None:
+    language = os.environ['LANG']
+elif os.environ.get('LANGUAGE') is not None:
+    language = os.environ['LANGUAGE']
+else:
+    language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
 if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
     transl = gettext.translation('wave_integration', localedir='locale', languages=[language])
     transl.install()
