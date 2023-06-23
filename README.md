@@ -21,10 +21,10 @@ To run the installation file, it is necessary to have a license for LEAP and WEA
 Both NEMO and Macro are written in Julia. They are open-source programs and do not require licenses. NEMO will install a copy of Julia, so it is best to install NEMO before Macro.
 
 To set up the full system:
-- Install [WEAP](https://weap.sei.org/index.asp?action=40);
-- Install [LEAP and NEMO](https://leap.sei.org/default.asp?action=download).
+- Go to the [WEAP](https://weap.sei.org/index.asp?action=40) download page, log in, download **WEAP**, and install it;
+- Go to the [LEAP](https://leap.sei.org/default.asp?action=download) download page, log in, download **LEAP** and **NEMO**, and install both of them.
 
 After NEMO has been installed,
-- Install [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/).
+- Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions.
 
 ## Installing the integration script
