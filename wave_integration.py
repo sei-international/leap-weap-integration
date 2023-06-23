@@ -38,7 +38,7 @@ from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
 #
-# Copyright © 2022: Stockholm Environment Institute U.S.
+# Copyright © 2022-2023: Stockholm Environment Institute U.S.
 #==================================================================================================#
 run_uuid = str(uuid.uuid4().hex)
 logfile = "wave_integration_" + run_uuid + ".log"
