@@ -31,9 +31,9 @@ else:
     gettext.install('wave_integration')
 
 # Load gettext and install translator before importing other local scripts
-from julia_utils import get_julia_path
-from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
-from weap_macro_sub import export_csv_module, weap_to_macro_processing
+from utils.julia import get_julia_path
+from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info
+from utils.weap_macro import export_csv_module, weap_to_macro_processing
 
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
