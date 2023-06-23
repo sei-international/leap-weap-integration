@@ -254,7 +254,7 @@ LEAP:
   Area: 'wave central asia v43'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
-  # Should be at the same level as the "LEAP Areas" folder -- it will be discovered by starting with the LEAP Areas folder
+  # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
   Folder: WAVE_Hydro
   # These are month names as specified in time slices; they should start with January and go through December
   Months: [January, February, March, April, May, June, July, August, September, October, November, December]
