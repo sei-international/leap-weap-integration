@@ -274,8 +274,6 @@ def main_integration(tolerance, max_iterations):
     # Validate LEAP and WEAP areas
     #
     #------------------------------------------------------------------------------------------------------------------------
-    # if lang == "RUS" : msg = "Валидирование областей WEAP и LEAP."
-    # else : msg = _('Validating WEAP and LEAP areas')
     msg = _('Validating WEAP and LEAP areas')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
@@ -329,8 +327,6 @@ def main_integration(tolerance, max_iterations):
     #       a) Scenarios from 1 with a corresponding scenario from 2;
     #       b) Corresponding scenarios from 2;
     #   4) Disable calculations for all other scenarios.
-    # if lang == "RUS": msg = "Определение сценариев для расчета."
-    # else : msg = _('Identifying scenarios to calculate')
     msg = _('Identifying scenarios to calculate')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(10)
