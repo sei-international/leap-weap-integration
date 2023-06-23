@@ -33,7 +33,7 @@ else:
 # Load gettext and install translator before importing other local scripts
 from julia_utils import get_julia_path
 from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
-from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
+from weap_macro_sub import export_csv_module, weap_to_macro_processing
 
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
@@ -835,7 +835,7 @@ def main_integration(tolerance, max_iterations):
                     os.mkdir(fdirweapoutput)
                     
                 # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
+                dfcov, dfcovdmd, dfcrop, dfcropprice = export_csv_module(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
                 for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
@@ -843,7 +843,7 @@ def main_integration(tolerance, max_iterations):
                     fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
                         
                     # process WEAP data for LEAP-Macro
-                    weaptomacroprocessing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # Run LEAP-Macro
             for s in leap_scenarios:
