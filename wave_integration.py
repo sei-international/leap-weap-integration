@@ -245,7 +245,7 @@ def main_integration(tolerance, max_iterations):
             logging.error(msg)
             sys.exit(msg)
         # Get Macro models folder path and create it if it doesn't exist
-        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['folder']))
+        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
         if not os.path.exists(macromodelspath):
             os.makedirs(macromodelspath)
 
@@ -411,7 +411,7 @@ def main_integration(tolerance, max_iterations):
     if leap_macro:
         for s in leap_scenarios:
             logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-            for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+            for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
                 logging.info('\t' + _('Region: {r}').format(r = r))
                 macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                 exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
@@ -710,13 +710,13 @@ def main_integration(tolerance, max_iterations):
             if leap_macro:
                 logging.info('\t' + _('Checking Macro results...'))
                 # Create an array of target Macro result values obtained in this iteration and stored in LEAP
-                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['regions'].keys()) * len(leap_calc_years)
+                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['Regions'].keys()) * len(leap_calc_years)
                 this_iteration_leapmacro_results[sl] = np.empty(leapmacro_results_size, dtype=object)
                 
                 current_index = 0
                 for e in target_leapmacro_results:
                     leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
-                    for r in config_params['LEAP-Macro']['regions']:
+                    for r in config_params['LEAP-Macro']['Regions']:
                         leap_region_id = leap_region_ids[r]
                         for y in leap_calc_years:
                             val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y)
@@ -769,7 +769,7 @@ def main_integration(tolerance, max_iterations):
                 if leap_macro and results_converged:
                     for i in range(0, len(this_iteration_leapmacro_results[sl])):
                         if abs(this_iteration_leapmacro_results[sl][i] - last_iteration_leapmacro_results[sl][i]) > abs(last_iteration_leapmacro_results[sl][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['regions'].keys()), leap_calc_years)
+                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['Regions'].keys()), leap_calc_years)
                             logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
                             results_converged = False
                             break
@@ -838,7 +838,7 @@ def main_integration(tolerance, max_iterations):
                 dfcov, dfcovdmd, dfcrop, dfcropprice = export_csv_module(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
+                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
                     # set file directories for WEAP to LEAP-Macro
                     fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
                         
@@ -848,7 +848,7 @@ def main_integration(tolerance, max_iterations):
             # Run LEAP-Macro
             for s in leap_scenarios:
                 logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
                     logging.info('\t' + _('Region: {r}').format(r = r))
                     macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                     exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
