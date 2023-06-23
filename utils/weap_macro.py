@@ -127,7 +127,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     #------------------------------------
     coverage = pd.DataFrame()
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
-        for subsector in config_params['LEAP-Macro']['regions'][region]['weap_coverage_mapping'][sector]: # subsector data is the same across a given sector
+        for subsector in config_params['LEAP-Macro']['Regions'][region]['weap_coverage_mapping'][sector]: # subsector data is the same across a given sector
             dfcovsec = dfcov[dfcov['Demand Site'].str.contains(sector)].copy() # removes strings not related to sector
             conditions = list(map(dfcovsec.loc[:,'Demand Site'].str.contains, countries)) # figure out which row is associated with which country
             dfcovsec.loc[:,'country'] = np.select(conditions, countries, 'other') # new column for countries
@@ -174,12 +174,12 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     pricegrowth = pd.DataFrame()
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         try:
-            for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
+            for subsector in config_params['LEAP-Macro']['Regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
                 dfcropsec = dfcrop[dfcrop['Branch'].str.contains(sector)].copy() # removes strings not related to sector  
                 conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries)) # figure out which row is associated with which country
                 dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other') # new column for countries
                 dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
-                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(config_params['LEAP-Macro']['crop_categories']['WEAP_to_Macro'])
+                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(config_params['LEAP-Macro']['Crop_categories']['WEAP_to_Macro'])
                 cols = list(dfcropsec) # list of columns
                 cols.insert(1, cols.pop(cols.index('country'))) # move the country column to specified index location
                 cols.insert(2, cols.pop(cols.index('crop'))) # move the country column to specified index location
@@ -238,7 +238,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
         # production value
         #------------------------------------
         try:
-            for subsector in config_params['LEAP-Macro']['regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
+            for subsector in config_params['LEAP-Macro']['Regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
                 prodvaluetemp = dfcropsecgrp * dfcropprice
                 prodvaluetemp = prodvaluetemp.groupby(['country']).sum()
                 prodvaluetemp = prodvaluetemp.drop('other', errors='ignore') # Drop 'other' if it is present
@@ -295,14 +295,14 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
         #------------------------------------
         realtemp = dfshare * (1 + dfinflation) * dfcropchange   
         try:
-            macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]
+            macrocrop = config_params['LEAP-Macro']['Regions'][region]['weap_real_output_index_mapping'][sector]
             macrocropno = len(macrocrop)        
             if macrocropno == 1:
                 realtemp = realtemp.groupby(['country']).sum()
                 for x in realtemp.index: 
                     if x == 'other': 
                         realtemp = realtemp.drop('other')
-                for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector]['All crops']: 
+                for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_real_output_index_mapping'][sector]['All crops']: 
                     realtemp = realtemp.rename(index={countries[0]: macrocrop})
                     realtemp2 = pd.concat([realtemp2, realtemp])
                 realtemp2 = realtemp2.drop_duplicates()
@@ -316,7 +316,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
                             pass
                 realtemp = realtemp.droplevel('country')
                 for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
-                    for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
+                    for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
                         realtemp = realtemp.rename(index={crop: macrocrop})
                         realtemp2 = pd.concat([realtemp2, realtemp.loc[macrocrop]])
         except:
@@ -336,14 +336,14 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
         #------------------------------------
         pricegrowthtemp = dfinflation * dfshare
         try:
-            macrocrop = config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]
+            macrocrop = config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][sector]
             macrocropno = len(macrocrop)     
             if macrocropno == 1:             
                 pricegrowthtemp = pricegrowthtemp.groupby(['country']).sum()
                 for x in pricegrowthtemp.index: 
                     if x == 'other': 
                         pricegrowthtemp = pricegrowthtemp.drop('other') 
-                for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector]['All crops']: 
+                for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][sector]['All crops']: 
                     pricegrowthtemp = pricegrowthtemp.rename(index={countries[0]: macrocrop})
                     # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
                     pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
@@ -358,7 +358,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
                             pass
                 pricegrowthtemp = pricegrowthtemp.droplevel('country')
                 for crop in config_params['LEAP-Macro']['WEAP']['croplist']:   
-                    for macrocrop in config_params['LEAP-Macro']['regions'][region]['weap_price_index_mapping'][sector][crop]: 
+                    for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
                         # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
                         pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
