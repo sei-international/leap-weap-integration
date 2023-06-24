@@ -12,7 +12,7 @@ from sys import float_info
 import psutil
 import numpy as np
 import re
-import uuid
+import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 
@@ -40,7 +40,10 @@ from utils.weap_macro import export_csv_module, weap_to_macro_processing
 #
 # Copyright © 2022-2023: Stockholm Environment Institute U.S.
 #==================================================================================================#
-run_uuid = str(uuid.uuid4().hex)
+# Get a unique run ID based on the UTC timestamp. Expect at least one second between logfiles
+# on any given machine, since multiple instances of LEAP & WEAP cannot be run. However, if more
+# resolution is needed, add "_%f" at the end to include milliseconds.
+run_uuid = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y-%m-%dUTC%H_%M_%S")
 logfile = "wave_integration_" + run_uuid + ".log"
 print('Sending to log file "{f}"'.format(f = logfile), flush = True)
 logging.basicConfig(filename=logfile,
