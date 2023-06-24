@@ -425,6 +425,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   WEAP:
     price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
+    # The sector names have underscores because of the way these are named in the WAVE WEAP application
     sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
     croplist: ["Seasonal crops", "Perennial crops"]
   Regions:
