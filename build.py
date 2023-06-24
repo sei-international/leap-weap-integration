@@ -10,4 +10,5 @@ os.system('pyinstaller --clean --onefile --icon=sei_icon-32x32.ico wave_integrat
 if os.path.exists('dist') and os.path.isdir('dist'):
     os.system('copy config.yml dist')
     os.system('copy scenarios.yml dist')
+    os.system('xcopy data dist\\data\\ /E')
     os.system('xcopy locale dist\\locale\\ /E')
