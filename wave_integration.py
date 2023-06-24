@@ -33,7 +33,7 @@ else:
 # Load gettext and install translator before importing other local scripts
 from utils.julia import get_julia_path
 from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info
-from utils.weap_macro import export_csv_module, weap_to_macro_processing
+from utils.weap_macro import get_weap_ag_results, weap_to_macro_processing
 
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
@@ -834,7 +834,7 @@ def main_integration(tolerance, max_iterations):
                     os.mkdir(fdirweapoutput)
                     
                 # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = export_csv_module(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
+                dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
                 for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  

@@ -20,11 +20,11 @@ def export_csv(WEAP, fname, favname):
     WEAP.ExportResults(fname)
 
 # WEAP favorites to export
-def export_csv_module(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
+def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     """Export WEAP favorites so they can be converted to Macro inputs using weap_to_macro_processing()
     
     Input arguments:
-        fdirweapoutput: the folder for WEAP outputs as prepared by export_csv_module()
+        fdirweapoutput: the folder for WEAP outputs as prepared by get_weap_ag_results()
         fdirmain: the folder containing LEAP_Macro models
         weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
         WEAP: WEAP object
@@ -115,8 +115,8 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
         region: the LEAP region to prepare CSV files for
         countries: the WEAP countries that corresponds to the region
         fdirmacroinput: the input folder for LEAP-Macro (where the files are placed)
-        fdirweapoutput: the folder for WEAP outputs as prepared by export_csv_module()
-        dfcov, dfcovdmd, dfcrop, dfcropprice: the Pandas dataframes returned by export_csv_module()
+        fdirweapoutput: the folder for WEAP outputs as prepared by get_weap_ag_results()
+        dfcov, dfcovdmd, dfcrop, dfcropprice: the Pandas dataframes returned by get_weap_ag_results()
     Returns: Nothing
     
     TODO: Specify list_separator
