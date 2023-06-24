@@ -415,7 +415,9 @@ LEAP:
       leap_unit: GWh
 
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
-  # Main folder for Macro models: Should be at the same level as the "LEAP Areas" folder -- it will be discovered by starting with the LEAP Areas folder
+  # Main folder for Macro models
+  # This must be at the same level as the "LEAP Areas" folder. It will be created if it does not exist, but it must
+  # exist and have the named directories listed below.
   Folder: WAVE_Macro
   # Target variables are the same for each region: must match branches in LEAP config above
   LEAP:
