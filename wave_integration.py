@@ -834,7 +834,7 @@ def main_integration(tolerance, max_iterations):
                     os.mkdir(fdirweapoutput)
                     
                 # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
+                dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
                 for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  

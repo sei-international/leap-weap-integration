@@ -20,7 +20,7 @@ def export_csv(WEAP, fname, favname):
     WEAP.ExportResults(fname)
 
 # WEAP favorites to export
-def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
+def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_params, rowskip):
     """Export WEAP favorites so they can be converted to Macro inputs using weap_to_macro_processing()
     
     Input arguments:
@@ -87,10 +87,10 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, rowskip):
     #------------------------------------
     # Crop prices
     #------------------------------------
-    fname = os.getcwd() + "\\Prices_v2.csv"
+    fname = os.path.join(os.getcwd(), "data", config_params['LEAP-Macro']['WEAP']['price_data']) 
     dfcropprice = pd.read_csv(fname, skiprows=rowskip)
     dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index 
-        
+    
     #------------------------------------
     # Investment
     #------------------------------------
