@@ -546,10 +546,6 @@ def main_integration(tolerance, max_iterations):
                         leap.ActiveRegion = leap_region_id
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-                        print(leap_scenario_id)
-                        print(leap.ActiveScenario)
-                        print(leap_region_id)
-                        print(leap.ActiveRegion)
                         leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").Value(leap_capacity_year)
                         leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").Value(leap_capacity_year)
                         weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
