@@ -498,6 +498,8 @@ def main_integration(tolerance, max_iterations):
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
             leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
+            # Make sure we are in the correct scenario
+            leap.ActiveScenario = leap_scenario_id
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
@@ -540,10 +542,16 @@ def main_integration(tolerance, max_iterations):
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
+                        # Ensure we are in the correct region
+                        leap.ActiveRegion = leap_region_id
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
-                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
+                        print(leap_scenario_id)
+                        print(leap.ActiveScenario)
+                        print(leap_region_id)
+                        print(leap.ActiveRegion)
+                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").Value(leap_capacity_year)
+                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").Value(leap_capacity_year)
                         weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
 
                     # Don't bother writing values for years where capacity = 0
@@ -685,6 +693,8 @@ def main_integration(tolerance, max_iterations):
 
         for sl in leap_scenarios:
             leap_scenario_id = leap_scenario_ids[sl]
+            # Make sure we are in the correct scenario
+            leap.ActiveScenario = leap_scenario_id
             sw = scenarios_map[sl]
             logging.info(_('Checking results for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
             
@@ -698,8 +708,9 @@ def main_integration(tolerance, max_iterations):
                 leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable'])
                 leap_unit = config_params['LEAP']['Hydropower_plants'][e]['leap_unit']
                 leap_region_id = leap_region_ids[config_params['LEAP']['Hydropower_plants'][e]['leap_region']]
+                leap.ActiveRegion = leap_region_id
                 for y in leap_calc_years:
-                    val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y, leap_unit)
+                    val = leap_var.Value(y, leap_unit)
                     if val is None:
                         logging.error(_('LEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sl))
                     this_iteration_leap_results[sl][current_index] = val
@@ -717,8 +728,9 @@ def main_integration(tolerance, max_iterations):
                     leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
                     for r in config_params['LEAP-Macro']['Regions']:
                         leap_region_id = leap_region_ids[r]
+                        leap.ActiveRegion = leap_region_id
                         for y in leap_calc_years:
-                            val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y)
+                            val = leap_var.Value(y)
                             if val is None:
                                 logging.error(_('LEAP did not return a value for Macro result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
                             this_iteration_leapmacro_results[sl][current_index] = val
