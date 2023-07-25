@@ -1,2 +1,2 @@
-SET LANGUAGE=ru
+SET LANGUAGE=en
 python wave_integration.py
