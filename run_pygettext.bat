@@ -1,1 +1,1 @@
-python pygettext.py -p locale -d wave_integration wave_integration.py leap_weap_sub.py
+python pygettext.py -p locale -d wave_integration wave_integration.py utils/leap_weap.py

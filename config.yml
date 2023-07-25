@@ -254,7 +254,7 @@ LEAP:
   Area: 'wave central asia v43'
   Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
-  # Should be at the same level as the "LEAP Areas" folder -- it will be discovered by starting with the LEAP Areas folder
+  # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
   Folder: WAVE_Hydro
   # These are month names as specified in time slices; they should start with January and go through December
   Months: [January, February, March, April, May, June, July, August, September, October, November, December]
@@ -415,16 +415,20 @@ LEAP:
       leap_unit: GWh
 
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
-  # Main folder for Macro models: Should be at the same level as the "LEAP Areas" folder -- it will be discovered by starting with the LEAP Areas folder
-  folder: WAVE_Macro
+  # Main folder for Macro models
+  # This must be at the same level as the "LEAP Areas" folder. It will be created if it does not exist, but it must
+  # exist and have the named directories listed below.
+  Folder: WAVE_Macro
   # Target variables are the same for each region: must match branches in LEAP config above
   LEAP:
     target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
   WEAP:
+    price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
+    # The sector names have underscores because of the way these are named in the WAVE WEAP application
     sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
     croplist: ["Seasonal crops", "Perennial crops"]
-  regions:
+  Regions:
       Kazakhstan:
         directory_name: KAZ_Macro
         script: runleapmacro.jl
@@ -458,7 +462,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
         weap_price_index_mapping: 
           'Agriculture_': 
             'All crops': ['P_agfor']
-  crop_categories:
+  Crop_categories:
       WEAP_to_Macro:
           'Apples': 'Perennial crops'
           'Barley': 'Seasonal crops'

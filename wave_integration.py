@@ -12,7 +12,7 @@ from sys import float_info
 import psutil
 import numpy as np
 import re
-import uuid
+import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 
@@ -31,16 +31,19 @@ else:
     gettext.install('wave_integration')
 
 # Load gettext and install translator before importing other local scripts
-from julia_utils import get_julia_path
-from leap_weap_sub import add_leap_data_to_weap_interp, get_leap_timeslice_info
-from weap_macro_sub import exportcsvmodule, weaptomacroprocessing
+from utils.julia import get_julia_path
+from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info
+from utils.weap_macro import get_weap_ag_results, weap_to_macro_processing
 
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
 #
-# Copyright © 2022: Stockholm Environment Institute U.S.
+# Copyright © 2022-2023: Stockholm Environment Institute U.S.
 #==================================================================================================#
-run_uuid = str(uuid.uuid4().hex)
+# Get a unique run ID based on the UTC timestamp. Expect at least one second between logfiles
+# on any given machine, since multiple instances of LEAP & WEAP cannot be run. However, if more
+# resolution is needed, add "_%f" at the end to include milliseconds.
+run_uuid = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y-%m-%dUTC%H_%M_%S")
 logfile = "wave_integration_" + run_uuid + ".log"
 print('Sending to log file "{f}"'.format(f = logfile), flush = True)
 logging.basicConfig(filename=logfile,
@@ -245,7 +248,7 @@ def main_integration(tolerance, max_iterations):
             logging.error(msg)
             sys.exit(msg)
         # Get Macro models folder path and create it if it doesn't exist
-        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['folder']))
+        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
         if not os.path.exists(macromodelspath):
             os.makedirs(macromodelspath)
 
@@ -274,8 +277,6 @@ def main_integration(tolerance, max_iterations):
     # Validate LEAP and WEAP areas
     #
     #------------------------------------------------------------------------------------------------------------------------
-    # if lang == "RUS" : msg = "Валидирование областей WEAP и LEAP."
-    # else : msg = _('Validating WEAP and LEAP areas')
     msg = _('Validating WEAP and LEAP areas')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
@@ -329,8 +330,6 @@ def main_integration(tolerance, max_iterations):
     #       a) Scenarios from 1 with a corresponding scenario from 2;
     #       b) Corresponding scenarios from 2;
     #   4) Disable calculations for all other scenarios.
-    # if lang == "RUS": msg = "Определение сценариев для расчета."
-    # else : msg = _('Identifying scenarios to calculate')
     msg = _('Identifying scenarios to calculate')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(10)
@@ -411,7 +410,7 @@ def main_integration(tolerance, max_iterations):
     if leap_macro:
         for s in leap_scenarios:
             logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-            for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+            for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
                 logging.info('\t' + _('Region: {r}').format(r = r))
                 macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                 exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
@@ -499,6 +498,8 @@ def main_integration(tolerance, max_iterations):
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
             leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
+            # Make sure we are in the correct scenario
+            leap.ActiveScenario = leap_scenario_id
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
                 xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
@@ -541,10 +542,12 @@ def main_integration(tolerance, max_iterations):
                         leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
+                        # Ensure we are in the correct region
+                        leap.ActiveRegion = leap_region_id
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
-                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueRS(leap_region_id, leap_scenario_id, leap_capacity_year)
+                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").Value(leap_capacity_year)
+                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").Value(leap_capacity_year)
                         weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
 
                     # Don't bother writing values for years where capacity = 0
@@ -686,6 +689,8 @@ def main_integration(tolerance, max_iterations):
 
         for sl in leap_scenarios:
             leap_scenario_id = leap_scenario_ids[sl]
+            # Make sure we are in the correct scenario
+            leap.ActiveScenario = leap_scenario_id
             sw = scenarios_map[sl]
             logging.info(_('Checking results for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
             
@@ -699,8 +704,9 @@ def main_integration(tolerance, max_iterations):
                 leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable'])
                 leap_unit = config_params['LEAP']['Hydropower_plants'][e]['leap_unit']
                 leap_region_id = leap_region_ids[config_params['LEAP']['Hydropower_plants'][e]['leap_region']]
+                leap.ActiveRegion = leap_region_id
                 for y in leap_calc_years:
-                    val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y, leap_unit)
+                    val = leap_var.Value(y, leap_unit)
                     if val is None:
                         logging.error(_('LEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sl))
                     this_iteration_leap_results[sl][current_index] = val
@@ -710,16 +716,17 @@ def main_integration(tolerance, max_iterations):
             if leap_macro:
                 logging.info('\t' + _('Checking Macro results...'))
                 # Create an array of target Macro result values obtained in this iteration and stored in LEAP
-                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['regions'].keys()) * len(leap_calc_years)
+                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['Regions'].keys()) * len(leap_calc_years)
                 this_iteration_leapmacro_results[sl] = np.empty(leapmacro_results_size, dtype=object)
                 
                 current_index = 0
                 for e in target_leapmacro_results:
                     leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
-                    for r in config_params['LEAP-Macro']['regions']:
+                    for r in config_params['LEAP-Macro']['Regions']:
                         leap_region_id = leap_region_ids[r]
+                        leap.ActiveRegion = leap_region_id
                         for y in leap_calc_years:
-                            val = leap_var.ValueRS(leap_region_id, leap_scenario_id, y)
+                            val = leap_var.Value(y)
                             if val is None:
                                 logging.error(_('LEAP did not return a value for Macro result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
                             this_iteration_leapmacro_results[sl][current_index] = val
@@ -769,7 +776,7 @@ def main_integration(tolerance, max_iterations):
                 if leap_macro and results_converged:
                     for i in range(0, len(this_iteration_leapmacro_results[sl])):
                         if abs(this_iteration_leapmacro_results[sl][i] - last_iteration_leapmacro_results[sl][i]) > abs(last_iteration_leapmacro_results[sl][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['regions'].keys()), leap_calc_years)
+                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['Regions'].keys()), leap_calc_years)
                             logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
                             results_converged = False
                             break
@@ -835,20 +842,20 @@ def main_integration(tolerance, max_iterations):
                     os.mkdir(fdirweapoutput)
                     
                 # export weap data
-                dfcov, dfcovdmd, dfcrop, dfcropprice = exportcsvmodule(fdirweapoutput, fdirmain, weap_scenario, weap, CSV_ROW_SKIP)
+                dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():  
+                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
                     # set file directories for WEAP to LEAP-Macro
                     fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
                         
                     # process WEAP data for LEAP-Macro
-                    weaptomacroprocessing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # Run LEAP-Macro
             for s in leap_scenarios:
                 logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-                for r, rinfo in config_params['LEAP-Macro']['regions'].items():
+                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
                     logging.info('\t' + _('Region: {r}').format(r = r))
                     macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
                     exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
