@@ -777,7 +777,7 @@ def main_integration(tolerance, max_iterations):
                     for i in range(0, len(this_iteration_leapmacro_results[sl])):
                         if abs(this_iteration_leapmacro_results[sl][i] - last_iteration_leapmacro_results[sl][i]) > abs(last_iteration_leapmacro_results[sl][i]) * tolerance + float_info.epsilon:
                             diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['Regions'].keys()), leap_calc_years)
-                            logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
+                            logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leapmacro_results[sl][i], c = this_iteration_leapmacro_results[sl][i]))
                             results_converged = False
                             break
 
