@@ -40,7 +40,9 @@ If you prefer a different folder name, you will need to change the name in the `
   1. Select the scenarios that you wish to run;
   1. Select the end year for the run.
 1. Start WEAP and open the most recent WAVE WEAP area.
-1. Either double-click on the `wave_integration.exe` file or open a terminal window and run the file from there.
+1. If available, double-click on the `wave_integration.exe` file or open a terminal window and run the file from there
+   change directory to leap-weap-integration folder
+   .\run.bat
 
 The integration program will generate a log file. The log file will have the time stamp and end in `.log`. (E.g., `wave_integration_2023-06-24UTC15_02_54.log`.) The progress of the program can be monitored by watching the log file. There are at least two ways to do that:
 - Open the log file in Notepad++ and click the "eye" icon (the `Monitoring (tail -f)` command);
