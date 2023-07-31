@@ -435,7 +435,7 @@ def main_integration(tolerance, max_iterations):
     if leap_macro:
         target_leapmacro_results = config_params['LEAP-Macro']['LEAP']['target_variables']
 
-    while completed_iterations < max_iterations :
+    while completed_iterations <= max_iterations :
         msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(20)
