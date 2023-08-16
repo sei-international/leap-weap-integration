@@ -28,7 +28,7 @@ After NEMO has been installed,
     - Open a Julia prompt
     - Press the `]` key to start the package manager
     - Type `add CSV@0.10.4` and press enter to install version 0.10.4
-- To run the integration program, add the `ArgParse` Julia package:
+- The integration program requires the Julia `ArgParse` package. You must add it manually:
   - Open a Julia prompt
   - Press the `]` key to start the package manager
   - Type `add ArgParse` and press enter
