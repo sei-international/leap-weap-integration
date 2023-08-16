@@ -24,10 +24,10 @@ To set up the full system:
 
 After NEMO has been installed,
 - Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions
-  - If you get an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
-    - Open a Julia prompt
-    - Press the `]` key to start the package manager
-    - Type `add CSV@0.10.4` and press enter to install version 0.10.4
+> If you get an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
+>- Open a Julia prompt
+>- Press the `]` key to start the package manager
+>- Type `add CSV@0.10.4` and press enter to install version 0.10.4
 ### Installing the integration program
 The integration program, with configuration scripts and translations, is available as a ZIP file. It is included as part of a release of the integration software on this site. Download the most recent ZIP file and unzip it in a convenient location on your computer.
 - The integration program requires the Julia `ArgParse` package. You must add it manually:
