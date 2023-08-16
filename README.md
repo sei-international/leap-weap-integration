@@ -22,7 +22,7 @@ To set up the full system:
 1. Go to the [WEAP](https://weap.sei.org/index.asp?action=40) download page, log in, download **WEAP**, and install it;
 1. Go to the [LEAP](https://leap.sei.org/default.asp?action=download) download page, log in, download **LEAP** and **NEMO**, and install both of them;
 3. Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions.
-> If you get an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
+> If the Macro installation gives an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
 >1. Open a Julia prompt;
 >1. Press the `]` key to start the package manager;
 >1. Type `add CSV@0.10.4` and press enter to install version 0.10.4.
