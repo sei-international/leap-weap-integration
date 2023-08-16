@@ -24,7 +24,7 @@ To set up the full system:
 
 After NEMO has been installed,
 - Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions
-  - If needed, revert to an earlier version (version 10.4) of the `CSV` Julia package, which Macro requires:
+  - If you get an error relating to Julia's `CSV` package, revert to version 10.4 of the package:
     - Open a Julia prompt
     - Press the `]` key to start the package manager
     - Type `add CSV@0.10.4` and press enter to install version 10.4
