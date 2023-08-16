@@ -27,7 +27,7 @@ After NEMO has been installed,
   - If you get an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
     - Open a Julia prompt
     - Press the `]` key to start the package manager
-    - Type `add CSV@0.10.4` and press enter to install version 10.4
+    - Type `add CSV@0.10.4` and press enter to install version 0.10.4
 - To run the integration program, add the `ArgParse` Julia package:
   - Open a Julia prompt
   - Press the `]` key to start the package manager
