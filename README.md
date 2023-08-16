@@ -20,20 +20,19 @@ Both NEMO and Macro are written in Julia. They are open-source programs and do n
 
 To set up the full system:
 1. Go to the [WEAP](https://weap.sei.org/index.asp?action=40) download page, log in, download **WEAP**, and install it;
-1. Go to the [LEAP](https://leap.sei.org/default.asp?action=download) download page, log in, download **LEAP** and **NEMO**, and install both of them.
-  After NEMO has been installed,
-3. Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions
+1. Go to the [LEAP](https://leap.sei.org/default.asp?action=download) download page, log in, download **LEAP** and **NEMO**, and install both of them;
+3. Go to the [Macro](https://sei-international.github.io/LEAPMacro.jl/stable/installation/) installation page and follow the instructions.
 > If you get an error relating to Julia's `CSV` package or `Parsers.Options`, revert to version 0.10.4 of the CSV package:
->1. Open a Julia prompt
->1. Press the `]` key to start the package manager
->1. Type `add CSV@0.10.4` and press enter to install version 0.10.4
+>1. Open a Julia prompt;
+>1. Press the `]` key to start the package manager;
+>1. Type `add CSV@0.10.4` and press enter to install version 0.10.4.
 ### Installing the integration program
 The integration program, with configuration scripts and translations, is available as a ZIP file. It is included as part of a release of the integration software on this site. Download the most recent ZIP file and unzip it in a convenient location on your computer.
 
 Note that the integration program requires the Julia `ArgParse` package. You must add it manually:
-1. Open a Julia prompt
-1. Press the `]` key to start the package manager
-1. Type `add ArgParse` and press enter
+1. Open a Julia prompt;
+1. Press the `]` key to start the package manager;
+1. Type `add ArgParse` and press enter.
 
 ## Loading the models
 Find the most recent LEAP and WEAP models. These will be made available separately -- for example, via Dropbox. They should have `.leap` and `.weap` extensions. Open the files by double-clicking on them and they will be added to the Areas available from inside LEAP and WEAP.
