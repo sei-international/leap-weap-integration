@@ -28,13 +28,12 @@ After NEMO has been installed,
     - Open a Julia prompt
     - Press the `]` key to start the package manager
     - Type `add CSV@0.10.4` and press enter to install version 0.10.4
+### Installing the integration program
+The integration program, with configuration scripts and translations, is available as a ZIP file. It is included as part of a release of the integration software on this site. Download the most recent ZIP file and unzip it in a convenient location on your computer.
 - The integration program requires the Julia `ArgParse` package. You must add it manually:
   - Open a Julia prompt
   - Press the `]` key to start the package manager
   - Type `add ArgParse` and press enter
-
-### Installing the integration program
-The integration program, with configuration scripts and translations, is available as a ZIP file. It is included as part of a release of the integration software on this site. Download the most recent ZIP file and unzip it in a convenient location on your computer.
 
 ## Loading the models
 Find the most recent LEAP and WEAP models. These will be made available separately -- for example, via Dropbox. They should have `.leap` and `.weap` extensions. Open the files by double-clicking on them and they will be added to the Areas available from inside LEAP and WEAP.
