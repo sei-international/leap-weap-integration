@@ -886,7 +886,6 @@ def main_integration(tolerance, max_iterations):
     # leap.ShowProgressBar(procedure_title, "".join(msg))
     # leap.SetProgressBar(95)
     
-    # # TODO: Make this generic -- right now assumes "Run of River" is present in path with that capitalization
     # logging.info("Final Step: Moving hydropower generation to WEAP and rerunning WEAP...")
     # weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
     # for i in range(0, len(weap_scenarios)):
