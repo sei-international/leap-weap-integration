@@ -377,20 +377,26 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     #------------------------------------
     # Write out Macro input files
     #------------------------------------
+    # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
     fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
     real = real.transpose()
     real.index = real.index.astype('int64') # After transpose, the index is years
-    # Must add some values to get to 2019
-    real.loc[2020] = 1
-    real.loc[2019] = 1/real.loc[2021]
+    val = 1
+    factor = 1/real.loc[2021]
+    for y in range(2020,2009,-1):
+        real.loc[y] = val
+        val *= factor
     real.sort_index(inplace=True)
     real.to_csv(fname, index=True, index_label = "year") # final output to csv
     
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
     pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
-    pricegrowth.loc[2020] = 1
-    pricegrowth.loc[2019] = 1/pricegrowth.loc[2021]
+    val = 1
+    factor = 1/pricegrowth.loc[2021]
+    for y in range(2020,2009,-1):
+        pricegrowth.loc[y] = val
+        val *= factor
     pricegrowth.sort_index(inplace=True)
     pricegrowth.to_csv(fname, index=True, index_label = "year") # final output to csv
     
