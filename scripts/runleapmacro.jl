@@ -75,6 +75,10 @@ if parsed_args["use_weap_results"]
 	cfg_yaml["exog-files"]["pot_output"] = parsed_args["scenario"] * "_realoutputindex.csv"
 	cfg_yaml["exog-files"]["max_util"] = parsed_args["scenario"] * "_max_util.csv"
 	cfg_yaml["exog-files"]["real_price"] = parsed_args["scenario"] * "_priceindex.csv"
+else
+	cfg_yaml["exog-files"]["pot_output"] = "~"
+	cfg_yaml["exog-files"]["max_util"] = "~"
+	cfg_yaml["exog-files"]["real_price"] = "~"
 end
 
 if parsed_args["init_run_number"] != 0
