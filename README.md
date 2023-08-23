@@ -1,17 +1,18 @@
 # Integrating LEAP, WEAP, and Macro
 The scripts in this repository implement the integration between LEAP/NEMO, WEAP, and Macro for the USAID WAVE Central Asia project. The integration script, which is written in Python, executes each program iteratively until convergence. Both LEAP and WEAP require Windows to run, and the full integration can consume substantial computer resources. The computer on which this script is run should have a reasonably fast processor and, more important, ample RAM and disk drive space.
 
-For distribution, the integration program is packaged into a Windows executable using the `build.py` script.
-
-In addition to an installation of Python, Python needs to have the following Python packages installed (can be installed using `pip install`) :
-  - pywin
-  - psutil
-  - PyYaml
-  - numpy
-  - pandas
-
 ## Installation
 In addition to the integration program itself, it is necessary to first install LEAP (with NEMO), WEAP, and Macro. It is also recommended to install the [Notepad++ text editor](https://notepad-plus-plus.org/), for reasons explained below.
+
+### Installing Python
+Download and install the [latest Python 3 release](https://www.python.org/downloads/windows/).
+
+- Look for the "Windows installer", and select either 32-bit or 64-bit, depending on your computer hardware.
+- When you run the installer, make sure to click "Add python.exe to PATH".
+- After installing, open a Windows command window and run the following command at the prompt:
+	```
+	pip install pywin psutil PyYaml numpy pandas
+	```
 
 ### Installing NEMO, LEAP, WEAP, and Macro
 For LEAP and WEAP, a license is required. Go to the [LEAP](https://leap.sei.org/) and [WEAP](https://weap.sei.org/) websites to obtain licenses. You may be available for a free or reduced-cost license. Use the contact information on the websites for more information.
