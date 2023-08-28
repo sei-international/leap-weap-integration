@@ -292,127 +292,82 @@ LEAP:
       variable: Activity Level
       unit: Cubic Meter/No Data
   
-  Hydropower_plants: # LEAP results to be checked for convergence
-    AKHANGARAN:
-      leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    ANDIJAN_1: 
-      leap_path: Transformation\Electricity Production\Processes\ANDIJAN_1
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    AKKAVAK_1:
-      leap_path: Transformation\Electricity Production\Processes\AKKAVAK_1
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    ANDIJAN_2: 
-      leap_path: Transformation\Electricity Production\Processes\ANDIJAN_2
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    AT_BASHIN:
-      leap_path: Transformation\Electricity Production\Processes\AT_BASHIN
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    CHARVAK:
-      leap_path: Transformation\Electricity Production\Processes\CHARVAK
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    CHIRCHIK_1:
-      leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_1
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    CHIRCHIK_2:
-      leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_2
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    FARKHAD: 
-      leap_path : Transformation\Electricity Production\Processes\FARKHAD
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    GAZLKENT:
-      leap_path: Transformation\Electricity Production\Processes\GAZALKENT
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KAIRAKKUM:
-      leap_path: Transformation\Electricity Production\Processes\KAIRAKKUM
-      leap_region: Tajikistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KAMBARATA_1:
-      leap_path: Transformation\Electricity Production\Processes\KAMBARATA_1
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh  
-    KAMBARATA_2:
-      leap_path: Transformation\Electricity Production\Processes\KAMBARATA_2
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KHODZHIKENT:
-      leap_path: Transformation\Electricity Production\Processes\KHODZHIKENT
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KURPSAI:
-      leap_path: Transformation\Electricity Production\Processes\KURPSAI
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    SHAMALDYSAI:
-      leap_path: Transformation\Electricity Production\Processes\SHAMALDYSAI
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    SHARDARINSKYA:
-      leap_path: Transformation\Electricity Production\Processes\SHARDARINSKYA
-      leap_region: Kazakhstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    TASH_KUMYR:
-      leap_path: Transformation\Electricity Production\Processes\TASH_KUMYR
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    TAVAK:
-      leap_path: Transformation\Electricity Production\Processes\TAVAK
-      leap_region: Uzbekistan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    TOKTOGUL:
-      leap_path: Transformation\Electricity Production\Processes\TOKTOGUL
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    UCH_KURGANSK:
-      leap_path: Transformation\Electricity Production\Processes\UCH_KURGANSK
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KOKOMEREN:
-      leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    UPPER NARYN:
-      leap_path: Transformation\Electricity Production\Processes\UPPER NARYN CASCADE
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
-    KAZARMAN:
-      leap_path: Transformation\Electricity Production\Processes\KAZARMAN CASCADE
-      leap_region: Kyrgyzstan
-      leap_variable: Energy Generation
-      leap_unit: GWh
+  Hydropower_plants:
+    leap_variable: Energy Generation # LEAP result to be checked for convergence
+    leap_unit: GWh
+    plants:
+        AKHANGARAN:
+          leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
+          leap_region: Uzbekistan
+        ANDIJAN_1: 
+          leap_path: Transformation\Electricity Production\Processes\ANDIJAN_1
+          leap_region: Uzbekistan
+        AKKAVAK_1:
+          leap_path: Transformation\Electricity Production\Processes\AKKAVAK_1
+          leap_region: Uzbekistan
+        ANDIJAN_2: 
+          leap_path: Transformation\Electricity Production\Processes\ANDIJAN_2
+          leap_region: Uzbekistan
+        AT_BASHIN:
+          leap_path: Transformation\Electricity Production\Processes\AT_BASHIN
+          leap_region: Kyrgyzstan
+        CHARVAK:
+          leap_path: Transformation\Electricity Production\Processes\CHARVAK
+          leap_region: Uzbekistan
+        CHIRCHIK_1:
+          leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_1
+          leap_region: Uzbekistan
+        CHIRCHIK_2:
+          leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_2
+          leap_region: Uzbekistan
+        FARKHAD: 
+          leap_path : Transformation\Electricity Production\Processes\FARKHAD
+          leap_region: Uzbekistan
+        GAZLKENT:
+          leap_path: Transformation\Electricity Production\Processes\GAZALKENT
+          leap_region: Uzbekistan
+        KAIRAKKUM:
+          leap_path: Transformation\Electricity Production\Processes\KAIRAKKUM
+          leap_region: Tajikistan
+        KAMBARATA_1:
+          leap_path: Transformation\Electricity Production\Processes\KAMBARATA_1
+          leap_region: Kyrgyzstan
+        KAMBARATA_2:
+          leap_path: Transformation\Electricity Production\Processes\KAMBARATA_2
+          leap_region: Kyrgyzstan
+        KHODZHIKENT:
+          leap_path: Transformation\Electricity Production\Processes\KHODZHIKENT
+          leap_region: Uzbekistan
+        KURPSAI:
+          leap_path: Transformation\Electricity Production\Processes\KURPSAI
+          leap_region: Kyrgyzstan
+        SHAMALDYSAI:
+          leap_path: Transformation\Electricity Production\Processes\SHAMALDYSAI
+          leap_region: Kyrgyzstan
+        SHARDARINSKYA:
+          leap_path: Transformation\Electricity Production\Processes\SHARDARINSKYA
+          leap_region: Kazakhstan
+        TASH_KUMYR:
+          leap_path: Transformation\Electricity Production\Processes\TASH_KUMYR
+          leap_region: Kyrgyzstan
+        TAVAK:
+          leap_path: Transformation\Electricity Production\Processes\TAVAK
+          leap_region: Uzbekistan
+        TOKTOGUL:
+          leap_path: Transformation\Electricity Production\Processes\TOKTOGUL
+          leap_region: Kyrgyzstan
+        UCH_KURGANSK:
+          leap_path: Transformation\Electricity Production\Processes\UCH_KURGANSK
+          leap_region: Kyrgyzstan
+        KOKOMEREN:
+          leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
+          leap_region: Kyrgyzstan
+        UPPER NARYN:
+          leap_path: Transformation\Electricity Production\Processes\UPPER NARYN CASCADE
+          leap_region: Kyrgyzstan
+        KAZARMAN:
+          leap_path: Transformation\Electricity Production\Processes\KAZARMAN CASCADE
+          leap_region: Kyrgyzstan
 
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
   # Main folder for Macro models
@@ -427,7 +382,6 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
     cov_to_util_exponent: 0.2
     # The sector names have underscores because of the way these are named in the WAVE WEAP application
     sectorlist: [Agriculture_, Industrial_, Domestic_]
-    croplist: [Seasonal crops, Perennial crops]
   Regions:
       Kazakhstan:
         directory_name: KAZ_Macro

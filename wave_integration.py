@@ -307,9 +307,9 @@ def main_integration(tolerance, max_iterations):
 
     # validate hydropower plants in leap
     logging.info(_('Including LEAP hydropower plants:'))
-    for b in config_params['LEAP']['Hydropower_plants'] :
+    for b, entry in config_params['LEAP']['Hydropower_plants']['plants'].items() :
         logging.info('\t' + b)
-        check_branch_var(leap, config_params['LEAP']['Hydropower_plants'][b]['leap_path'], "Maximum Availability", "Percent")
+        check_branch_var(leap, entry['leap_path'], "Maximum Availability", "Percent")
 
     # validate hydropower reservoirs in weap
     logging.info(_('Including WEAP hydropower reservoirs:'))
@@ -430,7 +430,7 @@ def main_integration(tolerance, max_iterations):
     results_converged = False
     # set up target results for convergence checks during iterative calculations, by scenario
     
-    target_leap_results = list(config_params['LEAP']['Hydropower_plants'].keys())
+    target_leap_results = list(config_params['LEAP']['Hydropower_plants']['plants'].keys())
     target_weap_results = list(config_params['WEAP']['Hydropower_plants'].keys())
     if leap_macro:
         target_leapmacro_results = config_params['LEAP-Macro']['LEAP']['target_variables']
@@ -539,8 +539,8 @@ def main_integration(tolerance, max_iterations):
                     weap_branch_capacity = 0  # Capacity in LEAP corresponding to WEAP branch [MW]
                     leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
                     for lb in leap_hpps:
-                        leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
-                        leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
+                        leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
+                        leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
                         # Ensure we are in the correct region
                         leap.ActiveRegion = leap_region_id
@@ -588,8 +588,8 @@ def main_integration(tolerance, max_iterations):
                         leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
                         for lhpp in leap_hpps:
                             logging.info('\t\t' + _('Assigning to LEAP hydropower plant: {h}').format(h = lhpp))
-                            lhpp_path = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_path']
-                            lhpp_region = config_params['LEAP']['Hydropower_plants'][lhpp]['leap_region']
+                            lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
+                            lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
                             leap.ActiveRegion = lhpp_region
                             leap.ActiveScenario = leap_scenarios[i]
                             leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_path , ", A1:C", str(num_lines_written), ")"])
@@ -687,6 +687,8 @@ def main_integration(tolerance, max_iterations):
         this_iteration_leapmacro_results = {}
         this_iteration_weap_results = {}
 
+        leap_unit = config_params['LEAP']['Hydropower_plants']['leap_unit']
+        leap_varname = config_params['LEAP']['Hydropower_plants']['leap_variable']
         for sl in leap_scenarios:
             leap_scenario_id = leap_scenario_ids[sl]
             # Make sure we are in the correct scenario
@@ -701,10 +703,8 @@ def main_integration(tolerance, max_iterations):
             
             current_index = 0
             for e in target_leap_results:
-                leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants'][e]['leap_path']).Variables(config_params['LEAP']['Hydropower_plants'][e]['leap_variable'])
-                leap_unit = config_params['LEAP']['Hydropower_plants'][e]['leap_unit']
-                leap_region_id = leap_region_ids[config_params['LEAP']['Hydropower_plants'][e]['leap_region']]
-                leap.ActiveRegion = leap_region_id
+                leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants']['plants'][e]['leap_path']).Variables(leap_varname)
+                leap.ActiveRegion = config_params['LEAP']['Hydropower_plants']['plants'][e]['leap_region']
                 for y in leap_calc_years:
                     val = leap_var.Value(y, leap_unit)
                     if val is None:
