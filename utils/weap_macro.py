@@ -44,6 +44,7 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     #------------------------------------
     # Coverage (for utilization calculation)
     #------------------------------------
+    # TODO: Put favnames in config file
     # Coverage
     favname = "WEAP Macro\Demand Site Coverage"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Coverage_Percent.csv")
@@ -172,6 +173,13 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     real = pd.DataFrame()
     pricegrowthtemp2 = pd.DataFrame()
     pricegrowth = pd.DataFrame()
+    
+    # Invert dict of crop categories to create the map
+    crop_categories = {}
+    for category, crops in config_params['LEAP-Macro']['Crop_categories'].items():
+        for crop in crops:
+            crop_categories[crop] = category
+    
     for sector in config_params['LEAP-Macro']['WEAP']['sectorlist']:    
         try:
             for subsector in config_params['LEAP-Macro']['Regions'][region]['weap_crop_production_value_mapping'][sector]: # subsector data is the same across a given sector
@@ -179,7 +187,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
                 conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries)) # figure out which row is associated with which country
                 dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other') # new column for countries
                 dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
-                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(config_params['LEAP-Macro']['Crop_categories']['WEAP_to_Macro'])
+                dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(crop_categories)
                 cols = list(dfcropsec) # list of columns
                 cols.insert(1, cols.pop(cols.index('country'))) # move the country column to specified index location
                 cols.insert(2, cols.pop(cols.index('crop'))) # move the country column to specified index location
