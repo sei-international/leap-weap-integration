@@ -4,7 +4,7 @@
 # Needs to be kept up-to-date by user
 ###############################################################
 WEAP:
-  Area: 'WAVE-SyrDarya 2022_09_19_MABIA'
+  Area: WAVE-SyrDarya 2022_09_19_MABIA
   Branches:
     Population_KAZ:
       path: Key\Demographic\KAZ\National population
@@ -251,8 +251,8 @@ WEAP:
 
 
 LEAP:
-  Area: 'wave central asia v43'
-  Regions: ["Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"]
+  Area: wave central asia v43
+  Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
   Folder: WAVE_Hydro
@@ -421,64 +421,64 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   Folder: WAVE_Macro
   # Target variables are the same for each region: must match branches in LEAP config above
   LEAP:
-    target_variables : ['GDP', 'Industrial VA', 'Commercial VA', 'Agricultural VA']
+    target_variables : [GDP, Industrial VA, Commercial VA, Agricultural VA]
   WEAP:
     price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
     # The sector names have underscores because of the way these are named in the WAVE WEAP application
-    sectorlist: ["Agriculture_", "Industrial_", "Domestic_"]
-    croplist: ["Seasonal crops", "Perennial crops"]
+    sectorlist: [Agriculture_, Industrial_, Domestic_]
+    croplist: [Seasonal crops, Perennial crops]
   Regions:
       Kazakhstan:
         directory_name: KAZ_Macro
         script: runleapmacro.jl
-        weap_region: ['KAZ']
+        weap_region: [KAZ]
         weap_coverage_mapping: 
-          'Agriculture_': ['S_agfor']
-          'Industrial_': ['S_food', 'S_paperpulp', 'S_otherind']
-          'Domestic_': ['S_hotelrestaurant', 'S_otherserv']
+          Agriculture_: [S_agfor]
+          Industrial_: [S_food, S_paperpulp, S_otherind]
+          Domestic_: [S_hotelrestaurant, S_otherserv]
         weap_crop_production_value_mapping:
-          'Agriculture_': ['S_agfor']
+          Agriculture_: [S_agfor]
         weap_real_output_index_mapping:
-          'Agriculture_': 
-            'All crops': ['S_agfor']
+          Agriculture_: 
+            All crops: [S_agfor]
         weap_price_index_mapping: 
-          'Agriculture_':
-            'Seasonal crops': ['P_agforseasonal']
-            'Perennial crops': ['P_agforperennial']
+          Agriculture_:
+            Seasonal crops: [P_agforseasonal]
+            Perennial crops: [P_agforperennial]
       Kyrgyzstan:
         directory_name: KGZ_Macro
         script: runleapmacro.jl
-        weap_region: ['KGZ']
+        weap_region: [KGZ]
         weap_coverage_mapping: 
-          'Agriculture_': ['S_agfor']
-          'Industrial_': ['S_food', 'S_woodpaper', 'S_otherind']
-          'Domestic_': ['S_hotelrestaurant', 'S_otherserv']
+          Agriculture_: [S_agfor]
+          Industrial_: [S_food, S_woodpaper, S_otherind]
+          Domestic_: [S_hotelrestaurant, S_otherserv]
         weap_crop_production_value_mapping:
-          'Agriculture_': ['S_agfor']
+          Agriculture_: [S_agfor]
         weap_real_output_index_mapping:
-          'Agriculture_': 
-            'All crops': ['S_agfor']
+          Agriculture_: 
+            All crops: [S_agfor]
         weap_price_index_mapping: 
-          'Agriculture_': 
-            'All crops': ['P_agfor']
+          Agriculture_: 
+            All crops: [P_agfor]
       Uzbekistan:
         directory_name: UZB_Macro
         script: runleapmacro.jl
-        weap_region: ['UZB']
+        weap_region: [UZB]
         weap_coverage_mapping: 
-          'Agriculture_': ['Acotton','Agrain','Atomat','Avegat','Afruit','Agrape','Apotat','AothA']
-          'Industrial_': ['Ametal','Achem','Amach','Aginning','Atextile','Amilling','Afood','AothI']
-          'Domestic_': ['Acons','Atrad','Atrans','Aots']
+          Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
+          Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
+          Domestic_: [Acons,Atrad,Atrans,Aots]
         weap_crop_production_value_mapping:
-          'Agriculture_': ['Acotton','Agrain','Atomat','Avegat','Afruit','Agrape','Apotat','AothA','Aanim']
+          Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
         weap_real_output_index_mapping:
-          'Agriculture_': 
-            'All crops': ['Acotton','Agrain','Atomat','Avegat','Afruit','Agrape','Apotat','AothA','Aanim']
+          Agriculture_: 
+            All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
         weap_price_index_mapping: 
-          'Agriculture_':
-            'Seasonal crops': ['Ccotton','Cgrain','Ctomat','Cvegat','Cpotat','CothA']
-            'Perennial crops': ['Cfruit','Cgrape']
+          Agriculture_:
+            Seasonal crops: [Ccotton,Cgrain,Ctomat,Cvegat,Cpotat,CothA]
+            Perennial crops: [Cfruit,Cgrape]
   Crop_categories:
       Perennial crops:
           - Apples
@@ -496,3 +496,4 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           - Sugar beet
           - Vegetables
           - Watermelons and squash
+          - Wheat
