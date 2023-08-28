@@ -480,37 +480,19 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
             'Seasonal crops': ['Ccotton','Cgrain','Ctomat','Cvegat','Cpotat','CothA']
             'Perennial crops': ['Cfruit','Cgrape']
   Crop_categories:
-      WEAP_to_Macro:
-          'Apples': 'Perennial crops'
-          'Barley': 'Seasonal crops'
-          'Corn': 'Seasonal crops'
-          'Cotton': 'Seasonal crops'
-          'Grapes': 'Perennial crops'
-          'Oil seeds and pulses': 'Seasonal crops'
-          'Other crops': 'Seasonal crops'
-          'Other grains': 'Seasonal crops'
-          'Other orchards': 'Perennial crops'
-          'Potatoes': 'Seasonal crops'
-          'Rice': 'Seasonal crops'
-          'Sugar beet': 'Seasonal crops'
-          'Vegetables': 'Seasonal crops'
-          'Watermelons and squash': 'Seasonal crops'
-          'Wheat': 'Seasonal crops'
-      Macro_to_WEAP:
-          'Perennial crops':
-              - 'Apples'
-              - 'Grapes'
-              - 'Other orchards'
-          'Seasonal crops':
-              - 'Barley'
-              - 'Corn'
-              - 'Cotton'
-              - 'Oil seeds and pulses'
-              - 'Other crops'
-              - 'Other grains'
-              - 'Potatoes'
-              - 'Rice'
-              - 'Sugar beet'
-              - 'Vegetables'
-              - 'Watermelons and squash'
-              - 'Wheat'
+      Perennial crops:
+          - Apples
+          - Grapes
+          - Other orchards
+      Seasonal crops:
+          - Barley
+          - Corn
+          - Cotton
+          - Oil seeds and pulses
+          - Other crops
+          - Other grains
+          - Potatoes
+          - Rice
+          - Sugar beet
+          - Vegetables
+          - Watermelons and squash
