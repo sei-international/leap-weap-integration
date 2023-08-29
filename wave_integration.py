@@ -305,17 +305,17 @@ def main_integration(tolerance, max_iterations):
         logging.info('\t' + r)
         check_region(leap, r)
 
-    # validate hydropower plants in leap
+    # validate hydropower plants in LEAP
     logging.info(_('Including LEAP hydropower plants:'))
     for b, entry in config_params['LEAP']['Hydropower_plants']['plants'].items() :
         logging.info('\t' + b)
         check_branch_var(leap, entry['leap_path'], "Maximum Availability", "Percent")
 
-    # validate hydropower reservoirs in weap
+    # validate hydropower reservoirs in WEAP
     logging.info(_('Including WEAP hydropower reservoirs:'))
-    for b in config_params['WEAP']['Hydropower_plants'] :
+    for b, entry in config_params['WEAP']['Hydropower_plants']['dams'].items() :
         logging.info('\t' + b)
-        check_branch_var(weap, config_params['WEAP']['Hydropower_plants'][b]['weap_path'], "Hydropower Generation", "GJ")
+        check_branch_var(weap, entry['weap_path'], "Hydropower Generation", "GJ")
 
 
     #------------------------------------------------------------------------------------------------------------------------
@@ -397,14 +397,13 @@ def main_integration(tolerance, max_iterations):
 
     # Clear hydropower reservoir energy demand from WEAP scenarios
     logging.info(_('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.'))
-    weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
+    weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
     for s in weap_scenarios:
         weap.ActiveScenario = s
         for wb in weap_hydro_branches:
-            weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
+            weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
             if not 'Run of River' in weap_path: 
-                weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
-                weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = ""
+                weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
 
     # Initial LEAP-Macro run, to provide macro-economic variables to LEAP
     if leap_macro:
@@ -431,7 +430,7 @@ def main_integration(tolerance, max_iterations):
     # set up target results for convergence checks during iterative calculations, by scenario
     
     target_leap_results = list(config_params['LEAP']['Hydropower_plants']['plants'].keys())
-    target_weap_results = list(config_params['WEAP']['Hydropower_plants'].keys())
+    target_weap_results = list(config_params['WEAP']['Hydropower_plants']['dams'].keys())
     if leap_macro:
         target_leapmacro_results = config_params['LEAP-Macro']['LEAP']['target_variables']
 
@@ -494,7 +493,7 @@ def main_integration(tolerance, max_iterations):
         excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files
         excel.ScreenUpdating = False
 
-        weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
+        weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
             leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
@@ -502,7 +501,7 @@ def main_integration(tolerance, max_iterations):
             leap.ActiveScenario = leap_scenario_id
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
-                xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
+                xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
                 xlsx_path = os.path.join(hydroexcelpath, xlsx_file)  # Full path to XLSX file being written
                 xlsx_path = fr"{xlsx_path}" # TODO: Is this needed with os.path.join?
                 csv_path = os.path.join(hydroexcelpath, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
@@ -515,13 +514,13 @@ def main_integration(tolerance, max_iterations):
                 num_lines_written = 0 # Number of lines written to CSV file
 
                 # check unit
-                weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').Unit
+                weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
                     msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
                 # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
-                weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
+                weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
 
                 # check that there are values for every month
                 if not len(weap_hpp_gen)%12 == 0:
@@ -537,7 +536,7 @@ def main_integration(tolerance, max_iterations):
                     if leap.EndYear < y :
                         leap_capacity_year = leap.EndYear
                     weap_branch_capacity = 0  # Capacity in LEAP corresponding to WEAP branch [MW]
-                    leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
+                    leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
                     for lb in leap_hpps:
                         leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
@@ -585,7 +584,7 @@ def main_integration(tolerance, max_iterations):
                         logging.warning(msg)
                     else:
                         # Update LEAP Maximum Availability expression
-                        leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
+                        leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
                         for lhpp in leap_hpps:
                             logging.info('\t\t' + _('Assigning to LEAP hydropower plant: {h}').format(h = lhpp))
                             lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
@@ -738,8 +737,10 @@ def main_integration(tolerance, max_iterations):
             this_iteration_weap_results[sw] = np.empty(weap_results_size, dtype=object)
             
             current_index = 0
+            weap_varname = ":" + config_params['WEAP']['Hydropower_plants']['weap_variable']
+            weap_unitname = "[" + config_params['WEAP']['Hydropower_plants']['weap_unit'] + "]"
             for e in target_weap_results:
-                weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants'][e]['weap_path'], config_params['WEAP']['Hydropower_plants'][e]['weap_variable']])
+                weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants']['dams'][e]['weap_path'], weap_varname, weap_unitname])
                 for y in range(weap.BaseYear, weap.EndYear + 1):
                     val = weap.ResultValue(weap_pathvar, y, 1, sw, y, 12, 'Total')
                     if val is None:

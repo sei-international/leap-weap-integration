@@ -81,71 +81,58 @@ WEAP:
       leap_region: Uzbekistan
 
 
-  Hydropower_plants: 
-    Toktogul:
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [TOKTOGUL]
-    Kambarata_I:
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kambarata_I
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KAMBARATA_1]
-    Kambarata_II:
-      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kambarata II
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KAMBARATA_2]
-    Kayrakkum :
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kayrakkum reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KAIRAKKUM]
-    Shardara :
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Shardara reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [SHARDARINSKYA]
-    Kurpsaiskaja:
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kurpsaiskaja
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KURPSAI]
-    Taschkumyrskaja : 
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Taschkumyrskaja_cascade
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [TASH_KUMYR, SHAMALDYSAI,UCH_KURGANSK]
-    Farkhad : 
-      weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Farkhad reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [FARKHAD]
-    Akhangaran : 
-      weap_path : Supply and Resources\River\Ahangaran\Reservoirs\Akhangaran reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps: [AKHANGARAN]
-    Charvak: 
-      weap_path : Supply and Resources\River\Circik River\Reservoirs\Charvak reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [CHARVAK, GAZLKENT, KHODZHIKENT]
-    Chirchik:
-      weap_path : Supply and Resources\River\Circik River\Reservoirs\Chirchik_cascade
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [AKKAVAK_1, CHIRCHIK_1, CHIRCHIK_2, TAVAK]
-    Andijan :
-      weap_path : Supply and Resources\River\Andijan River\Reservoirs\Andijan Reservoir
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [ANDIJAN_1, ANDIJAN_2]
-    At-Bashi : 
-      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [AT_BASHIN]
-    Kokomeren : 
-      weap_path : Supply and Resources\River\Kokomeren River\Run of River Hydro\Kokomeren RoR
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KOKOMEREN]
-    Upper Naryn : 
-      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Upper Naryn RoR
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [UPPER NARYN]
-    Kazarman : 
-      weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
-      weap_variable: :Hydropower Generation[GWH]
-      leap_hpps : [KAZARMAN]
+  Hydropower_plants:
+    weap_variable: Hydropower Generation # WEAP result variable to be checked for convergence
+    weap_unit: GWH
+    dams:
+        Toktogul:
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
+          leap_hpps : [TOKTOGUL]
+        Kambarata_I:
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kambarata_I
+          leap_hpps : [KAMBARATA_1]
+        Kambarata_II:
+          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kambarata II
+          leap_hpps : [KAMBARATA_2]
+        Kayrakkum :
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kayrakkum reservoir
+          leap_hpps : [KAIRAKKUM]
+        Shardara :
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Shardara reservoir
+          leap_hpps : [SHARDARINSKYA]
+        Kurpsaiskaja:
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kurpsaiskaja
+          leap_hpps : [KURPSAI]
+        Taschkumyrskaja : 
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Taschkumyrskaja_cascade
+          leap_hpps : [TASH_KUMYR, SHAMALDYSAI,UCH_KURGANSK]
+        Farkhad : 
+          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Farkhad reservoir
+          leap_hpps : [FARKHAD]
+        Akhangaran : 
+          weap_path : Supply and Resources\River\Ahangaran\Reservoirs\Akhangaran reservoir
+          leap_hpps: [AKHANGARAN]
+        Charvak: 
+          weap_path : Supply and Resources\River\Circik River\Reservoirs\Charvak reservoir
+          leap_hpps : [CHARVAK, GAZLKENT, KHODZHIKENT]
+        Chirchik:
+          weap_path : Supply and Resources\River\Circik River\Reservoirs\Chirchik_cascade
+          leap_hpps : [AKKAVAK_1, CHIRCHIK_1, CHIRCHIK_2, TAVAK]
+        Andijan :
+          weap_path : Supply and Resources\River\Andijan River\Reservoirs\Andijan Reservoir
+          leap_hpps : [ANDIJAN_1, ANDIJAN_2]
+        At-Bashi : 
+          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
+          leap_hpps : [AT_BASHIN]
+        Kokomeren : 
+          weap_path : Supply and Resources\River\Kokomeren River\Run of River Hydro\Kokomeren RoR
+          leap_hpps : [KOKOMEREN]
+        Upper Naryn : 
+          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Upper Naryn RoR
+          leap_hpps : [UPPER NARYN]
+        Kazarman : 
+          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
+          leap_hpps : [KAZARMAN]
 
   Agricultural regions: # these are used for water pumping
     Kazakhstan:
