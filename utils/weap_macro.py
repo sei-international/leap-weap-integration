@@ -399,6 +399,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
     pricegrowth = pricegrowth.transpose()
+    print(pricegrowth) # TODO: TESTING remove
     pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
     val = 1
     factor = 1/pricegrowth.loc[2021]
