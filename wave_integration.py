@@ -686,8 +686,8 @@ def main_integration(tolerance, max_iterations):
         this_iteration_leapmacro_results = {}
         this_iteration_weap_results = {}
 
-        leap_unit = config_params['LEAP']['Hydropower_plants']['leap_unit']
-        leap_varname = config_params['LEAP']['Hydropower_plants']['leap_variable']
+        leap_unit = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_unit']
+        leap_varname = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_variable']
         for sl in leap_scenarios:
             leap_scenario_id = leap_scenario_ids[sl]
             # Make sure we are in the correct scenario
@@ -737,8 +737,8 @@ def main_integration(tolerance, max_iterations):
             this_iteration_weap_results[sw] = np.empty(weap_results_size, dtype=object)
             
             current_index = 0
-            weap_varname = ":" + config_params['WEAP']['Hydropower_plants']['weap_variable']
-            weap_unitname = "[" + config_params['WEAP']['Hydropower_plants']['weap_unit'] + "]"
+            weap_varname = ":" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_variable']
+            weap_unitname = "[" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_unit'] + "]"
             for e in target_weap_results:
                 weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants']['dams'][e]['weap_path'], weap_varname, weap_unitname])
                 for y in range(weap.BaseYear, weap.EndYear + 1):

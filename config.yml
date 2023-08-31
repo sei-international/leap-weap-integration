@@ -82,8 +82,9 @@ WEAP:
 
 
   Hydropower_plants:
-    weap_variable: Hydropower Generation # WEAP result variable to be checked for convergence
-    weap_unit: GWH
+    convergence_check:
+        weap_variable: Hydropower Generation # WEAP result variable to be checked for convergence
+        weap_unit: GWH
     dams:
         Toktogul:
           weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
@@ -280,8 +281,9 @@ LEAP:
       unit: Cubic Meter/No Data
   
   Hydropower_plants:
-    leap_variable: Energy Generation # LEAP result to be checked for convergence
-    leap_unit: GWh
+    convergence_check:
+        leap_variable: Energy Generation # LEAP result to be checked for convergence
+        leap_unit: GWh
     plants:
         AKHANGARAN:
           leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
