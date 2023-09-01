@@ -424,17 +424,16 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: 
             All crops: [P_agfor]
         crop_categories:
-          Perennial crops:
+          All crops:
               - Apples
-              - Grapes
-              - Other orchards
-          Seasonal crops:
               - Barley
               - Corn
               - Cotton
+              - Grapes
               - Oil seeds and pulses
               - Other crops
               - Other grains
+              - Other orchards
               - Potatoes
               - Rice
               - Sugar beet
@@ -456,23 +455,33 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
             All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
         weap_price_index_mapping: 
           Agriculture_:
-            Seasonal crops: [Ccotton,Cgrain,Ctomat,Cvegat,Cpotat,CothA]
-            Perennial crops: [Cfruit,Cgrape]
+            Cotton: [Ccotton]
+            Grains: [Cgrain]
+            Vegetables: [Ctomat,Cvegat]
+            Potatoes: [Cpotat]
+            Fruits: [Cfruit]
+            Grapes: [Cgrape]
+            Other crops: [CothA]
         crop_categories:
-          Perennial crops:
-              - Apples
-              - Grapes
-              - Other orchards
-          Seasonal crops:
+         Cotton:
+              - Cotton
+         Grains:
               - Barley
               - Corn
-              - Cotton
-              - Oil seeds and pulses
-              - Other crops
-              - Other grains
-              - Potatoes
               - Rice
-              - Sugar beet
-              - Vegetables
-              - Watermelons and squash
               - Wheat
+              - Other grains
+         Vegetables:
+              - Vegetables
+         Potatoes:
+              - Potatoes
+         Fruits:
+              - Apples
+              - Other orchards
+         Grapes:
+              - Grapes
+         Other crops:
+              - Oil seeds and pulses
+              - Sugar beet
+              - Watermelons and squash
+              - Other crops
