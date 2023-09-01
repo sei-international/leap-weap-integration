@@ -176,7 +176,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
     
     # Invert dict of crop categories to create the map
     crop_categories = {}
-    for category, crops in config_params['LEAP-Macro']['Crop_categories'].items():
+    for category, crops in config_params['LEAP-Macro'][region]['crop_categories'].items():
         for crop in crops:
             crop_categories[crop] = category
     
@@ -323,7 +323,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
                         except:
                             pass
                 realtemp = realtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['Crop_categories']:
+                for crop in config_params['LEAP-Macro'][region]['crop_categories']:
                     for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_real_output_index_mapping'][sector][crop]: 
                         realtemp = realtemp.rename(index={crop: macrocrop})
                         realtemp2 = pd.concat([realtemp2, realtemp.loc[macrocrop]])
@@ -365,7 +365,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario, config_params, region
                         except:
                             pass
                 pricegrowthtemp = pricegrowthtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['Crop_categories']:
+                for crop in config_params['LEAP-Macro'][region]['crop_categories']:
                     for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][sector][crop]: 
                         pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
                         # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added

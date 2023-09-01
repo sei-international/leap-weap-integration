@@ -389,6 +389,24 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_:
             Seasonal crops: [P_agforseasonal]
             Perennial crops: [P_agforperennial]
+        crop_categories:
+          Perennial crops:
+              - Apples
+              - Grapes
+              - Other orchards
+          Seasonal crops:
+              - Barley
+              - Corn
+              - Cotton
+              - Oil seeds and pulses
+              - Other crops
+              - Other grains
+              - Potatoes
+              - Rice
+              - Sugar beet
+              - Vegetables
+              - Watermelons and squash
+              - Wheat
       Kyrgyzstan:
         directory_name: KGZ_Macro
         script: runleapmacro.jl
@@ -405,6 +423,24 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
         weap_price_index_mapping: 
           Agriculture_: 
             All crops: [P_agfor]
+        crop_categories:
+          Perennial crops:
+              - Apples
+              - Grapes
+              - Other orchards
+          Seasonal crops:
+              - Barley
+              - Corn
+              - Cotton
+              - Oil seeds and pulses
+              - Other crops
+              - Other grains
+              - Potatoes
+              - Rice
+              - Sugar beet
+              - Vegetables
+              - Watermelons and squash
+              - Wheat
       Uzbekistan:
         directory_name: UZB_Macro
         script: runleapmacro.jl
@@ -422,21 +458,21 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_:
             Seasonal crops: [Ccotton,Cgrain,Ctomat,Cvegat,Cpotat,CothA]
             Perennial crops: [Cfruit,Cgrape]
-  Crop_categories:
-      Perennial crops:
-          - Apples
-          - Grapes
-          - Other orchards
-      Seasonal crops:
-          - Barley
-          - Corn
-          - Cotton
-          - Oil seeds and pulses
-          - Other crops
-          - Other grains
-          - Potatoes
-          - Rice
-          - Sugar beet
-          - Vegetables
-          - Watermelons and squash
-          - Wheat
+        crop_categories:
+          Perennial crops:
+              - Apples
+              - Grapes
+              - Other orchards
+          Seasonal crops:
+              - Barley
+              - Corn
+              - Cotton
+              - Oil seeds and pulses
+              - Other crops
+              - Other grains
+              - Potatoes
+              - Rice
+              - Sugar beet
+              - Vegetables
+              - Watermelons and squash
+              - Wheat
