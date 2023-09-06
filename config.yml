@@ -370,7 +370,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
     price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
     # The sector names have underscores because of the way these are named in the WAVE WEAP application
-    sectorlist: [Agriculture_, Industrial_, Domestic_]
+    # sectorlist: [Agriculture_, Industrial_, Domestic_]
   Regions:
       Kazakhstan:
         directory_name: KAZ_Macro
@@ -380,11 +380,11 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: [S_agfor]
           Industrial_: [S_food, S_paperpulp, S_otherind]
           Domestic_: [S_hotelrestaurant, S_otherserv]
-        weap_crop_production_value_mapping:
-          Agriculture_: [S_agfor]
-        weap_real_output_index_mapping:
-          Agriculture_: 
-            All crops: [S_agfor]
+        weap_crop_production_mapping:
+          Agriculture_:
+            value: [S_agfor]
+            real_index:
+                All crops: [S_agfor]
         weap_price_index_mapping: 
           Agriculture_:
             Seasonal crops: [P_agforseasonal]
@@ -415,11 +415,11 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: [S_agfor]
           Industrial_: [S_food, S_woodpaper, S_otherind]
           Domestic_: [S_hotelrestaurant, S_otherserv]
-        weap_crop_production_value_mapping:
-          Agriculture_: [S_agfor]
-        weap_real_output_index_mapping:
-          Agriculture_: 
-            All crops: [S_agfor]
+        weap_crop_production_mapping:
+          Agriculture_:
+            value: [S_agfor]
+            real_index:
+                All crops: [S_agfor]
         weap_price_index_mapping: 
           Agriculture_: 
             All crops: [P_agfor]
@@ -448,11 +448,11 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
           Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
           Domestic_: [Acons,Atrad,Atrans,Aots]
-        weap_crop_production_value_mapping:
-          Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
-        weap_real_output_index_mapping:
-          Agriculture_: 
-            All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
+        weap_crop_production_mapping:
+          Agriculture_:
+            value: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
+            real_index:
+                All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
         weap_price_index_mapping: 
           Agriculture_:
             Cotton: [Ccotton]
