@@ -369,6 +369,22 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   WEAP:
     price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
+    all_crops: &WEAP_CROPS
+      - Apples
+      - Barley
+      - Corn
+      - Cotton
+      - Grapes
+      - Oil seeds and pulses
+      - Other crops
+      - Other grains
+      - Other orchards
+      - Potatoes
+      - Rice
+      - Sugar beet
+      - Vegetables
+      - Watermelons and squash
+      - Wheat
   Regions:
       Kazakhstan:
         directory_name: KAZ_Macro
@@ -422,22 +438,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: 
             All crops: [P_agfor]
         crop_categories:
-          All crops:
-              - Apples
-              - Barley
-              - Corn
-              - Cotton
-              - Grapes
-              - Oil seeds and pulses
-              - Other crops
-              - Other grains
-              - Other orchards
-              - Potatoes
-              - Rice
-              - Sugar beet
-              - Vegetables
-              - Watermelons and squash
-              - Wheat
+          All crops: *WEAP_CROPS
       Uzbekistan:
         directory_name: UZB_Macro
         script: runleapmacro.jl
