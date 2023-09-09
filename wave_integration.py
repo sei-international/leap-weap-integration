@@ -168,7 +168,7 @@ def kill_excel():
 #==================================================================================================#
 #                                         MAIN ROUTINE                                             #
 #==================================================================================================#
-def main_integration(tolerance, max_iterations):
+def main_integration():
     """Main code: call to run the integrated models
     
     Input arguments:
