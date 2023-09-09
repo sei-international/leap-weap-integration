@@ -10,6 +10,16 @@ import numpy as np
 import pandas as pd
 import os
 
+# Load and calculate correct scenario
+def load_weap_scen(WEAP, weap_scenario):
+    WEAP.View = "Results"
+    WEAP.ActiveScenario = weap_scenario
+
+# Export WEAP files
+def export_csv(WEAP, fname, favname):
+    WEAP.LoadFavorite(favname)
+    WEAP.ExportResults(fname)
+
 # WEAP favorites to export
 def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_params, rowskip):
     """Export WEAP favorites so they can be converted to Macro inputs using weap_to_macro_processing()
