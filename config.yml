@@ -243,7 +243,7 @@ WEAP:
 
 
 LEAP:
-  Area: wave central asia v43
+  Area: wave central asia v43ekb # This is Eric's model for Syr Darya only, including LEAP favorite
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
