@@ -9,24 +9,22 @@ import logging
 import numpy as np
 import pandas as pd
 import os
-import sys # TODO: **DEBUGGING** Only for debugging
-import win32com.client as win32 # TODO: **DEBUGGING** Only for debugging
-import yaml # TODO: **DEBUGGING** Only for debugging
-import gettext, locale, ctypes
-# Allow a user to "short-circuit" the system language with an environment variable
-if os.environ.get('LANG') is not None:
-    language = os.environ['LANG']
-elif os.environ.get('LANGUAGE') is not None:
-    language = os.environ['LANGUAGE']
-else:
-    language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
-if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
-    transl = gettext.translation('wave_integration', localedir='locale', languages=[language])
-    transl.install()
-else:
-    gettext.install('wave_integration')
-
-
+# import sys # TODO: **DEBUGGING** Only for debugging
+# import win32com.client as win32 # TODO: **DEBUGGING** Only for debugging
+# import yaml # TODO: **DEBUGGING** Only for debugging
+# import gettext, locale, ctypes
+# # Allow a user to "short-circuit" the system language with an environment variable
+# if os.environ.get('LANG') is not None:
+    # language = os.environ['LANG']
+# elif os.environ.get('LANGUAGE') is not None:
+    # language = os.environ['LANGUAGE']
+# else:
+    # language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
+# if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
+    # transl = gettext.translation('wave_integration', localedir='locale', languages=[language])
+    # transl.install()
+# else:
+    # gettext.install('wave_integration')
 
 # Load and calculate correct scenario
 def load_weap_scen(WEAP, weap_scenario):
@@ -371,12 +369,13 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     dfshare = dfshare.drop(columns = min(dfcrop_cols))
 
     #------------------------------------
-    # price growth
+    # price growth indices (by sector & by product)
     #------------------------------------
     pricegrowth_jointcrop = dfinflation * dfshare
     pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country') # TODO: Can do this earlier -- never carry 'other'
     pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['crop category']).sum()
     
+    #--- By Macro ag sector
     # Create dataframe with no entries
     pricegrowth_macro_agsec = pd.DataFrame.from_dict(macro_joint_agsec_map, columns=['crop category'], orient='index')
     pricegrowth_macro_agsec.reset_index(inplace = True)
@@ -395,6 +394,28 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Insert index = 1 in first year position
     pricendx_macro_agsec.insert(0, int(min(pricendx_macro_agsec)) - 1, 1.0)
     
+    #--- By Macro ag product
+    # Create dataframe with no entries
+    pricegrowth_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
+    pricegrowth_macro_agprod.reset_index(inplace = True)
+    pricegrowth_macro_agprod = pricegrowth_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    
+    # Merge with pricegrowth_jointcrop to assign values, then drop crop categories column
+    pricegrowth_macro_agprod = pricegrowth_macro_agprod.merge(pricegrowth_jointcrop,
+                                                              left_on=['crop category'],
+                                                              right_on=['crop category'],
+                                                              how='right')
+    pricegrowth_macro_agprod.drop('crop category', axis=1, inplace=True)
+    pricegrowth_macro_agprod.set_index('macro_agprod', inplace=True)
+    
+    # Convert from growth rate to index
+    pricendx_macro_agprod = (1.0 + pricegrowth_macro_agprod).cumprod(axis = 1)
+    # Insert index = 1 in first year position
+    pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
+
+    #------------------------------------
+    # nominal output index
+    #------------------------------------
     # Create a value index by joint product
     valndx_joint = dfcropsecgrp.groupby('crop category').sum()
     valndx_joint = valndx_joint.div(valndx_joint[min(valndx_joint)], axis=0)
@@ -433,39 +454,39 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     realndx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
-    pricendx_macro_agsec = pricendx_macro_agsec.transpose()
-    pricendx_macro_agsec.index = pricendx_macro_agsec.index.astype('int64') # After transpose, the index is years
+    pricendx_macro_agprod = pricendx_macro_agprod.transpose()
+    pricendx_macro_agprod.index = pricendx_macro_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/pricendx_macro_agsec.loc[firstyear+1]
+    factor = 1/pricendx_macro_agprod.loc[firstyear+1]
     for y in range(firstyear,2009,-1):
-        pricendx_macro_agsec.loc[y] = val
+        pricendx_macro_agprod.loc[y] = val
         val *= factor
-    pricendx_macro_agsec.sort_index(inplace=True)
-    pricendx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
+    pricendx_macro_agprod.sort_index(inplace=True)
+    pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
 
-# TODO: **DEBUGGING**
-weap = win32.Dispatch('WEAP.WEAPApplication')
-with open(r'config.yml') as file:
-    config_params = yaml.full_load(file)
+# # TODO: **DEBUGGING**
+# weap = win32.Dispatch('WEAP.WEAPApplication')
+# with open(r'config.yml') as file:
+    # config_params = yaml.full_load(file)
 
-macromodelspath = os.path.normpath(os.path.join(weap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
+# macromodelspath = os.path.normpath(os.path.join(weap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
 
-fdirmain = macromodelspath
-fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
+# fdirmain = macromodelspath
+# fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
 
-leap_scenario = 'S1 Baseline Historical'
-weap_scenario = 'S1 Historical'
-CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
+# leap_scenario = 'S1 Baseline Historical'
+# weap_scenario = 'S1 Historical'
+# CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
 
-# export weap data
-dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
+# # export weap data
+# dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
 
-logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
-for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
-    # set file directories for WEAP to LEAP-Macro
-    fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
+# logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
+# for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
+    # # set file directories for WEAP to LEAP-Macro
+    # fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
         
-    # process WEAP data for LEAP-Macro
-    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+    # # process WEAP data for LEAP-Macro
+    # weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
