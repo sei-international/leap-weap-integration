@@ -32,7 +32,7 @@ else:
 
 # Load gettext and install translator before importing other local scripts
 from utils.julia import get_julia_path
-from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info
+from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info, export_leap_hpp_to_weap
 from utils.weap_macro import get_weap_ag_results, weap_to_macro_processing
 
 #==================================================================================================#
