@@ -378,22 +378,22 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['crop category']).sum()
     
     # Create dataframe with no entries
-    pricegrowth_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
-    pricegrowth_macro_agprod.reset_index(inplace = True)
-    pricegrowth_macro_agprod = pricegrowth_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    pricegrowth_macro_agsec = pd.DataFrame.from_dict(macro_joint_agsec_map, columns=['crop category'], orient='index')
+    pricegrowth_macro_agsec.reset_index(inplace = True)
+    pricegrowth_macro_agsec = pricegrowth_macro_agsec.rename(columns = {'index':'macro_agsec'})
     
     # Merge with pricegrowth_jointcrop to assign values, then drop crop categories column
-    pricegrowth_macro_agprod = pricegrowth_macro_agprod.merge(pricegrowth_jointcrop,
+    pricegrowth_macro_agsec = pricegrowth_macro_agsec.merge(pricegrowth_jointcrop,
                                                               left_on=['crop category'],
                                                               right_on=['crop category'],
                                                               how='right')
-    pricegrowth_macro_agprod.drop('crop category', axis=1, inplace=True)
-    pricegrowth_macro_agprod.set_index('macro_agprod', inplace=True)
+    pricegrowth_macro_agsec.drop('crop category', axis=1, inplace=True)
+    pricegrowth_macro_agsec.set_index('macro_agsec', inplace=True)
     
     # Convert from growth rate to index
-    pricendx_macro_agprod = (1.0 + pricegrowth_macro_agprod).cumprod(axis = 1)
+    pricendx_macro_agsec = (1.0 + pricegrowth_macro_agsec).cumprod(axis = 1)
     # Insert index = 1 in first year position
-    pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
+    pricendx_macro_agsec.insert(0, int(min(pricendx_macro_agsec)) - 1, 1.0)
     
     # Create a value index by joint product
     valndx_joint = dfcropsecgrp.groupby('crop category').sum()
@@ -401,47 +401,47 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     
     # Assign to macro ag products
     # Create dataframe with no entries
-    valndx_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
-    valndx_macro_agprod.reset_index(inplace = True)
-    valndx_macro_agprod = valndx_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    valndx_macro_agsec = pd.DataFrame.from_dict(macro_joint_agsec_map, columns=['crop category'], orient='index')
+    valndx_macro_agsec.reset_index(inplace = True)
+    valndx_macro_agsec = valndx_macro_agsec.rename(columns = {'index':'macro_agsec'})
     
     # Merge with valndx_joint to assign values, then drop crop categories column
-    valndx_macro_agprod = valndx_macro_agprod.merge(valndx_joint,
+    valndx_macro_agsec = valndx_macro_agsec.merge(valndx_joint,
                                                     left_on=['crop category'],
                                                     right_on=['crop category'],
                                                     how='right')
-    valndx_macro_agprod.drop('crop category', axis=1, inplace=True)
-    valndx_macro_agprod.set_index('macro_agprod', inplace=True)
+    valndx_macro_agsec.drop('crop category', axis=1, inplace=True)
+    valndx_macro_agsec.set_index('macro_agsec', inplace=True)
     
     # Calculate real index by dividing value index by price index
-    realndx_macro_agprod = valndx_macro_agprod/pricendx_macro_agprod.values
+    realndx_macro_agsec = valndx_macro_agsec/pricendx_macro_agsec.values
     
     #------------------------------------
     # Write out Macro input files
     #------------------------------------
     # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
-    firstyear = int(min(realndx_macro_agprod))
+    firstyear = int(min(realndx_macro_agsec))
     fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
-    realndx_macro_agprod = realndx_macro_agprod.transpose()
-    realndx_macro_agprod.index = realndx_macro_agprod.index.astype('int64') # After transpose, the index is years
+    realndx_macro_agsec = realndx_macro_agsec.transpose()
+    realndx_macro_agsec.index = realndx_macro_agsec.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/realndx_macro_agprod.loc[firstyear+1]
+    factor = 1/realndx_macro_agsec.loc[firstyear+1]
     for y in range(firstyear,2009,-1):
-        realndx_macro_agprod.loc[y] = val
+        realndx_macro_agsec.loc[y] = val
         val *= factor
-    realndx_macro_agprod.sort_index(inplace=True)
-    realndx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
+    realndx_macro_agsec.sort_index(inplace=True)
+    realndx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
-    pricendx_macro_agprod = pricendx_macro_agprod.transpose()
-    pricendx_macro_agprod.index = pricendx_macro_agprod.index.astype('int64') # After transpose, the index is years
+    pricendx_macro_agsec = pricendx_macro_agsec.transpose()
+    pricendx_macro_agsec.index = pricendx_macro_agsec.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/pricendx_macro_agprod.loc[firstyear+1]
+    factor = 1/pricendx_macro_agsec.loc[firstyear+1]
     for y in range(firstyear,2009,-1):
-        pricendx_macro_agprod.loc[y] = val
+        pricendx_macro_agsec.loc[y] = val
         val *= factor
-    pricendx_macro_agprod.sort_index(inplace=True)
-    pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
+    pricendx_macro_agsec.sort_index(inplace=True)
+    pricendx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
 
