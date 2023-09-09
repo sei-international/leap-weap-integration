@@ -9,6 +9,24 @@ import logging
 import numpy as np
 import pandas as pd
 import os
+import sys # TODO: **DEBUGGING** Only for debugging
+import win32com.client as win32 # TODO: **DEBUGGING** Only for debugging
+import yaml # TODO: **DEBUGGING** Only for debugging
+import gettext, locale, ctypes
+# Allow a user to "short-circuit" the system language with an environment variable
+if os.environ.get('LANG') is not None:
+    language = os.environ['LANG']
+elif os.environ.get('LANGUAGE') is not None:
+    language = os.environ['LANGUAGE']
+else:
+    language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
+if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
+    transl = gettext.translation('wave_integration', localedir='locale', languages=[language])
+    transl.install()
+else:
+    gettext.install('wave_integration')
+
+
 
 # Load and calculate correct scenario
 def load_weap_scen(WEAP, weap_scenario):
@@ -59,7 +77,7 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     dfwatdmd = pd.read_csv(fname, skiprows=rowskip)
 
     #------------------------------------
-    # Potential crop production (for real and price series)
+    # Potential crop production (for realndx_incr and price series)
     #------------------------------------
     # TODO: Pull in actual crop production & use to construct a physically-based max utilization measure for ag
     favname = "WEAP Macro\Area"
@@ -91,7 +109,6 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     #------------------------------------
     fname = os.path.join(os.getcwd(), "data", config_params['LEAP-Macro']['WEAP']['price_data'])
     dfcropprice = pd.read_csv(fname, skiprows=rowskip)
-    dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index
 
     #------------------------------------
     # Investment
@@ -131,8 +148,8 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Process coverage data
     #------------------------------------
     coverage = pd.DataFrame()
-    for weap_sectorname, sectorentry in config_params['LEAP-Macro']['Regions'][region]['weap_coverage_mapping'].items():
-        for macrosector in sectorentry:
+    for weap_sectorname, weap_sectorentry in config_params['LEAP-Macro']['Regions'][region]['weap_coverage_mapping'].items():
+        for macro_agsubsect in weap_sectorentry:
             #----------------------------------------------------------------
             # Get detailed WEAP coverage data
             #----------------------------------------------------------------
@@ -188,7 +205,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             coveragetemp = coveragetemp.drop('other', errors='ignore')
             
             # Replace country label (no longer needed) with the current macro sector within the current weap sector
-            coveragetemp = coveragetemp.rename(index={countries[0]: macrosector})
+            coveragetemp = coveragetemp.rename(index={countries[0]: macro_agsubsect})
             # Add to the coverage dataframe
             coverage = pd.concat([coverage, coveragetemp])
     
@@ -207,257 +224,382 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     #------------------------------------
     # Crop production
     #------------------------------------
-    cropprod = pd.DataFrame()
-    prodvalue = pd.DataFrame()
-    realtemp2 = pd.DataFrame()
-    real = pd.DataFrame()
     pricegrowthtemp2 = pd.DataFrame()
     pricegrowth = pd.DataFrame()
 
     # Invert dict of crop categories to create the map
-    crop_categories = {}
-    for category, crops in config_params['LEAP-Macro']['Regions'][region]['crop_categories'].items():
-        for crop in crops:
-            crop_categories[crop] = category
+    weap_joint_crop_map = {}
+    macro_joint_agsec_map = {}
+    macro_joint_agprod_map = {}
+    for category, entry in config_params['LEAP-Macro']['Regions'][region]['crop_categories'].items():
+        for crop in entry['weap']:
+            weap_joint_crop_map[crop] = category
+        for agsector in entry['macro']['sector']:
+            macro_joint_agsec_map[agsector] = category
+        for agprod in entry['macro']['product']:
+            macro_joint_agprod_map[agprod] = category
 
-    for weap_sectorname, sectorentry in config_params['LEAP-Macro']['Regions'][region]['weap_crop_production_mapping'].items():
-        for macrosector in sectorentry['value']:
-            # Remove any branches not related to this sector
-            dfcropsec = dfcrop[dfcrop['Branch'].str.contains(weap_sectorname)].copy()
-            # Extract every row for the WEAP countries in this LEAP region
-            conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries))
-            # Add a column to list the countries (default to 'other' if not in the list)
-            dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other')
-            
-            # Identify crops from branch
-            dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
-            # Map WEAP crops to crop categories
-            dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(crop_categories)
-            
-            # Move country, crop, and crop category columns to indices 1, 2, and 3 and reorder dataframe
-            cols = list(dfcropsec) # list of columns
-            cols.insert(1, cols.pop(cols.index('country')))
-            cols.insert(2, cols.pop(cols.index('crop')))
-            cols.insert(3, cols.pop(cols.index('crop category')))
-            dfcropsec = dfcropsec.loc[:,cols]
-            
-            # Index on Branch x country x crop x crop category
-            dfcropsec.set_index(['Branch', 'country', 'crop', 'crop category'], inplace=True)
-            # Convert columns to numeric, sum to country values, and drop 'other' if present
-            dfcropsec = dfcropsec.apply(pd.to_numeric)
-            croptemp = dfcropsec.groupby(['country']).sum()
-            croptemp = croptemp.drop('other', errors='ignore')
-            
-            # Replace country label (no longer needed) with the current macro sector within the current weap sector
-            croptemp = croptemp.rename(index={countries[0]: macrosector})
-            # Add to the cropprod dataframe
-            cropprod = pd.concat([cropprod, croptemp])
+    # Add crop categories to dfcropprice
+    dfcropprice.loc[:,'crop category'] = dfcropprice.loc[:,'crop'].map(weap_joint_crop_map)
+    dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index
 
-        #----------------------------------------------------------------------------------------
-        # Ensure number of columns in the prices matrix is same as the crop production matrix
-        #----------------------------------------------------------------------------------------
-        # Find difference between the columns in dfcrop and dfcropprice
-        diff_cols = dfcropprice.columns.difference(dfcrop.columns)
-        # Limit to those containing years (giving True for isdigit) and drop from dfcropprice
-        diff_cols = [x for x in diff_cols if x.isdigit()]
-        dfcropprice = dfcropprice.drop(columns = diff_cols)
-        # Fill in any missing years from dfcrop, assuming constant below and above the min/max year
-        dfcropprice_cols = dfcropprice.columns
-        dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()]
-        diff_cols = dfcrop.columns.difference(dfcropprice_cols)
-        diff_cols = [x for x in diff_cols if x.isdigit()]
-        # If there are years beyond the available time series, set equal to the value for the earliest/latest year
-        minyr = min(dfcropprice_cols)
-        maxyr = max(dfcropprice_cols)
-        for x in diff_cols:
-            if x < minyr:
-                dfcropprice[x] = dfcropprice[minyr]
-            elif x > maxyr:
-                dfcropprice[x] = dfcropprice[maxyr]
-            else:
-                # Must include all years between the min & max, so any interpolation must be done offline
-                msg = _('Must have a complete time series for crop prices: Missing value in year {a}, which is between the minimum and maximum years {b} and {c}').format(a = x, b = minyr, c = maxyr)
-                logging.error(msg)
-                sys.exit(msg)
-        dfcropprice_cols = dfcropprice.columns # column names for dfcropprice
-        dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()] # keeps if column header has digits (years)
-        dfcropprice_cols.sort() # sort column names
-        dfcropprice = dfcropprice.loc[:,dfcropprice_cols] # sorted columns
+    # Only include branches related to this sector
+    dfcropsec = dfcrop[dfcrop['Branch'].str.contains(config_params['LEAP-Macro']['WEAP']['agsector'])].copy()
+    # Extract every row for the WEAP countries in this LEAP region
+    conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries))
+    # Add a column to list the countries (default to 'other' if not in the list)
+    dfcropsec.loc[:,'country'] = np.select(conditions, countries, 'other')
+    
+    # Identify crops from branch
+    dfcropsec.loc[:,'crop']= dfcropsec.loc[:,'Branch'].str.rsplit('\\', n=1).str.get(1)
+    # Map WEAP crops to crop categories
+    dfcropsec.loc[:,'crop category'] = dfcropsec.loc[:,'crop'].map(weap_joint_crop_map)
+    
+    # Move country, crop, and crop category columns to indices 1, 2, and 3 and reorder dataframe
+    cols = list(dfcropsec) # list of columns
+    cols.insert(1, cols.pop(cols.index('country')))
+    cols.insert(2, cols.pop(cols.index('crop')))
+    cols.insert(3, cols.pop(cols.index('crop category')))
+    dfcropsec = dfcropsec.loc[:,cols]
+    
+    # Index on Branch x country x crop x crop category
+    dfcropsec.set_index(['Branch', 'country', 'crop', 'crop category'], inplace=True)
+    # Convert columns to numeric, sum to country values, and drop 'other' if present
+    dfcropsec = dfcropsec.apply(pd.to_numeric)
+    
+    # TODO: This is never used
+    # # Create cropprod dataframe
+    # cropprod = pd.DataFrame() # By Macro sector
+    # croptemp = dfcropsec.groupby(['country']).sum()
+    # croptemp = croptemp.drop('other', errors='ignore')
+    # for joint_cropname, joint_cropentry in config_params['LEAP-Macro']['Regions'][region]['crop_categories'].items():
+        # # Replace country label with a placeholder
+        # croptemp = croptemp.rename(index={countries[0]: 'TEMP'})
+        # for macro_agsubsect in joint_cropentry['macro']['sector']:
+            # # Replace country label with the current macro sector within the current weap sector
+            # croptemp = croptemp.rename(index={'TEMP': macro_agsubsect})
+            # # Add to the cropprod dataframe
+            # cropprod = pd.concat([cropprod, croptemp])
+            # # Return to 'TEMP' so it can be reused
+            # croptemp = croptemp.rename(index={macro_agsubsect: 'TEMP'})
 
-        ## ensure number of rows in the prices matrix is same as the crop production matrix
-        dfcropsecgrp = dfcropsec.groupby(['country','crop','crop category']).sum()
-        dfcropsecgrp = dfcropsecgrp.reset_index()
-        dfcropsecgrp['key'] = dfcropsecgrp['country']+dfcropsecgrp['crop'] # helper column
-        dfcropprice = dfcropprice.reset_index()
-        dfcropprice['key'] = dfcropprice['country']+dfcropprice['crop'] # helper column
-        dfcropprice = dfcropprice[dfcropprice['key'].isin(dfcropsecgrp['key'])] # deletes rows that do not match
-        dfcropsecgrp = dfcropsecgrp.sort_values('key')
-        dfcropprice = dfcropprice.sort_values('key')
-        dfcropsecgrp = dfcropsecgrp.drop(columns = 'key') # drops helper column
-        dfcropprice = dfcropprice.drop(columns = 'key') # drops helper column
-        dfcropsecgrp.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index
-        dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index
+    #----------------------------------------------------------------------------------------
+    # Ensure number of columns & rows are the same in the prices and crop production matrices
+    #----------------------------------------------------------------------------------------
+    # ***** Columns
+    # Find difference between the columns in dfcrop and dfcropprice
+    diff_cols = dfcropprice.columns.difference(dfcrop.columns)
+    # Limit to those containing years (giving True for isdigit) and drop from dfcropprice
+    diff_cols = [x for x in diff_cols if x.isdigit()]
+    dfcropprice = dfcropprice.drop(columns = diff_cols)
+    # Fill in any missing years from dfcrop, assuming constant below and above the min/max year
+    dfcropprice_cols = dfcropprice.columns
+    dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()]
+    diff_cols = dfcrop.columns.difference(dfcropprice_cols)
+    diff_cols = [x for x in diff_cols if x.isdigit()]
+    # If there are years beyond the available time series, set equal to the value for the earliest/latest year
+    minyr = min(dfcropprice_cols)
+    maxyr = max(dfcropprice_cols)
+    for x in diff_cols:
+        if x < minyr:
+            dfcropprice[x] = dfcropprice[minyr]
+        elif x > maxyr:
+            dfcropprice[x] = dfcropprice[maxyr] * 1.01**(int(x) - int(maxyr)) # TODO: **DEBUGGING** Return to zero realndx_incr price growth
+        else:
+            # Must include all years between the min & max, so any interpolation must be done offline
+            msg = _('Must have a complete time series for crop prices: Missing value in year {a}, which is between the minimum and maximum years {b} and {c}').format(a = x, b = minyr, c = maxyr)
+            logging.error(msg)
+            sys.exit(msg)
+    # Resort columns labeling years to ensure they are in order
+    dfcropprice_cols = dfcropprice.columns
+    dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()]
+    dfcropprice_cols.sort()
+    dfcropprice = dfcropprice.loc[:,dfcropprice_cols]
 
-        #------------------------------------
-        # production value
-        #------------------------------------
-        for macrosector in sectorentry['value']: # subsector data is the same across a given sector
-            prodvaluetemp = dfcropsecgrp * dfcropprice
-            prodvaluetemp = prodvaluetemp.groupby(['country']).sum()
-            prodvaluetemp = prodvaluetemp.drop('other', errors='ignore') # Drop 'other' if it is present
-            prodvaluetemp = prodvaluetemp.rename(index={countries[0]: macrosector})
-            prodvalue = pd.concat([prodvalue, prodvaluetemp])
+    # ***** Rows
+    # Sector crop production: Create a "helper column" called "key"
+    dfcropsecgrp = dfcropsec.groupby(['country','crop','crop category']).sum()
+    dfcropsecgrp = dfcropsecgrp.reset_index()
+    dfcropsecgrp['key'] = dfcropsecgrp['country']+dfcropsecgrp['crop'] # helper column
+    # Crop price: Create a "helper column" and called "key"
+    dfcropprice = dfcropprice.reset_index()
+    dfcropprice['key'] = dfcropprice['country']+dfcropprice['crop'] # helper column
+    # Delete any rows that don't match
+    dfcropprice = dfcropprice[dfcropprice['key'].isin(dfcropsecgrp['key'])]
+    # Sort on the (identical) helper columns & then drop, since no longer needed
+    dfcropsecgrp = dfcropsecgrp.sort_values('key')
+    dfcropprice = dfcropprice.sort_values('key')
+    dfcropsecgrp = dfcropsecgrp.drop(columns = 'key')
+    dfcropprice = dfcropprice.drop(columns = 'key')
+    # Reset index columns (country x crop x crop category)
+    dfcropsecgrp.set_index(['country', 'crop', 'crop category'], inplace=True)
+    dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)
+    dfcropsecgrp.drop(index='other', level='country', errors='ignore', inplace=True) # Drop 'other' if it is present
 
-        #------------------------------------
-        # price inflation (change in crop price)
-        #------------------------------------
-        dfinflation = dfcropprice
-        dfinflation = dfinflation.drop(columns = min(dfcropprice_cols))
-        for x in dfcropprice_cols:
-            if x < max(dfcropprice_cols):
-                year1 = int(x)
-                year2 = year1+1
-            else:
-                break
-            dfinflation[str(year2)] = dfcropprice[str(year2)] - dfcropprice[str(year1)]
-            dfinflation[str(year2)] = dfinflation[str(year2)].div(dfcropprice[str(year1)])
+    print("---------------------- dfcropprice")
+    print(dfcropprice)
+    
+    print("---------------------- dfcropsecgrp")
+    print(dfcropsecgrp)
+    
+    # TODO: This isn't used
+    #------------------------------------
+    # calculate nominal production value as price x prod
+    #------------------------------------
+    # prodvalue = pd.DataFrame() # By joint crop category
+    # # Start with value by crop
+    # prodvalue_by_crop = dfcropsecgrp * dfcropprice
+    # # prodvalue_by_crop = prodvalue_by_crop.groupby(['country']).sum()
+    # prodvalue_by_crop = prodvalue_by_crop.drop('other', errors='ignore') # Drop 'other' if it is present
+    # prodvalue_by_crop = prodvalue_by_crop.droplevel('country')
+    # # Sum to get by joint category
+    # prodvalue = prodvalue_by_crop.groupby(['crop category']).sum()
 
-        #------------------------------------
-        # change in production
-        #------------------------------------
-        dfcrop_cols = [x for x in dfcrop.columns if x.isdigit()] # keeps if column header has digits (years)
-        dfcropchange = dfcropsecgrp
-        dfcropchange = dfcropchange.drop(columns = min(dfcrop_cols))
-        for x in dfcrop_cols:
-            if x < max(dfcrop_cols):
-                year1 = int(x)
-                year2 = year1+1
-            else:
-                break
-            dfcropchange[str(year2)] = dfcropsecgrp[str(year2)] - dfcropsecgrp[str(year1)]
-            dfcropchange[str(year2)] = dfcropchange[str(year2)].div(dfcropsecgrp[str(year1)])
 
-        #------------------------------------
-        # share of production
-        #------------------------------------
-        dfnum = dfcropsecgrp * dfcropprice
-        dfdom = dfnum.groupby(['country']).sum()
-        dfnum = dfnum.reset_index()
-        dfdom = dfnum.merge(dfdom, left_on=['country'], right_on=['country'], how='right')
-        dfdom = dfdom[dfdom.columns.drop(list(dfdom.filter(regex='x')))]
-        dfdom.columns = dfdom.columns.str.replace('_y', '')
-        dfnum.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index
-        dfdom.set_index(['country', 'crop', 'crop category'], inplace=True) # sets first two columns as index
-        dfshare = dfnum.div(dfdom)
-        dfshare = dfshare.drop(columns = min(dfcrop_cols))
+    # print("---------------------- prodvalue")
+    # print(prodvalue)
+    
+    #------------------------------------
+    # price inflation (change in crop price)
+    #------------------------------------
+    dfinflation = dfcropprice
+    dfinflation = dfinflation.drop(columns = min(dfcropprice.columns))
+    for x in dfcropprice.columns:
+        if x < max(dfcropprice.columns):
+            year1 = int(x)
+            year2 = year1+1
+        else:
+            break
+        dfinflation[str(year2)] = dfcropprice[str(year2)] - dfcropprice[str(year1)]
+        dfinflation[str(year2)] = dfinflation[str(year2)].div(dfcropprice[str(year1)])
 
-        #------------------------------------
-        # real output growth
-        #------------------------------------
-        realtemp = dfshare * (1 + dfinflation) * dfcropchange
-        try:
-            crop_categories = sectorentry['real_index']
-            if len(crop_categories) == 1:
-                realtemp = realtemp.groupby(['country']).sum()
-                for x in realtemp.index:
-                    if x == 'other':
-                        realtemp = realtemp.drop('other')
-                for macrocrop in crop_categories['All crops']:
-                    realtemp = realtemp.rename(index={countries[0]: macrocrop})
-                    realtemp2 = pd.concat([realtemp2, realtemp])
-                realtemp2 = realtemp2.drop_duplicates()
-            else:
-                realtemp = realtemp.groupby(['country', 'crop category']).sum()
-                for x, y in realtemp.index:
-                    if x == 'other':
-                        try:
-                            realtemp = realtemp.drop('other', axis=0)
-                        except:
-                            pass
-                realtemp = realtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['Regions'][region]['crop_categories']:
-                    for macrocrop in crop_categories[crop]:
-                        realtemp = realtemp.rename(index={crop: macrocrop})
-                        realtemp2 = pd.concat([realtemp2, realtemp.loc[macrocrop]])
-        except:
-            pass
+    print("---------------------- dfinflation")
+    print(dfinflation)
 
-        # convert real output growth to indices
-        for x in realtemp2:
-            if x == min(realtemp2):
-                real[x] = 1*(1+(realtemp2[x]))
-                y = real[x]
-            else:
-                real[x] = y*(1+(realtemp2[x]))
-                y = real[x]
+    #------------------------------------
+    # growth rate of production
+    #------------------------------------
+    dfcrop_cols = [x for x in dfcrop.columns if x.isdigit()] # keeps if column header has digits (years)
+    dfcropprod_gr = dfcropsecgrp
+    dfcropprod_gr = dfcropprod_gr.drop(columns = min(dfcrop_cols))
+    for x in dfcrop_cols:
+        if x < max(dfcrop_cols):
+            year1 = int(x)
+            year2 = year1+1
+        else:
+            break
+        dfcropprod_gr[str(year2)] = dfcropsecgrp[str(year2)] - dfcropsecgrp[str(year1)]
+        dfcropprod_gr[str(year2)] = dfcropprod_gr[str(year2)].div(dfcropsecgrp[str(year1)])
 
-        #------------------------------------
-        # price growth
-        #------------------------------------
-        pricegrowthtemp = dfinflation * dfshare
-        try:
-            macrocrop = config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][weap_sectorname]
-            macrocropno = len(macrocrop)
-            if macrocropno == 1:
-                pricegrowthtemp = pricegrowthtemp.groupby(['country']).sum()
-                for x in pricegrowthtemp.index:
-                    if x == 'other':
-                        pricegrowthtemp = pricegrowthtemp.drop('other')
-                for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][weap_sectorname]['All crops']:
-                    pricegrowthtemp = pricegrowthtemp.rename(index={countries[0]: macrocrop})
-                    # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
-                    pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
-                pricegrowthtemp2 = pricegrowthtemp2.drop_duplicates()
-            else:
-                pricegrowthtemp = pricegrowthtemp.groupby(['country', 'crop category']).sum()
-                for x, y in pricegrowthtemp.index:
-                    if x == 'other':
-                        try:
-                            pricegrowthtemp = pricegrowthtemp.drop('other', axis=0)
-                        except:
-                            pass
-                pricegrowthtemp = pricegrowthtemp.droplevel('country')
-                for crop in config_params['LEAP-Macro']['Regions'][region]['crop_categories']:
-                    for macrocrop in config_params['LEAP-Macro']['Regions'][region]['weap_price_index_mapping'][weap_sectorname][crop]:
-                        pricegrowthtemp = pricegrowthtemp.rename(index={crop: macrocrop})
-                        # Because pricegrowthtemp2 starts empty, have to explicitly transpose the rows being added
-                        pricegrowthtemp2 = pd.concat([pricegrowthtemp2, pricegrowthtemp.loc[macrocrop].to_frame().T])
-        except:
-            pass
+    print("---------------------- dfcropprod_gr")
+    print(dfcropprod_gr)
+    
+    #------------------------------------
+    # share of production by joint crop category
+    #------------------------------------
+    # Numerator
+    dfnum = dfcropsecgrp * dfcropprice
+    # Denominator
+    dfdom = dfnum.groupby(['country', 'crop category']).sum()
+    # Associate denominator with numerator by merging -- will assign "_x" and "_y" for the year columns in dfnum & dfdom
+    dfnum = dfnum.reset_index()
+    dfdom = dfnum.merge(dfdom, left_on=['country','crop category'], right_on=['country','crop category'], how='right')
+    # Get rid of dfnum columns & get rid of "_y" so same denom for all country/crop combinations
+    dfdom = dfdom[dfdom.columns.drop(list(dfdom.filter(regex='x')))]
+    dfdom.columns = dfdom.columns.str.replace('_y', '')
+    # Assign dfnum & dfdom identically structured indices
+    dfnum.set_index(['country', 'crop', 'crop category'], inplace=True)
+    dfdom.set_index(['country', 'crop', 'crop category'], inplace=True)
+    # Divide numerator by denominator
+    dfshare = dfnum.div(dfdom)
+    # Drop first year because it's not present in the growth rate data frames
+    dfshare = dfshare.drop(columns = min(dfcrop_cols))
+        
+    print("---------------------- dfshare")
+    print(dfshare)
 
-        # convert price growth to indices
-        for x in pricegrowthtemp2:
-            if x == min(pricegrowthtemp2):
-                pricegrowth[x] = 1*(1+(pricegrowthtemp2[x]))
-                y = pricegrowth[x]
-            else:
-                pricegrowth[x] = y*(1+(pricegrowthtemp2[x]))
-                y = pricegrowth[x]
+    # TODO: This is not needed
+    # #------------------------------------
+    # # realndx_incr output growth
+    # #------------------------------------
+    # # Note: This is exact for contribution to percent change in value; it doesn't drop second-order terms
+    # realndx_cum = pd.DataFrame()
+    # realndx_incr = pd.Series()
+    # nomprod_gr = dfshare * (1 + dfinflation) * dfcropprod_gr
+    # nomprod_gr = nomprod_gr.droplevel('country') # TODO: Can do this earlier -- never carry 'other'
+    # nomprod_gr = nomprod_gr.groupby(['crop category']).sum()
+    # # convert realndx_incr output growth to indices
+    # for x in nomprod_gr:
+        # if x == min(nomprod_gr):
+            # realndx_incr[x] = 1*(1+(nomprod_gr[x]))
+            # y = realndx_incr[x]
+        # else:
+            # realndx_incr[x] = y*(1+(nomprod_gr[x]))
+            # y = realndx_incr[x]
+    # realndx_cum = pd.concat([realndx_cum, nomprod_gr])
+    
+    # # crop_categories = joint_cropentry['macro']['sector']
+    # # if len(crop_categories) == 1:
+        # # nomprod_gr = nomprod_gr.groupby(['country']).sum()
+        # # for x in nomprod_gr.index:
+            # # if x == 'other':
+                # # nomprod_gr = nomprod_gr.drop('other')
+        # # for macrocrop in crop_categories['All crops']:
+            # # nomprod_gr = nomprod_gr.rename(index={countries[0]: macrocrop})
+            # # realndx_cum = pd.concat([realndx_cum, nomprod_gr])
+        # # realndx_cum = realndx_cum.drop_duplicates()
+    # # else:
+        # # nomprod_gr = nomprod_gr.groupby(['country', 'crop category']).sum()
+        # # for x, y in nomprod_gr.index:
+            # # if x == 'other':
+                # # try:
+                    # # nomprod_gr = nomprod_gr.drop('other', axis=0)
+                # # except:
+                    # # pass
+        # # nomprod_gr = nomprod_gr.droplevel('country')
+        # # for crop in config_params['LEAP-Macro']['Regions'][region]['crop_categories']:
+            # # for macrocrop in crop_categories[crop]:
+                # # nomprod_gr = nomprod_gr.rename(index={crop: macrocrop})
+                # # realndx_cum = pd.concat([realndx_cum, nomprod_gr.loc[macrocrop]])
+
+    # # # convert realndx_incr output growth to indices
+    # # for x in realndx_cum:
+        # # if x == min(realndx_cum):
+            # # realndx_incr[x] = 1*(1+(realndx_cum[x]))
+            # # y = realndx_incr[x]
+        # # else:
+            # # realndx_incr[x] = y*(1+(realndx_cum[x]))
+            # # y = realndx_incr[x]
+
+    # print("----------------------------- realndx_cum")
+    # print(realndx_cum)
+    
+    # for macro_agsubsect in joint_cropentry['macro']['sector']:
+    #------------------------------------
+    # price growth
+    #------------------------------------
+    pricegrowth_jointcrop = dfinflation * dfshare
+    pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country') # TODO: Can do this earlier -- never carry 'other'
+    pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['crop category']).sum()
+    
+    # Create dataframe with no entries
+    pricegrowth_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
+    pricegrowth_macro_agprod.reset_index(inplace = True)
+    pricegrowth_macro_agprod = pricegrowth_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    
+    # Merge with pricegrowth_jointcrop to assign values, then drop crop categories column
+    pricegrowth_macro_agprod = pricegrowth_macro_agprod.merge(pricegrowth_jointcrop,
+                                                              left_on=['crop category'],
+                                                              right_on=['crop category'],
+                                                              how='right')
+    pricegrowth_macro_agprod.drop('crop category', axis=1, inplace=True)
+    pricegrowth_macro_agprod.set_index('macro_agprod', inplace=True)
+    
+    # Convert from growth rate to index
+    pricendx_macro_agprod = (1.0 + pricegrowth_macro_agprod).cumprod(axis = 1)
+    # Insert index = 1 in first year position
+    pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
+    
+    # macro_agprod_list = joint_cropentry['macro']['product']
+    # pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['country', 'crop category']).sum()
+    # for x, y in pricegrowth_jointcrop.index:
+        # if x == 'other':
+            # try:
+                # pricegrowth_jointcrop = pricegrowth_jointcrop.drop('other', axis=0)
+            # except:
+                # pass
+    # pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country')
+    # for macro_agprod in macro_agprod_list:
+        # pricegrowth_jointcrop = pricegrowth_jointcrop.rename(index={crop: macro_agprod})
+        # # Because pricegrowthtemp_cum starts empty, have to explicitly transpose the rows being added
+        # pricegrowthtemp_cum = pd.concat([pricegrowthtemp_cum, pricegrowth_jointcrop.loc[macro_agprod].to_frame().T])
+        # pricegrowth_jointcrop = pricegrowth_jointcrop.rename(index={macro_agprod: crop})
+
+    print("----------------------------- pricegrowth_jointcrop")
+    print(pricegrowth_jointcrop)
+    print("----------------------------- pricegrowth_macro_agprod")
+    print(pricendx_macro_agprod)
+    
+    # Create a value index by joint product
+    valndx_joint = dfcropsecgrp.groupby('crop category').sum()
+    valndx_joint = valndx_joint.div(valndx_joint[min(valndx_joint)], axis=0)
+    
+    # Assign to macro ag products
+    # Create dataframe with no entries
+    valndx_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
+    valndx_macro_agprod.reset_index(inplace = True)
+    valndx_macro_agprod = valndx_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    
+    # Merge with valndx_joint to assign values, then drop crop categories column
+    valndx_macro_agprod = valndx_macro_agprod.merge(valndx_joint,
+                                                    left_on=['crop category'],
+                                                    right_on=['crop category'],
+                                                    how='right')
+    valndx_macro_agprod.drop('crop category', axis=1, inplace=True)
+    valndx_macro_agprod.set_index('macro_agprod', inplace=True)
+    
+    # Calculate real index by dividing value index by price index
+    realndx_macro_agprod = valndx_macro_agprod/pricendx_macro_agprod.values
+    
+    print("----------------------------- pricendx_macro_agprod")
+    print(pricendx_macro_agprod)
+    print("----------------------------- valndx_joint")
+    print(valndx_joint)
+    print("----------------------------- valndx_macro_agprod")
+    print(valndx_macro_agprod)
+    print("----------------------------- realndx_macro_agprod")
+    print(realndx_macro_agprod)
 
     #------------------------------------
     # Write out Macro input files
     #------------------------------------
     # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
+    firstyear = int(min(realndx_macro_agprod))
     fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
-    real = real.transpose()
-    real.index = real.index.astype('int64') # After transpose, the index is years
+    realndx_macro_agprod = realndx_macro_agprod.transpose()
+    realndx_macro_agprod.index = realndx_macro_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/real.loc[2021]
-    for y in range(2020,2009,-1):
-        real.loc[y] = val
+    factor = 1/realndx_macro_agprod.loc[firstyear+1]
+    for y in range(firstyear,2009,-1):
+        realndx_macro_agprod.loc[y] = val
         val *= factor
-    real.sort_index(inplace=True)
-    real.to_csv(fname, index=True, index_label = "year") # final output to csv
+    realndx_macro_agprod.sort_index(inplace=True)
+    realndx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
-    pricegrowth = pricegrowth.transpose()
-    pricegrowth.index = pricegrowth.index.astype('int64') # After transpose, the index is years
+    pricendx_macro_agprod = pricendx_macro_agprod.transpose()
+    pricendx_macro_agprod.index = pricendx_macro_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/pricegrowth.loc[2021]
-    for y in range(2020,2009,-1):
-        pricegrowth.loc[y] = val
+    factor = 1/pricendx_macro_agprod.loc[firstyear+1]
+    for y in range(firstyear,2009,-1):
+        pricendx_macro_agprod.loc[y] = val
         val *= factor
-    pricegrowth.sort_index(inplace=True)
-    pricegrowth.to_csv(fname, index=True, index_label = "year") # final output to csv
+    pricendx_macro_agprod.sort_index(inplace=True)
+    pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
+
+# TODO: **DEBUGGING**
+weap = win32.Dispatch('WEAP.WEAPApplication')
+with open(r'config.yml') as file:
+    config_params = yaml.full_load(file)
+
+macromodelspath = os.path.normpath(os.path.join(weap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
+
+fdirmain = macromodelspath
+fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
+
+leap_scenario = 'S1 Baseline Historical'
+weap_scenario = 'S1 Historical'
+CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
+
+# export weap data
+dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
+
+logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
+for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
+    # set file directories for WEAP to LEAP-Macro
+    fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
+        
+    # process WEAP data for LEAP-Macro
+    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)

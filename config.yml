@@ -367,6 +367,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   LEAP:
     target_variables : [GDP, Industrial VA, Commercial VA, Agricultural VA]
   WEAP:
+    agsector: Agriculture_
     price_data: crop_prices.csv
     cov_to_util_exponent: 0.2
     all_crops: &WEAP_CROPS
@@ -447,40 +448,62 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
           Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
           Domestic_: [Acons,Atrad,Atrans,Aots]
-        weap_crop_production_mapping:
-          Agriculture_:
-            value: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
-            real_index:
-                All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
-        weap_price_index_mapping: 
-          Agriculture_:
-            Cotton: [Ccotton]
-            Grains: [Cgrain]
-            Vegetables: [Ctomat,Cvegat]
-            Potatoes: [Cpotat]
-            Fruits: [Cfruit]
-            Grapes: [Cgrape]
-            Other crops: [CothA]
+        # weap_crop_production_mapping:
+          # Agriculture_:
+            # value: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
+            # real_index:
+                # All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
+        # weap_price_index_mapping: 
+          # Agriculture_:
+            # Cotton: [Ccotton]
+            # Grains: [Cgrain]
+            # Vegetables: [Ctomat,Cvegat]
+            # Potatoes: [Cpotat]
+            # Fruits: [Cfruit]
+            # Grapes: [Cgrape]
+            # Other crops: [CothA]
         crop_categories:
          Cotton:
-              - Cotton
+            weap: [Cotton]
+            macro: {sector: [Acotton], product: [Ccotton]}
          Grains:
-              - Barley
-              - Corn
-              - Rice
-              - Wheat
-              - Other grains
+            weap: [Barley,Corn,Rice,Wheat,Other grains]
+            macro: {sector: [Agrain], product: [Cgrain]}
          Vegetables:
-              - Vegetables
+            weap: [Vegetables]
+            macro: {sector: [Atomat,Avegat], product: [Ctomat,Cvegat]}
          Potatoes:
-              - Potatoes
+            weap: [Potatoes]
+            macro: {sector: [Apotat], product: [Cpotat]}
          Fruits:
-              - Apples
-              - Other orchards
+            weap: [Apples,Other orchards]
+            macro: {sector: [Afruit], product: [Cfruit]}
          Grapes:
-              - Grapes
+            weap: [Grapes]
+            macro: {sector: [Agrape], product: [Cgrape]}
          Other crops:
-              - Oil seeds and pulses
-              - Sugar beet
-              - Watermelons and squash
-              - Other crops
+            weap: [Oil seeds and pulses,Sugar beet,Watermelons and squash,Other crops]
+            macro: {sector: [AothA,Aanim], product: [CothA]}
+        # crop_categories:
+         # Cotton:
+              # - Cotton
+         # Grains:
+              # - Barley
+              # - Corn
+              # - Rice
+              # - Wheat
+              # - Other grains
+         # Vegetables:
+              # - Vegetables
+         # Potatoes:
+              # - Potatoes
+         # Fruits:
+              # - Apples
+              # - Other orchards
+         # Grapes:
+              # - Grapes
+         # Other crops:
+              # - Oil seeds and pulses
+              # - Sugar beet
+              # - Watermelons and squash
+              # - Other crops
