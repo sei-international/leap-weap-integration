@@ -2,7 +2,7 @@ import sys
 from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
-import win32gui
+import win32gui # TODO: Don't need this, right?
 import yaml
 import time
 from winreg import *
@@ -851,7 +851,7 @@ def main_integration(tolerance, max_iterations):
                     fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
                         
                     # process WEAP data for LEAP-Macro
-                    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
+                    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov.copy(), dfcovdmd.copy(), dfcrop.copy(), dfcropprice.copy())
 
             # Run LEAP-Macro
             for s in leap_scenarios:
