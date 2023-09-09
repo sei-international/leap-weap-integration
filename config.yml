@@ -3,6 +3,10 @@
 # Defines variable parameters required to run integration
 # Needs to be kept up-to-date by user
 ###############################################################
+Integrated model:
+    Tolerance: 0.1
+    Maximum iterations: 10
+
 WEAP:
   Area: WAVE-SyrDarya 2022_09_19_MABIA
   Branches:

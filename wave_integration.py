@@ -201,6 +201,9 @@ def main_integration(tolerance, max_iterations):
 
     with open(r'scenarios.yml') as file:
         scenarios = yaml.full_load(file)
+        
+    tolerance = config_params['Integrated model']['Tolerance']
+    max_iterations = config_params['Integrated model']['Maximum iterations']
 
     # Ensure both LEAP and WEAP are open
     leap = win32.Dispatch('LEAP.LEAPApplication') # will open Freedonia
