@@ -320,12 +320,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)
     dfcropsecgrp.drop(index='other', level='country', errors='ignore', inplace=True) # Drop 'other' if it is present
 
-    print("---------------------- dfcropprice")
-    print(dfcropprice)
-    
-    print("---------------------- dfcropsecgrp")
-    print(dfcropsecgrp)
-        
     #------------------------------------
     # price inflation (change in crop price)
     #------------------------------------
@@ -339,9 +333,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             break
         dfinflation[str(year2)] = dfcropprice[str(year2)] - dfcropprice[str(year1)]
         dfinflation[str(year2)] = dfinflation[str(year2)].div(dfcropprice[str(year1)])
-
-    print("---------------------- dfinflation")
-    print(dfinflation)
 
     #------------------------------------
     # growth rate of production
@@ -357,9 +348,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             break
         dfcropprod_gr[str(year2)] = dfcropsecgrp[str(year2)] - dfcropsecgrp[str(year1)]
         dfcropprod_gr[str(year2)] = dfcropprod_gr[str(year2)].div(dfcropsecgrp[str(year1)])
-
-    print("---------------------- dfcropprod_gr")
-    print(dfcropprod_gr)
     
     #------------------------------------
     # share of production by joint crop category
@@ -381,9 +369,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     dfshare = dfnum.div(dfdom)
     # Drop first year because it's not present in the growth rate data frames
     dfshare = dfshare.drop(columns = min(dfcrop_cols))
-        
-    print("---------------------- dfshare")
-    print(dfshare)
 
     #------------------------------------
     # price growth
@@ -410,11 +395,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Insert index = 1 in first year position
     pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
     
-    print("----------------------------- pricegrowth_jointcrop")
-    print(pricegrowth_jointcrop)
-    print("----------------------------- pricegrowth_macro_agprod")
-    print(pricendx_macro_agprod)
-    
     # Create a value index by joint product
     valndx_joint = dfcropsecgrp.groupby('crop category').sum()
     valndx_joint = valndx_joint.div(valndx_joint[min(valndx_joint)], axis=0)
@@ -436,15 +416,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Calculate real index by dividing value index by price index
     realndx_macro_agprod = valndx_macro_agprod/pricendx_macro_agprod.values
     
-    print("----------------------------- pricendx_macro_agprod")
-    print(pricendx_macro_agprod)
-    print("----------------------------- valndx_joint")
-    print(valndx_joint)
-    print("----------------------------- valndx_macro_agprod")
-    print(valndx_macro_agprod)
-    print("----------------------------- realndx_macro_agprod")
-    print(realndx_macro_agprod)
-
     #------------------------------------
     # Write out Macro input files
     #------------------------------------
