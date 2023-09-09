@@ -9,32 +9,6 @@ import logging
 import numpy as np
 import pandas as pd
 import os
-# import sys # TODO: **DEBUGGING** Only for debugging
-# import win32com.client as win32 # TODO: **DEBUGGING** Only for debugging
-# import yaml # TODO: **DEBUGGING** Only for debugging
-# import gettext, locale, ctypes
-# # Allow a user to "short-circuit" the system language with an environment variable
-# if os.environ.get('LANG') is not None:
-    # language = os.environ['LANG']
-# elif os.environ.get('LANGUAGE') is not None:
-    # language = os.environ['LANGUAGE']
-# else:
-    # language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
-# if gettext.find('wave_integration', localedir='locale', languages=[language]) is not None:
-    # transl = gettext.translation('wave_integration', localedir='locale', languages=[language])
-    # transl.install()
-# else:
-    # gettext.install('wave_integration')
-
-# Load and calculate correct scenario
-def load_weap_scen(WEAP, weap_scenario):
-    WEAP.View = "Results"
-    WEAP.ActiveScenario = weap_scenario
-
-# Export WEAP files
-def export_csv(WEAP, fname, favname):
-    WEAP.LoadFavorite(favname)
-    WEAP.ExportResults(fname)
 
 # WEAP favorites to export
 def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_params, rowskip):
@@ -222,9 +196,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     #------------------------------------
     # Crop production
     #------------------------------------
-    pricegrowthtemp2 = pd.DataFrame()
-    pricegrowth = pd.DataFrame()
-
     # Invert dict of crop categories to create the map
     weap_joint_crop_map = {}
     macro_joint_agsec_map = {}
@@ -286,7 +257,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
         if x < minyr:
             dfcropprice[x] = dfcropprice[minyr]
         elif x > maxyr:
-            dfcropprice[x] = dfcropprice[maxyr] * 1.01**(int(x) - int(maxyr)) # TODO: **DEBUGGING** Return to zero realndx_incr price growth
+            dfcropprice[x] = dfcropprice[maxyr]
         else:
             # Must include all years between the min & max, so any interpolation must be done offline
             msg = _('Must have a complete time series for crop prices: Missing value in year {a}, which is between the minimum and maximum years {b} and {c}').format(a = x, b = minyr, c = maxyr)
@@ -319,34 +290,12 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     dfcropsecgrp.drop(index='other', level='country', errors='ignore', inplace=True) # Drop 'other' if it is present
 
     #------------------------------------
-    # price inflation (change in crop price)
+    # price inflation (growth rate of crop price)
     #------------------------------------
-    dfinflation = dfcropprice
-    dfinflation = dfinflation.drop(columns = min(dfcropprice.columns))
-    for x in dfcropprice.columns:
-        if x < max(dfcropprice.columns):
-            year1 = int(x)
-            year2 = year1+1
-        else:
-            break
-        dfinflation[str(year2)] = dfcropprice[str(year2)] - dfcropprice[str(year1)]
-        dfinflation[str(year2)] = dfinflation[str(year2)].div(dfcropprice[str(year1)])
-
-    #------------------------------------
-    # growth rate of production
-    #------------------------------------
-    dfcrop_cols = [x for x in dfcrop.columns if x.isdigit()] # keeps if column header has digits (years)
-    dfcropprod_gr = dfcropsecgrp
-    dfcropprod_gr = dfcropprod_gr.drop(columns = min(dfcrop_cols))
-    for x in dfcrop_cols:
-        if x < max(dfcrop_cols):
-            year1 = int(x)
-            year2 = year1+1
-        else:
-            break
-        dfcropprod_gr[str(year2)] = dfcropsecgrp[str(year2)] - dfcropsecgrp[str(year1)]
-        dfcropprod_gr[str(year2)] = dfcropprod_gr[str(year2)].div(dfcropsecgrp[str(year1)])
-    
+    dfinflation = dfcropprice.drop(columns = min(dfcropprice.columns))
+    dfinflation_lag = dfcropprice.drop(columns = max(dfcropprice.columns))
+    dfinflation = dfinflation/dfinflation_lag.values - 1.0
+ 
     #------------------------------------
     # share of production by joint crop category
     #------------------------------------
@@ -366,13 +315,14 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Divide numerator by denominator
     dfshare = dfnum.div(dfdom)
     # Drop first year because it's not present in the growth rate data frames
+    dfcrop_cols = [x for x in dfcrop.columns if x.isdigit()] # keeps if column header has digits (years)
     dfshare = dfshare.drop(columns = min(dfcrop_cols))
 
     #------------------------------------
     # price growth indices (by sector & by product)
     #------------------------------------
     pricegrowth_jointcrop = dfinflation * dfshare
-    pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country') # TODO: Can do this earlier -- never carry 'other'
+    pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country')
     pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['crop category']).sum()
     
     #--- By Macro ag sector
@@ -385,7 +335,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     pricegrowth_macro_agsec = pricegrowth_macro_agsec.merge(pricegrowth_jointcrop,
                                                               left_on=['crop category'],
                                                               right_on=['crop category'],
-                                                              how='right')
+                                                              how='left')
     pricegrowth_macro_agsec.drop('crop category', axis=1, inplace=True)
     pricegrowth_macro_agsec.set_index('macro_agsec', inplace=True)
     
@@ -404,7 +354,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     pricegrowth_macro_agprod = pricegrowth_macro_agprod.merge(pricegrowth_jointcrop,
                                                               left_on=['crop category'],
                                                               right_on=['crop category'],
-                                                              how='right')
+                                                              how='left')
     pricegrowth_macro_agprod.drop('crop category', axis=1, inplace=True)
     pricegrowth_macro_agprod.set_index('macro_agprod', inplace=True)
     
@@ -430,7 +380,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     valndx_macro_agsec = valndx_macro_agsec.merge(valndx_joint,
                                                     left_on=['crop category'],
                                                     right_on=['crop category'],
-                                                    how='right')
+                                                    how='left')
     valndx_macro_agsec.drop('crop category', axis=1, inplace=True)
     valndx_macro_agsec.set_index('macro_agsec', inplace=True)
     
@@ -465,28 +415,3 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
-
-# # TODO: **DEBUGGING**
-# weap = win32.Dispatch('WEAP.WEAPApplication')
-# with open(r'config.yml') as file:
-    # config_params = yaml.full_load(file)
-
-# macromodelspath = os.path.normpath(os.path.join(weap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
-
-# fdirmain = macromodelspath
-# fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
-
-# leap_scenario = 'S1 Baseline Historical'
-# weap_scenario = 'S1 Historical'
-# CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
-
-# # export weap data
-# dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
-
-# logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
-# for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
-    # # set file directories for WEAP to LEAP-Macro
-    # fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
-        
-    # # process WEAP data for LEAP-Macro
-    # weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)

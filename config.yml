@@ -387,59 +387,48 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
       - Watermelons and squash
       - Wheat
   Regions:
-      # Kazakhstan:
-        # directory_name: KAZ_Macro
-        # script: runleapmacro.jl
-        # weap_region: [KAZ]
-        # weap_coverage_mapping: 
-          # Agriculture_: [S_agfor]
-          # Industrial_: [S_food, S_paperpulp, S_otherind]
-          # Domestic_: [S_hotelrestaurant, S_otherserv]
-        # weap_crop_production_mapping:
-          # Agriculture_:
-            # value: [S_agfor]
-            # real_index:
-                # All crops: [S_agfor]
-        # weap_price_index_mapping: 
-          # Agriculture_:
-            # Seasonal crops: [P_agforseasonal]
-            # Perennial crops: [P_agforperennial]
-        # crop_categories:
-          # Perennial crops:
-              # - Apples
-              # - Grapes
-              # - Other orchards
-          # Seasonal crops:
-              # - Barley
-              # - Corn
-              # - Cotton
-              # - Oil seeds and pulses
-              # - Other crops
-              # - Other grains
-              # - Potatoes
-              # - Rice
-              # - Sugar beet
-              # - Vegetables
-              # - Watermelons and squash
-              # - Wheat
-      # Kyrgyzstan:
-        # directory_name: KGZ_Macro
-        # script: runleapmacro.jl
-        # weap_region: [KGZ]
-        # weap_coverage_mapping: 
-          # Agriculture_: [S_agfor]
-          # Industrial_: [S_food, S_woodpaper, S_otherind]
-          # Domestic_: [S_hotelrestaurant, S_otherserv]
-        # weap_crop_production_mapping:
-          # Agriculture_:
-            # value: [S_agfor]
-            # real_index:
-                # All crops: [S_agfor]
-        # weap_price_index_mapping: 
-          # Agriculture_: 
-            # All crops: [P_agfor]
-        # crop_categories:
-          # All crops: *WEAP_CROPS
+      Kazakhstan:
+        directory_name: KAZ_Macro
+        script: runleapmacro.jl
+        weap_region: [KAZ]
+        weap_coverage_mapping: 
+          Agriculture_: [S_agfor]
+          Industrial_: [S_food, S_paperpulp, S_otherind]
+          Domestic_: [S_hotelrestaurant, S_otherserv]
+        crop_categories:
+          Perennial crops:
+            weap:
+              - Apples
+              - Grapes
+              - Other orchards
+            macro: {sector: [], product: [P_agforperennial]}
+          Seasonal crops:
+            weap:
+              - Barley
+              - Corn
+              - Cotton
+              - Oil seeds and pulses
+              - Other crops
+              - Other grains
+              - Potatoes
+              - Rice
+              - Sugar beet
+              - Vegetables
+              - Watermelons and squash
+              - Wheat
+            macro: {sector: [S_agfor], product: [P_agforseasonal]}
+      Kyrgyzstan:
+        directory_name: KGZ_Macro
+        script: runleapmacro.jl
+        weap_region: [KGZ]
+        weap_coverage_mapping: 
+          Agriculture_: [S_agfor]
+          Industrial_: [S_food, S_woodpaper, S_otherind]
+          Domestic_: [S_hotelrestaurant, S_otherserv]
+        crop_categories:
+          All crops:
+            weap: *WEAP_CROPS
+            macro: {sector: [S_agfor], product: [P_agfor]}
       Uzbekistan:
         directory_name: UZB_Macro
         script: runleapmacro.jl
@@ -448,20 +437,6 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
           Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
           Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
           Domestic_: [Acons,Atrad,Atrans,Aots]
-        # weap_crop_production_mapping:
-          # Agriculture_:
-            # value: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
-            # real_index:
-                # All crops: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA,Aanim]
-        # weap_price_index_mapping: 
-          # Agriculture_:
-            # Cotton: [Ccotton]
-            # Grains: [Cgrain]
-            # Vegetables: [Ctomat,Cvegat]
-            # Potatoes: [Cpotat]
-            # Fruits: [Cfruit]
-            # Grapes: [Cgrape]
-            # Other crops: [CothA]
         crop_categories:
          Cotton:
             weap: [Cotton]
@@ -484,26 +459,3 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
          Other crops:
             weap: [Oil seeds and pulses,Sugar beet,Watermelons and squash,Other crops]
             macro: {sector: [AothA,Aanim], product: [CothA]}
-        # crop_categories:
-         # Cotton:
-              # - Cotton
-         # Grains:
-              # - Barley
-              # - Corn
-              # - Rice
-              # - Wheat
-              # - Other grains
-         # Vegetables:
-              # - Vegetables
-         # Potatoes:
-              # - Potatoes
-         # Fruits:
-              # - Apples
-              # - Other orchards
-         # Grapes:
-              # - Grapes
-         # Other crops:
-              # - Oil seeds and pulses
-              # - Sugar beet
-              # - Watermelons and squash
-              # - Other crops
