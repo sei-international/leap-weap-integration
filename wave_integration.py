@@ -875,47 +875,20 @@ def main_integration(tolerance, max_iterations):
                         logging.error(msg)
                         sys.exit(msg)
     
-    #------------------------------------------------------------------------------------------------------------------------
-    #
-    # Completed iterations: wrap up
-    #
-    #------------------------------------------------------------------------------------------------------------------------
-    
-    # TODO: Provide monthly values and bring them into the iteration to allow WEAP to release water for other purposes if not needed for hydropower
-    # TODO: Replace older style of translation with gettext strings
-    # if lang == "RUS":
-        # msg ="Заключительный шаг: Перемещение выработки гидроэлектроэнергии в WEAP и повторный запуск WEAP..."
-    # else :
-        # msg = "Final Step: Moving hydropower generation to WEAP and rerunning WEAP..."
-    # leap.ShowProgressBar(procedure_title, "".join(msg))
-    # leap.SetProgressBar(95)
-    
-    # logging.info("Final Step: Moving hydropower generation to WEAP and rerunning WEAP...")
-    # weap_hydro_branches = config_params['WEAP']['Hydropower_plants'].keys()
-    # for i in range(0, len(weap_scenarios)):
-        # weap.ActiveScenario = weap_scenarios[i]
-        # for wb in weap_hydro_branches:
-            # weap_path = config_params['WEAP']['Hydropower_plants'][wb]['weap_path']
-            # logging.info(_('WEAP hydropower reservoir: {r}').format(r = wb))
-            # if 'Run of River' in weap_path: 
-                # logging.info(_('This is a Run of River hydropower plant, ignoring....'))
-            # else:
-                # new_data = 'Interp('
-                # for y in range(weap.BaseYear, weap.EndYear):
-                    # weap_branch_energydemand = 0.0
-                    # leap_hpps = config_params['WEAP']['Hydropower_plants'][wb]['leap_hpps']
-                    # for lb in leap_hpps:
-                        # leap_path = config_params['LEAP']['Hydropower_plants'][lb]['leap_path']
-                        # leap_region = config_params['LEAP']['Hydropower_plants'][lb]['leap_region']
-                        # weap_branch_energydemand += leap.Branches(leap_path).Variables('Energy Generation').ValueRS(leap.regions(leap_region).id, leap_scenarios[i], y, 'GWh') 
-                    # new_data ="".join([new_data, str(y), LIST_SEPARATOR, str(weap_branch_energydemand), LIST_SEPARATOR])
-                # new_data ="".join([new_data[0:-1], ")"]) # remove last list separator and close bracket
-                # weap.Branches(config_params['WEAP']['Hydropower_plants'][wb]['weap_path']).Variables('Energy Demand').Expression = new_data # Cannot specify unit, but is GWh in WEAP
-
-    # logging.info(_('Calculating WEAP one last time...'))
-    # weap.Calculate(0, 0, False) # Only calculate if needed
-    # while weap.IsCalculating :
-        # leap.Sleep(1000)
+        #------------------------------------------------------------------------------------------------------------------------
+        #
+        # Pass LEAP hydropower generation to WEAP
+        #
+        #------------------------------------------------------------------------------------------------------------------------
+        logging.info(_('Moving hydropower generation to WEAP and rerunning WEAP...'))
+        for sl in leap_scenarios:
+            sw = scenarios_map[sl]
+            export_leap_hpp_to_weap(leap, weap, sl, sw, config_params)
+        
+        logging.info(_('Calculating WEAP...'))
+        weap.Calculate(0, 0, False) # Only calculate if needed
+        while weap.IsCalculating :
+            leap.Sleep(1000)
 
     msg = _('Completed WEAP-LEAP integration procedure')
     leap.ShowProgressBar(procedure_title, msg)
@@ -931,5 +904,4 @@ def main_integration(tolerance, max_iterations):
     total_elapsed_time = tet - tst
     logging.info(_('Total elapsed time: {t}').format(t = hms_from_sec(total_elapsed_time)))
 
-# TODO: Provide command-line interface
-main_integration(tolerance=0.1, max_iterations=10)
+main_integration()
