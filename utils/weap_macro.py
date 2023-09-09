@@ -267,22 +267,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Convert columns to numeric, sum to country values, and drop 'other' if present
     dfcropsec = dfcropsec.apply(pd.to_numeric)
     
-    # TODO: This is never used
-    # # Create cropprod dataframe
-    # cropprod = pd.DataFrame() # By Macro sector
-    # croptemp = dfcropsec.groupby(['country']).sum()
-    # croptemp = croptemp.drop('other', errors='ignore')
-    # for joint_cropname, joint_cropentry in config_params['LEAP-Macro']['Regions'][region]['crop_categories'].items():
-        # # Replace country label with a placeholder
-        # croptemp = croptemp.rename(index={countries[0]: 'TEMP'})
-        # for macro_agsubsect in joint_cropentry['macro']['sector']:
-            # # Replace country label with the current macro sector within the current weap sector
-            # croptemp = croptemp.rename(index={'TEMP': macro_agsubsect})
-            # # Add to the cropprod dataframe
-            # cropprod = pd.concat([cropprod, croptemp])
-            # # Return to 'TEMP' so it can be reused
-            # croptemp = croptemp.rename(index={macro_agsubsect: 'TEMP'})
-
     #----------------------------------------------------------------------------------------
     # Ensure number of columns & rows are the same in the prices and crop production matrices
     #----------------------------------------------------------------------------------------
@@ -341,24 +325,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     
     print("---------------------- dfcropsecgrp")
     print(dfcropsecgrp)
-    
-    # TODO: This isn't used
-    #------------------------------------
-    # calculate nominal production value as price x prod
-    #------------------------------------
-    # prodvalue = pd.DataFrame() # By joint crop category
-    # # Start with value by crop
-    # prodvalue_by_crop = dfcropsecgrp * dfcropprice
-    # # prodvalue_by_crop = prodvalue_by_crop.groupby(['country']).sum()
-    # prodvalue_by_crop = prodvalue_by_crop.drop('other', errors='ignore') # Drop 'other' if it is present
-    # prodvalue_by_crop = prodvalue_by_crop.droplevel('country')
-    # # Sum to get by joint category
-    # prodvalue = prodvalue_by_crop.groupby(['crop category']).sum()
-
-
-    # print("---------------------- prodvalue")
-    # print(prodvalue)
-    
+        
     #------------------------------------
     # price inflation (change in crop price)
     #------------------------------------
@@ -418,63 +385,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     print("---------------------- dfshare")
     print(dfshare)
 
-    # TODO: This is not needed
-    # #------------------------------------
-    # # realndx_incr output growth
-    # #------------------------------------
-    # # Note: This is exact for contribution to percent change in value; it doesn't drop second-order terms
-    # realndx_cum = pd.DataFrame()
-    # realndx_incr = pd.Series()
-    # nomprod_gr = dfshare * (1 + dfinflation) * dfcropprod_gr
-    # nomprod_gr = nomprod_gr.droplevel('country') # TODO: Can do this earlier -- never carry 'other'
-    # nomprod_gr = nomprod_gr.groupby(['crop category']).sum()
-    # # convert realndx_incr output growth to indices
-    # for x in nomprod_gr:
-        # if x == min(nomprod_gr):
-            # realndx_incr[x] = 1*(1+(nomprod_gr[x]))
-            # y = realndx_incr[x]
-        # else:
-            # realndx_incr[x] = y*(1+(nomprod_gr[x]))
-            # y = realndx_incr[x]
-    # realndx_cum = pd.concat([realndx_cum, nomprod_gr])
-    
-    # # crop_categories = joint_cropentry['macro']['sector']
-    # # if len(crop_categories) == 1:
-        # # nomprod_gr = nomprod_gr.groupby(['country']).sum()
-        # # for x in nomprod_gr.index:
-            # # if x == 'other':
-                # # nomprod_gr = nomprod_gr.drop('other')
-        # # for macrocrop in crop_categories['All crops']:
-            # # nomprod_gr = nomprod_gr.rename(index={countries[0]: macrocrop})
-            # # realndx_cum = pd.concat([realndx_cum, nomprod_gr])
-        # # realndx_cum = realndx_cum.drop_duplicates()
-    # # else:
-        # # nomprod_gr = nomprod_gr.groupby(['country', 'crop category']).sum()
-        # # for x, y in nomprod_gr.index:
-            # # if x == 'other':
-                # # try:
-                    # # nomprod_gr = nomprod_gr.drop('other', axis=0)
-                # # except:
-                    # # pass
-        # # nomprod_gr = nomprod_gr.droplevel('country')
-        # # for crop in config_params['LEAP-Macro']['Regions'][region]['crop_categories']:
-            # # for macrocrop in crop_categories[crop]:
-                # # nomprod_gr = nomprod_gr.rename(index={crop: macrocrop})
-                # # realndx_cum = pd.concat([realndx_cum, nomprod_gr.loc[macrocrop]])
-
-    # # # convert realndx_incr output growth to indices
-    # # for x in realndx_cum:
-        # # if x == min(realndx_cum):
-            # # realndx_incr[x] = 1*(1+(realndx_cum[x]))
-            # # y = realndx_incr[x]
-        # # else:
-            # # realndx_incr[x] = y*(1+(realndx_cum[x]))
-            # # y = realndx_incr[x]
-
-    # print("----------------------------- realndx_cum")
-    # print(realndx_cum)
-    
-    # for macro_agsubsect in joint_cropentry['macro']['sector']:
     #------------------------------------
     # price growth
     #------------------------------------
@@ -500,21 +410,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Insert index = 1 in first year position
     pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
     
-    # macro_agprod_list = joint_cropentry['macro']['product']
-    # pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['country', 'crop category']).sum()
-    # for x, y in pricegrowth_jointcrop.index:
-        # if x == 'other':
-            # try:
-                # pricegrowth_jointcrop = pricegrowth_jointcrop.drop('other', axis=0)
-            # except:
-                # pass
-    # pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country')
-    # for macro_agprod in macro_agprod_list:
-        # pricegrowth_jointcrop = pricegrowth_jointcrop.rename(index={crop: macro_agprod})
-        # # Because pricegrowthtemp_cum starts empty, have to explicitly transpose the rows being added
-        # pricegrowthtemp_cum = pd.concat([pricegrowthtemp_cum, pricegrowth_jointcrop.loc[macro_agprod].to_frame().T])
-        # pricegrowth_jointcrop = pricegrowth_jointcrop.rename(index={macro_agprod: crop})
-
     print("----------------------------- pricegrowth_jointcrop")
     print(pricegrowth_jointcrop)
     print("----------------------------- pricegrowth_macro_agprod")
