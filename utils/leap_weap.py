@@ -15,20 +15,15 @@ def leapfloat(x):
     else:
         return float(x)
 
-# Load and calculate correct scenario in LEAP
-def load_leap_scen(leap, leap_scenario):
+# Load favorite for selected scenario and export -- takes a long time to render, so disable controls
+def export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname, units):
+    leap.DisableControls
     leap.ActiveView = "Results"
-    leap.ActiveScenario = leap_scenario
-    # while leap.IsCalculating:
-        # time.sleep(1)
-
-# Export LEAP files    
-def export_leap_favorite_to_csv(leap, leap_export_fname, favname, units):
     leap.Favorites(favname).Activate
-    # while leap.IsCalculating:
-        # time.sleep(1)
     leap.ActiveUnit = units
     leap.ExportResultsCSV(leap_export_fname)
+    leap.ActiveView = "Analysis"
+    leap.EnableControls
 
 def get_leap_timeslice_info(leap, months):
     month_dict = dict(zip(months, [i+1 for i in range(len(months))]))
@@ -227,7 +222,7 @@ def export_leap_hpp_to_weap(leap, weap, iteration, leap_scenario, weap_scenario,
         os.makedirs(leap_export_path)
     leap_export_fname = os.path.join(leap_export_path, leap_scenario + "_iteration_" + str(iteration) + "_HPP.csv")
     favname = "WEAP#hydropower"
-    export_leap_favorite_to_csv(leap, leap_export_fname, favname, energy_unit)
+    export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname, units)
     hpp = proc_leap_hpp(leap_export_fname, config_params)
 
     # 2. Load values into WEAP 
