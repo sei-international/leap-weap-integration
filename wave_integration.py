@@ -795,7 +795,7 @@ def main_integration():
                 if results_converged :
                     for i in range(0, len(this_iteration_weap_results[sw])):
                         if abs(this_iteration_weap_results[sw][i] - last_iteration_weap_results[sw][i]) > abs(last_iteration_weap_results[sw][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_weap_results, weap.EndYear - weap.BaseYear + 1)
+                            diff_loc = index_to_elements(i, target_weap_results, list(range(weap.BaseYear, weap.EndYear+1)))
                             logging.info('\t\t' + _('Difference exceeded tolerance for WEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_weap_results[sw][i], c = this_iteration_weap_results[sw][i]))
                             results_converged = False
                             break
