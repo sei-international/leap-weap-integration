@@ -218,15 +218,14 @@ def proc_weap_hpp(weap, hpp, config_params):
 
     return hpp_weap
             
-def export_leap_hpp_to_weap(leap, weap, leap_scenario, weap_scenario, config_params):
+def export_leap_hpp_to_weap(leap, weap, iteration, leap_scenario, weap_scenario, config_params):
     energy_unit = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_unit']
     # 1. Get values from LEAP
     # Get path for storing files and create it if it doesn't exist
     leap_export_path = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
     if not os.path.exists(leap_export_path):
         os.makedirs(leap_export_path)
-    leap_export_fname = os.path.join(leap_export_path, leap_scenario + "_HPP.csv")
-    load_leap_scen(leap, leap_scenario)
+    leap_export_fname = os.path.join(leap_export_path, leap_scenario + "_iteration_" + str(iteration) + "_HPP.csv")
     favname = "WEAP#hydropower"
     export_leap_favorite_to_csv(leap, leap_export_fname, favname, energy_unit)
     hpp = proc_leap_hpp(leap_export_fname, config_params)
@@ -238,7 +237,7 @@ def export_leap_hpp_to_weap(leap, weap, leap_scenario, weap_scenario, config_par
     hdr = ",".join(["$Columns = Year","Month",hpp_hdr]) + "\n"
 
     weap_export_path = os.path.normpath(os.path.join(weap.ActiveArea.Directory, config_params['WEAP']['Folder']))
-    weap_fname = weap_scenario + "_HPP_demand.csv"
+    weap_fname = weap_scenario + "_iteration_" + str(iteration) + "_HPP_demand.csv"
     if not os.path.exists(weap_export_path):
         os.makedirs(weap_export_path)
     with open(os.path.join(weap_export_path, weap_fname), 'w') as csvfile:
