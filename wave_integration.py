@@ -2,7 +2,7 @@ import sys
 from errno import WSAEDQUOT
 from ntpath import altsep
 import win32com.client as win32
-import win32gui # TODO: Don't need this, right?
+import win32gui
 import yaml
 import time
 from winreg import *
@@ -504,9 +504,13 @@ def main_integration():
             leap.ActiveScenario = leap_scenario_id
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
-                xlsx_file = "".join(["hydro_availability_wbranch", str(weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Id), "_lscenario", str(leap_scenario_id), ".xlsx" ])
+                xlsx_file = "".join(["hydro_availability_wbranch",
+                                     str(weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Id),
+                                     "_lscenario", str(leap_scenario_id),
+                                     "_iteration", str(completed_iterations + 1),
+                                     ".xlsx" ])
                 xlsx_path = os.path.join(hydroexcelpath, xlsx_file)  # Full path to XLSX file being written
-                xlsx_path = fr"{xlsx_path}" # TODO: Is this needed with os.path.join?
+                xlsx_path = fr"{xlsx_path}"
                 csv_path = os.path.join(hydroexcelpath, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
 
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
@@ -613,6 +617,8 @@ def main_integration():
 
         logging.info(_('Moving water pumping information from WEAP to LEAP'))
         region_ag_demand_map = config_params['WEAP']['Agricultural regions']
+        # TODO: WEAP.Catchments.FilterByTag("AmuDarya,Agriculture")
+        # TODO: WEAP.Catchments.FilterByTag("SyrDarya,Agriculture") -- these don't exist
         for i in range(0, len(weap_scenarios)):
             logging.info('\t' + _('Scenario: {w} (WEAP)/{l} (LEAP)').format(w = weap_scenarios[i], l = leap_scenarios[i]))
             for r in region_ag_demand_map:
