@@ -9,6 +9,7 @@ Integrated model:
 
 WEAP:
   Area: WAVE-SyrDarya 2022_09_19_MABIA
+  Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
       path: Key\Demographic\KAZ\National population
@@ -240,7 +241,6 @@ WEAP:
         leap_region: Uzbekistan
         variable: Supply Requirement
         unit: m^3
-
 
 LEAP:
   Area: wave central asia v43ekb # This is Eric's model for Syr Darya only, including LEAP favorite
