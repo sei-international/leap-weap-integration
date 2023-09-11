@@ -883,7 +883,7 @@ def main_integration():
         logging.info(_('Moving hydropower generation to WEAP and rerunning WEAP...'))
         for sl in leap_scenarios:
             sw = scenarios_map[sl]
-            export_leap_hpp_to_weap(leap, weap, sl, sw, config_params)
+            export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
         
         logging.info(_('Calculating WEAP...'))
         weap.Calculate(0, 0, False) # Only calculate if needed
