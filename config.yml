@@ -193,12 +193,20 @@ LEAP:
       path: Key\Macroeconomic\Agriculture_Value Added
       variable: Activity Level
       unit: 2020 USD
-    Ag_water_demand:
+    Syr_Darya_Ag_water_demand:
       path: Demand\Agriculture\Syr Darya\Water demand
       variable: Activity Level
       unit: Cubic Meter/No Data
-    Ind_water_demand:
+    Syr_Darya_Ind_water_demand:
       path: Demand\Industry\Other\Syr Darya Water Pumping
+      variable: Activity Level
+      unit: Cubic Meter/No Data
+    Amu_Darya_Ag_water_demand:
+      path: Demand\Agriculture\Amu Darya\Water demand
+      variable: Activity Level
+      unit: Cubic Meter/No Data
+    Amu_Darya_Ind_water_demand:
+      path: Demand\Industry\Other\Amu Darya Water Pumping
       variable: Activity Level
       unit: Cubic Meter/No Data
   
