@@ -85,60 +85,143 @@ WEAP:
       leap_branch: Industrial_VA_fraction
       leap_region: Uzbekistan
 
-
   Hydropower_plants:
     convergence_check:
         weap_variable: Hydropower Generation # WEAP result variable to be checked for convergence
         weap_unit: GWH
     dams:
         Toktogul:
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
-          leap_hpps : [TOKTOGUL]
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Toktogul reservoir
+          leap_hpps: [TOKTOGUL]
         Kambarata_I:
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kambarata_I
-          leap_hpps : [KAMBARATA_1]
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Kambarata_I
+          leap_hpps: [KAMBARATA_1]
         Kambarata_II:
-          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kambarata II
-          leap_hpps : [KAMBARATA_2]
+          weap_path: Supply and Resources\River\Syr Darya River\Run of River Hydro\Kambarata II
+          leap_hpps: [KAMBARATA_2]
         Kayrakkum :
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kayrakkum reservoir
-          leap_hpps : [KAIRAKKUM]
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Kayrakkum reservoir
+          leap_hpps: [KAIRAKKUM]
         Shardara :
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Shardara reservoir
-          leap_hpps : [SHARDARINSKYA]
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Shardara reservoir
+          leap_hpps: [SHARDARINSKYA]
         Kurpsaiskaja:
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Kurpsaiskaja
-          leap_hpps : [KURPSAI]
-        Taschkumyrskaja : 
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Taschkumyrskaja_cascade
-          leap_hpps : [TASH_KUMYR, SHAMALDYSAI,UCH_KURGANSK]
-        Farkhad : 
-          weap_path : Supply and Resources\River\Syr Darya River\Reservoirs\Farkhad reservoir
-          leap_hpps : [FARKHAD]
-        Akhangaran : 
-          weap_path : Supply and Resources\River\Ahangaran\Reservoirs\Akhangaran reservoir
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Kurpsaiskaja
+          leap_hpps: [KURPSAI]
+        Taschkumyrskaja: 
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Taschkumyrskaja_cascade
+          leap_hpps: [TASH_KUMYR, SHAMALDYSAI,UCH_KURGANSK]
+        Farkhad: 
+          weap_path: Supply and Resources\River\Syr Darya River\Reservoirs\Farkhad reservoir
+          leap_hpps: [FARKHAD]
+        Akhangaran: 
+          weap_path: Supply and Resources\River\Ahangaran\Reservoirs\Akhangaran reservoir
           leap_hpps: [AKHANGARAN]
         Charvak: 
-          weap_path : Supply and Resources\River\Circik River\Reservoirs\Charvak reservoir
-          leap_hpps : [CHARVAK, GAZLKENT, KHODZHIKENT]
+          weap_path: Supply and Resources\River\Circik River\Reservoirs\Charvak reservoir
+          leap_hpps: [CHARVAK, GAZLKENT, KHODZHIKENT]
         Chirchik:
-          weap_path : Supply and Resources\River\Circik River\Reservoirs\Chirchik_cascade
-          leap_hpps : [AKKAVAK_1, CHIRCHIK_1, CHIRCHIK_2, TAVAK]
+          weap_path: Supply and Resources\River\Circik River\Reservoirs\Chirchik_cascade
+          leap_hpps: [AKKAVAK_1, CHIRCHIK_1, CHIRCHIK_2, TAVAK]
         Andijan :
-          weap_path : Supply and Resources\River\Andijan River\Reservoirs\Andijan Reservoir
-          leap_hpps : [ANDIJAN_1, ANDIJAN_2]
-        At-Bashi : 
-          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
-          leap_hpps : [AT_BASHIN]
-        Kokomeren : 
-          weap_path : Supply and Resources\River\Kokomeren River\Run of River Hydro\Kokomeren RoR
-          leap_hpps : [KOKOMEREN]
-        Upper Naryn : 
-          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Upper Naryn RoR
-          leap_hpps : [UPPER NARYN]
-        Kazarman : 
-          weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
-          leap_hpps : [KAZARMAN]
+          weap_path: Supply and Resources\River\Andijan River\Reservoirs\Andijan Reservoir
+          leap_hpps: [ANDIJAN_1, ANDIJAN_2]
+        At-Bashi: 
+          weap_path: Supply and Resources\River\Syr Darya River\Run of River Hydro\At Bashi RoR
+          leap_hpps: [AT_BASHIN]
+        Kokomeren: 
+          weap_path: Supply and Resources\River\Kokomeren River\Run of River Hydro\Kokomeren RoR
+          leap_hpps: [KOKOMEREN]
+        Upper Naryn: 
+          weap_path: Supply and Resources\River\Syr Darya River\Run of River Hydro\Upper Naryn RoR
+          leap_hpps: [UPPER NARYN]
+        Kazarman: 
+          weap_path: Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
+          leap_hpps: [KAZARMAN]
+        Baipaza:
+          weap_path: Supply and Resources\River\Vakhsh River\Reservoirs\Baipaza
+          leap_hpps: [BAIPAZA]
+        Dashtijum:
+          weap_path: Supply and Resources\River\Amu Darya River\Reservoirs\Dashtijum
+          leap_hpps: [DASHTIJUM]
+        Gissarak:
+          weap_path: Supply and Resources\River\Kashkadarya River\Reservoirs\Gissarak reservoir
+          leap_hpps: [GISSARAK]
+        Kumkurgan:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Reservoirs\Kumkurgan
+          leap_hpps: [KUMKURGAN]
+        Nurek:
+          weap_path: Supply and Resources\River\Vakhsh River\Reservoirs\Nurek reservoir
+          leap_hpps: [NUREK]
+        Rogun:
+          weap_path: Supply and Resources\River\Vakhsh River\Reservoirs\Rogun
+          leap_hpps: [ROGUN]
+        THC Complex:
+          weap_path: Supply and Resources\River\THC\Reservoirs\THC Complex
+          leap_hpps: [TYUYAMUYUNSKAYA]
+        Tupalang:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Reservoirs\Tupalang reservoir
+          leap_hpps: [TUPALONG 1]
+        Ayni:
+          weap_path: Supply and Resources\River\Zeravshan River\Run of River Hydro\Ayni
+          leap_hpps: [AYNI]
+        Nilyu:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Run of River Hydro\Nilyu
+          leap_hpps: [NILYU 2]
+        # Transitional HP:
+          # weap_path: Supply and Resources\River\Lower Vakhsh HP Diversion\Run of River Hydro\Transitional HP
+          # leap_hpps: []
+        Zarchob1:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Run of River Hydro\Zarchob1
+          leap_hpps: [ZARCHOB 1]
+        Zarchob2:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Run of River Hydro\Zarchob2
+          leap_hpps: [ZARCHOB 2]
+        Zarchob3:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Run of River Hydro\Zarchob3
+          leap_hpps: [ZARCHOB 3]
+        Nurobod:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Nurobod
+          leap_hpps: [NUROBOD]
+        Kaphtarguzar:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Kaphtarguzar
+          leap_hpps: [KAPHTARGUZAR]
+        Sangtuda 1:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Sangtuda 1
+          leap_hpps: [SANGTUDA 1]
+        Sangtuda 2:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Sangtuda 2
+          leap_hpps: [SANGTUDA 2]
+        Golovnaya:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Golovnaya
+          leap_hpps: [GOLOVNAYA]
+        Perepadnaya Khatolon:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Perepadnaya Khatolon
+          leap_hpps: [PEREPADNAYA KHATLON]
+        Daraut Kurgan:
+          weap_path: Supply and Resources\River\Vakhsh River\Run of River Hydro\Daraut Kurgan
+          leap_hpps: [DARAUT KURGAN]
+        Bachishamal2:
+          weap_path: Supply and Resources\River\Khishrau Diversion\Run of River Hydro\Bachishamal2
+          leap_hpps: [BACHISHAMAL 2]
+        Hazarbahskaya:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Run of River Hydro\Hazarbahskaya
+          leap_hpps: [HAZARBAHSKAYA]
+        Kishraus:
+          weap_path: Supply and Resources\River\Khishrau Diversion\Run of River Hydro\Kishraus
+          leap_hpps: [KHISHRAUS]
+        Kumkurgan:
+          weap_path: Supply and Resources\River\Surkhandarrya River\Reservoirs\Kumkurgan
+          leap_hpps: [KUMKURGAN]
+        Sarvoz:
+          weap_path: Supply and Resources\River\Kafirnigan River\Run of River Hydro\Sarvoz
+          leap_hpps: [SARVOZ]
+        Central HP:
+          weap_path: Supply and Resources\River\Lower Vakhsh HP Diversion\Run of River Hydro\Central HP
+          leap_hpps: [TSENTRALNAYA TAJIK]
+        Varzob:
+          weap_path: Supply and Resources\River\Kafirnigan River\Run of River Hydro\Varzob
+          leap_hpps: [VARZOB 2]
 
   Water pumping:
     variable: Supply Requirement
@@ -218,11 +301,11 @@ LEAP:
         AKHANGARAN:
           leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR
           leap_region: Uzbekistan
-        ANDIJAN_1: 
-          leap_path: Transformation\Electricity Production\Processes\ANDIJAN_1
-          leap_region: Uzbekistan
         AKKAVAK_1:
           leap_path: Transformation\Electricity Production\Processes\AKKAVAK_1
+          leap_region: Uzbekistan
+        ANDIJAN_1: 
+          leap_path: Transformation\Electricity Production\Processes\ANDIJAN_1
           leap_region: Uzbekistan
         ANDIJAN_2: 
           leap_path: Transformation\Electricity Production\Processes\ANDIJAN_2
@@ -230,6 +313,15 @@ LEAP:
         AT_BASHIN:
           leap_path: Transformation\Electricity Production\Processes\AT_BASHIN
           leap_region: Kyrgyzstan
+        AYNI:
+          leap_path: Transformation\Electricity Production\Processes\AYNI
+          leap_region: Tajikistan
+        BACHISHAMAL 2:
+          leap_path: Transformation\Electricity Production\Processes\BACHISHAMAL 2
+          leap_region: Uzbekistan
+        BAIPAZA:
+          leap_path: Transformation\Electricity Production\Processes\BAIPAZA
+          leap_region: Tajikistan
         CHARVAK:
           leap_path: Transformation\Electricity Production\Processes\CHARVAK
           leap_region: Uzbekistan
@@ -239,11 +331,26 @@ LEAP:
         CHIRCHIK_2:
           leap_path: Transformation\Electricity Production\Processes\CHIRCHIK_2
           leap_region: Uzbekistan
+        DARAUT KURGAN:
+          leap_path: Transformation\Electricity Production\Processes\DARAUT KURGAN
+          leap_region: Kyrgyzstan
+        DASHTIJUM:
+          leap_path: Transformation\Electricity Production\Processes\DASHTIJUM
+          leap_region: Tajikistan
         FARKHAD: 
-          leap_path : Transformation\Electricity Production\Processes\FARKHAD
+          leap_path: Transformation\Electricity Production\Processes\FARKHAD
           leap_region: Uzbekistan
         GAZLKENT:
           leap_path: Transformation\Electricity Production\Processes\GAZALKENT
+          leap_region: Uzbekistan
+        GISSARAK:
+          leap_path: Transformation\Electricity Production\Processes\GISSARAK
+          leap_region: Uzbekistan
+        GOLOVNAYA:
+          leap_path: Transformation\Electricity Production\Processes\GOLOVNAYA
+          leap_region: Tajikistan
+        HAZARBAHSKAYA:
+          leap_path: Transformation\Electricity Production\Processes\HAZARBAHSKAYA
           leap_region: Uzbekistan
         KAIRAKKUM:
           leap_path: Transformation\Electricity Production\Processes\KAIRAKKUM
@@ -254,18 +361,69 @@ LEAP:
         KAMBARATA_2:
           leap_path: Transformation\Electricity Production\Processes\KAMBARATA_2
           leap_region: Kyrgyzstan
+        KAPHTARGUZAR:
+          leap_path: Transformation\Electricity Production\Processes\KAPHTARGUZAR
+          leap_region: Tajikistan
+        KAZARMAN:
+          leap_path: Transformation\Electricity Production\Processes\KAZARMAN CASCADE
+          leap_region: Kyrgyzstan
+        KHISHRAUS:
+          leap_path: Transformation\Electricity Production\Processes\KHISHRAUS
+          leap_region: Uzbekistan
         KHODZHIKENT:
           leap_path: Transformation\Electricity Production\Processes\KHODZHIKENT
+          leap_region: Uzbekistan
+        KOKOMEREN:
+          leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
+          leap_region: Kyrgyzstan
+        KUMKURGAN:
+          leap_path: Transformation\Electricity Production\Processes\KUMKURGAN
           leap_region: Uzbekistan
         KURPSAI:
           leap_path: Transformation\Electricity Production\Processes\KURPSAI
           leap_region: Kyrgyzstan
+        NILYU 2:
+          leap_path: Transformation\Electricity Production\Processes\NILYU 2
+          leap_region: Uzbekistan
+        NUREK:
+          leap_path: Transformation\Electricity Production\Processes\NUREK
+          leap_region: Tajikistan
+        NUROBOD:
+          leap_path: Transformation\Electricity Production\Processes\NUROBOD
+          leap_region: Tajikistan
+        PAMIR 1:
+          leap_path: Transformation\Electricity Production\Processes\PAMIR 1
+          leap_region: Tajikistan
+        PAMIR 2:
+          leap_path: Transformation\Electricity Production\Processes\PAMIR 2
+          leap_region: Tajikistan
+        PEREPADNAYA KHATLON:
+          leap_path: Transformation\Electricity Production\Processes\PEREPADNAYA KHATLON
+          leap_region: Tajikistan
+        ROGUN:
+          leap_path: Transformation\Electricity Production\Processes\ROGUN
+          leap_region: Tajikistan
+        SANGTUDA 1:
+          leap_path: Transformation\Electricity Production\Processes\SANGTUDA 1
+          leap_region: Tajikistan
+        SANGTUDA 2:
+          leap_path: Transformation\Electricity Production\Processes\SANGTUDA 2
+          leap_region: Tajikistan
+        SARVOZ:
+          leap_path: Transformation\Electricity Production\Processes\SARVOZ
+          leap_region: Tajikistan
         SHAMALDYSAI:
           leap_path: Transformation\Electricity Production\Processes\SHAMALDYSAI
           leap_region: Kyrgyzstan
         SHARDARINSKYA:
           leap_path: Transformation\Electricity Production\Processes\SHARDARINSKYA
           leap_region: Kazakhstan
+        SICHANKUL CANAL:
+          leap_path: Transformation\Electricity Production\Processes\SICHANKUL CANAL
+          leap_region: Uzbekistan
+        SUUSAMYR_KOKOMEREN CASCADE:
+          leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
+          leap_region: Kyrgyzstan
         TASH_KUMYR:
           leap_path: Transformation\Electricity Production\Processes\TASH_KUMYR
           leap_region: Kyrgyzstan
@@ -275,19 +433,34 @@ LEAP:
         TOKTOGUL:
           leap_path: Transformation\Electricity Production\Processes\TOKTOGUL
           leap_region: Kyrgyzstan
+        TSENTRALNAYA TAJIK:
+          leap_path: Transformation\Electricity Production\Processes\TSENTRALNAYA TAJIK
+          leap_region: Tajikistan
+        TUPALONG 1:
+          leap_path: Transformation\Electricity Production\Processes\TUPALONG 1
+          leap_region: Uzbekistan
+        TYUYAMUYUNSKAYA:
+          leap_path: Transformation\Electricity Production\Processes\TYUYAMUYUNSKAYA
+          leap_region: Uzbekistan
         UCH_KURGANSK:
           leap_path: Transformation\Electricity Production\Processes\UCH_KURGANSK
-          leap_region: Kyrgyzstan
-        KOKOMEREN:
-          leap_path: Transformation\Electricity Production\Processes\SUUSAMYR_KOKOMEREN CASCADE
           leap_region: Kyrgyzstan
         UPPER NARYN:
           leap_path: Transformation\Electricity Production\Processes\UPPER NARYN CASCADE
           leap_region: Kyrgyzstan
-        KAZARMAN:
-          leap_path: Transformation\Electricity Production\Processes\KAZARMAN CASCADE
-          leap_region: Kyrgyzstan
-
+        VARZOB 2:
+          leap_path: Transformation\Electricity Production\Processes\VARZOB 2
+          leap_region: Tajikistan
+        ZARCHOB 1:
+          leap_path: Transformation\Electricity Production\Processes\ZARCHOB 1
+          leap_region: Uzbekistan
+        ZARCHOB 2:
+          leap_path: Transformation\Electricity Production\Processes\ZARCHOB 2
+          leap_region: Uzbekistan
+        ZARCHOB 3:
+          leap_path: Transformation\Electricity Production\Processes\ZARCHOB 3
+          leap_region: Uzbekistan
+        
 LEAP-Macro: # Removing this will stop wave-integration from running with leap-macro
   # Main folder for Macro models
   # This must be at the same level as the "LEAP Areas" folder. It will be created if it does not exist, but it must
@@ -295,7 +468,7 @@ LEAP-Macro: # Removing this will stop wave-integration from running with leap-ma
   Folder: WAVE_Macro
   # Target variables are the same for each region: must match branches in LEAP config above
   LEAP:
-    target_variables : [GDP, Industrial VA, Commercial VA, Agricultural VA]
+    target_variables: [GDP, Industrial VA, Commercial VA, Agricultural VA]
   WEAP:
     agsector: Agriculture_
     price_data: crop_prices.csv
