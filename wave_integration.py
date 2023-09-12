@@ -293,13 +293,6 @@ def main_integration():
                     check_branch_var(weap, config_params[aep]['Branches'][key]['path'], config_params[aep]['Branches'][key]['variable'], config_params[aep]['Branches'][key]['unit'])
                 elif aep== 'LEAP' :
                     check_branch_var(leap, config_params[aep]['Branches'][key]['path'], config_params[aep]['Branches'][key]['variable'], config_params[aep]['Branches'][key]['unit'])
-            if aep == "WEAP" :
-                for r in config_params[aep]['Agricultural regions']:
-                    for key in config_params[aep]['Agricultural regions'][r]:
-                        check_branch_var(weap, config_params[aep]['Agricultural regions'][r][key]['weap_path'], config_params[aep]['Agricultural regions'][r][key]['variable'], config_params[aep]['Agricultural regions'][r][key]['unit'])
-                for r in config_params[aep]['Industrial and domestic regions']:
-                    for key in config_params[aep]['Industrial and domestic regions'][r]:
-                        check_branch_var(weap, config_params[aep]['Industrial and domestic regions'][r][key]['weap_path'], config_params[aep]['Industrial and domestic regions'][r][key]['variable'], config_params[aep]['Industrial and domestic regions'][r][key]['unit'])
 
     # validate regions
     logging.info(_('Running the model for regions:'))
@@ -430,8 +423,11 @@ def main_integration():
     #------------------------------------------------------------------------------------------------------------------------
     completed_iterations = 0
     results_converged = False
-    # set up target results for convergence checks during iterative calculations, by scenario
     
+    # This only needs to be evaluated once
+    weap_pump_var = ":" + config_params['WEAP']['Water pumping']['variable'] + "[" + config_params['WEAP']['Water pumping']['unit'] + "]"
+
+    # Initialize target results for convergence checks during iterative calculations, by scenario
     target_leap_results = list(config_params['LEAP']['Hydropower_plants']['plants'].keys())
     target_weap_results = list(config_params['WEAP']['Hydropower_plants']['dams'].keys())
     if leap_macro:
@@ -608,61 +604,56 @@ def main_integration():
         # END: Move hydropower availability information from WEAP to LEAP.
 
         #------------------------------------------------------------------------------------------------------------------------
-        # Move Syr Darya agricultural water requirements from WEAP to LEAP.
+        # Move pumping water requirements from WEAP to LEAP.
         #------------------------------------------------------------------------------------------------------------------------
-        # TODO: Make this generic, not just for this application/Syr Darya
-        msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), agricultural use').format(i = completed_iterations+1)
+        msg = _('Moving water pumping information from WEAP to LEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, "".join(msg))
         leap.SetProgressBar(50)
 
         logging.info(_('Moving water pumping information from WEAP to LEAP'))
-        region_ag_demand_map = config_params['WEAP']['Agricultural regions']
-        # TODO: WEAP.Catchments.FilterByTag("AmuDarya,Agriculture")
-        # TODO: WEAP.Catchments.FilterByTag("SyrDarya,Agriculture") -- these don't exist
+        
         for i in range(0, len(weap_scenarios)):
             logging.info('\t' + _('Scenario: {w} (WEAP)/{l} (LEAP)').format(w = weap_scenarios[i], l = leap_scenarios[i]))
-            for r in region_ag_demand_map:
-                expr = "Interp("  # Expression that will be set for Demand\Agriculture\Syr Darya\Water demand:Activity Level in LEAP
+            for weap_basin, leap_basin in config_params['WEAP']['Water pumping']['basin_map'].items():
+                logging.info('\t' + _('{b} basin: Agriculture').format(b = leap_basin))
+                leap_branch = "Demand\\Agriculture\\" + leap_basin + "\\Water demand"
+                for wr, lr in config_params['WEAP']['Water pumping']['region_map'].items():
+                    expr = "Interp("  # Expression that will be set in LEAP
+                    for y in range(weap.BaseYear, weap.EndYear+1):
+                        val = 0  # Value that will be written into expr for y
+                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Agriculture"):
+                            if re.search(wr, wb.FullName) is None:
+                                continue
+                            val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
+                        expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
+                    expr = "".join([expr[0:-1], ")"])
+                    leap.ActiveRegion = lr
+                    leap.ActiveScenario = leap_scenarios[i]
+                    logging.info('\t\t' + _('Region: {r}').format(r = lr))
+                    leap.Branches(leap_branch).Variables("Activity Level").Expression = expr
 
-                for y in range(weap.BaseYear, weap.EndYear+1):
-                    val = 0  # Value that will be written into expr for y
-                    for wb in region_ag_demand_map[r]:
-                        val = val + weap.ResultValue("".join([region_ag_demand_map[r][wb]['weap_path'], ":Supply Requirement[m^3]"]), y, 1, weap_scenarios[i], y, 12, 'Total')
-                    expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
-
-
-                expr = "".join([expr[0:-1], ")"])
-                leap.ActiveRegion = r
-                leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\t\t' + _('Region: {r}').format(r = r))
-                leap.Branches("Demand\Agriculture\Syr Darya\Water demand").Variables("Activity Level").Expression = expr
-		# END: Move Syr Darya agricultural water requirements from WEAP to LEAP.
-
-        #------------------------------------------------------------------------------------------------------------------------
-        # Move industrial and domestic water requirements from WEAP to LEAP
-        #------------------------------------------------------------------------------------------------------------------------
-        logging.info(_('Moving industrial water requirements from WEAP to LEAP'))
-        msg = _('Moving water pumping information from WEAP to LEAP (iteration {i}), industrial and domestic use').format(i = completed_iterations+1)
-        leap.ShowProgressBar(procedure_title, msg)
-        leap.SetProgressBar(55)
-
-        region_inddom_demand_map = config_params['WEAP']['Industrial and domestic regions']
-        for i in range(0, len(weap_scenarios)):
-            logging.info('\t' + _('Scenario: {w} (WEAP)/{l} (LEAP)').format(w = weap_scenarios[i], l = leap_scenarios[i]))
-            for r in region_inddom_demand_map:
-                expr = "Interp("  # Expression that will be set for Demand\Industry\Syr Darya\Water demand:Activity Level in LEAP
-
-                for y in range(weap.BaseYear, weap.EndYear+1):
-                    val = 0  # Value that will be written into expr for y
-                    for wb in region_inddom_demand_map[r]:
-                        val = val + weap.ResultValue("".join([region_inddom_demand_map[r][wb]['weap_path'], ":Supply Requirement[m^3]"]), y, 1, weap_scenarios[i], y, 12, 'Total')
-                    expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
-
-                expr = "".join([expr[0:-1], ")"])
-                leap.ActiveRegion = r
-                leap.ActiveScenario = leap_scenarios[i]
-                logging.info('\t\t' + _('Region: {r}').format(r = r))
-                leap.Branches("Demand\Industry\Other\Syr Darya Water Pumping").Variables("Activity Level").Expression = expr
+                logging.info('\t' + _('{b} basin: Industrial and domestic').format(b = leap_basin))
+                leap_branch = "Demand\\Industry\\Other\\" + leap_basin + " Water Pumping"
+                for wr, lr in config_params['WEAP']['Water pumping']['region_map'].items():
+                    expr = "Interp("  # Expression that will be set in LEAP
+                    for y in range(weap.BaseYear, weap.EndYear+1):
+                        val = 0  # Value that will be written into expr for y
+                        # Combine industrial and domestic
+                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Industrial"):
+                            if re.search(wr, wb.FullName) is None:
+                                continue
+                            val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
+                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Domestic"):
+                            if re.search(wr, wb.FullName) is None:
+                                continue
+                            val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
+                        expr = "".join([expr,str(y),LIST_SEPARATOR,str(val),LIST_SEPARATOR])
+                    expr = "".join([expr[0:-1], ")"])
+                    leap.ActiveRegion = lr
+                    leap.ActiveScenario = leap_scenarios[i]
+                    logging.info('\t\t' + _('Region: {r}').format(r = lr))
+                    leap.Branches(leap_branch).Variables("Activity Level").Expression = expr
+		# END: Move agricultural water requirements from WEAP to LEAP.
 
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate LEAP

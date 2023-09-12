@@ -8,7 +8,7 @@ Integrated model:
     Maximum iterations: 10
 
 WEAP:
-  Area: WAVE-SyrDarya 2022_09_19_MABIA
+  Area: WAVE-Amu_Syr_Darya 2023_09_11
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -140,111 +140,29 @@ WEAP:
           weap_path : Supply and Resources\River\Syr Darya River\Run of River Hydro\Kazarman RoR
           leap_hpps : [KAZARMAN]
 
-  Agricultural regions: # these are used for water pumping
-    Kazakhstan:
-      Kyzlorda:
-        weap_path : Demand Sites and Catchments\Agriculture_KAZ_Kyzylorda 
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-      Shmykent:
-        weap_path: Demand Sites and Catchments\Agriculture_KAZ_Turkestan_Shymkent
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-    Kyrgyzstan:
-      JalalAbat:
-        weap_path: Demand Sites and Catchments\Agriculture_KGZ_Naryn_JalalAbat_Osh_Batken
-        leap_region: Kyrgyzstan
-        variable: Supply Requirement
-        unit: m^3
-    Tajikistan:
-      Sogd:
-        weap_path: Demand Sites and Catchments\Agriculture_TJK_Sogd
-        leap_region: Tajikistan
-        variable: Supply Requirement
-        unit: m^3
-    Uzbekistan:
-      Andijan:
-        weap_path: Demand Sites and Catchments\Agriculture_UZB_Andijan_Namangan_Fergana
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: m^3
-      SyrDarya:
-        weap_path: Demand Sites and Catchments\Agriculture_UZB_SyrDarya_Tashkent_Jizzakh
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: 'm^3'
-  
-  Industrial and domestic regions: # these are used for water pumping
-    Kazakhstan:
-      Kyzlorda_Ind:
-        weap_path : Demand Sites and Catchments\Industrial_KAZ_Kyzylorda 
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-      Shmykent_Ind:
-        weap_path: Demand Sites and Catchments\Industrial_KAZ_Turkestan_Shymkent
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-      Kyzlorda_Dom:
-        weap_path : Demand Sites and Catchments\Domestic_KAZ_Kyzylorda 
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-      Shmykent_Dom:
-        weap_path: Demand Sites and Catchments\Domestic_KAZ_Turkestan_Shymkent
-        leap_region: Kazakhstan
-        variable: Supply Requirement
-        unit: m^3
-    Kyrgyzstan:
-      JalalAba_Ind:
-        weap_path: Demand Sites and Catchments\Industrial_KGZ_Naryn_JalalAbat_Osh_Batken
-        leap_region: Kyrgyzstan
-        variable: Supply Requirement
-        unit: m^3
-      JalalAbat_Dom:
-        weap_path: Demand Sites and Catchments\Domestic_KGZ_Naryn_JalalAbat_Osh_Batken
-        leap_region: Kyrgyzstan
-        variable: Supply Requirement
-        unit: m^3
-    Tajikistan:
-      Sogd_Ind:
-        weap_path: Demand Sites and Catchments\Industrial_TJK_Sogd
-        leap_region: Tajikistan
-        variable: Supply Requirement
-        unit: m^3
-      Sogd_Dom:
-        weap_path: Demand Sites and Catchments\Domestic_TJK_Sogd
-        leap_region: Tajikistan
-        variable: Supply Requirement
-        unit: m^3
-    Uzbekistan:
-      Andijan_Ind:
-        weap_path: Demand Sites and Catchments\Industrial_UZB_Andijan_Namangan_Fergana
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: m^3
-      SyrDarya_Ind:
-        weap_path: Demand Sites and Catchments\Industrial_UZB_SyrDarya_Tashkent_Jizzakh
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: m^3
-      Andijan_Dom:
-        weap_path: Demand Sites and Catchments\Domestic_UZB_Andijan_Namangan_Fergana
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: m^3
-      SyrDarya_Dom:
-        weap_path: Demand Sites and Catchments\Domestic_UZB_SyrDarya_Tashkent_Jizzakh
-        leap_region: Uzbekistan
-        variable: Supply Requirement
-        unit: m^3
+  Water pumping:
+    variable: Supply Requirement
+    unit: m^3
+    # WEAP must have sector tags called "Agriculture", "Industry", and "Domestic"
+    # The basin_map is in the form "WEAP: LEAP", where:
+    #  - for WEAP the entry is a tag
+    #  - for LEAP it is a string in a branch path
+    basin_map:
+        Syr Darya: Syr Darya
+        AmuDarya: Amu Darya
+    # The region_map is in the form "WEAP: LEAP", where:
+    #  - for WEAP it is a string in a branch path
+    #  - for LEAP it is a "region" in the LEAP model
+    region_map:
+        KAZ: Kazakhstan
+        KGZ: Kyrgyzstan
+        TJK: Tajikistan
+        UZB: Uzbekistan
+        TKM: Turkmenistan
 
 LEAP:
-  Area: wave central asia v43ekb # This is Eric's model for Syr Darya only, including LEAP favorite
-  Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Uzbekistan]
+  Area: wave central asia v52
+  Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
   Folder: WAVE_Hydro
