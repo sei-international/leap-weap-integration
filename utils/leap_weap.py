@@ -17,13 +17,13 @@ def leapfloat(x):
 
 # Load favorite for selected scenario and export -- takes a long time to render, so disable controls
 def export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname, units):
-    leap.DisableControls
+#    leap.DisableControls
     leap.ActiveView = "Results"
     leap.Favorites(favname).Activate
     leap.ActiveUnit = units
     leap.ExportResultsCSV(leap_export_fname)
     leap.ActiveView = "Analysis"
-    leap.EnableControls
+#    leap.EnableControls
 
 def get_leap_timeslice_info(leap, months):
     month_dict = dict(zip(months, [i+1 for i in range(len(months))]))
