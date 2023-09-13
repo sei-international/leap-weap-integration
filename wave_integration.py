@@ -833,7 +833,7 @@ def main_integration():
         # Pass LEAP hydropower generation to WEAP
         #
         #------------------------------------------------------------------------------------------------------------------------
-        logging.info(_('Moving hydropower generation to WEAP...'))
+        logging.info(_('Moving hydropower generation from LEAP to WEAP...'))
         for sl in leap_scenarios:
             sw = scenarios_map[sl]
             export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
