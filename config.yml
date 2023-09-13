@@ -8,7 +8,7 @@ Integrated model:
     Maximum iterations: 10
 
 WEAP:
-  Area: WAVE-Amu_Syr_Darya 2023_09_11
+  Area: WAVE-Amu_Syr_Darya 2023_09_12
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -18,19 +18,25 @@ WEAP:
       leap_branch: Population 
       leap_region: Kazakhstan
     Population_KGZ:
-      path: Key\Demographic\KAZ\National population
+      path: Key\Demographic\KGZ\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Kyrgyzstan
     Population_TJK:
-      path: Key\Demographic\KAZ\National population
+      path: Key\Demographic\TJK\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Tajikistan
+    Population_TKM:
+      path: Key\Demographic\TKM\National population
+      variable: Annual Activity Level
+      unit: cap
+      leap_branch: Population
+      leap_region: Turkmenistan
     Population_UZB:
-      path: Key\Demographic\KAZ\National population
+      path: Key\Demographic\UZB\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
@@ -53,6 +59,12 @@ WEAP:
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Tajikistan
+    GDP_TKM:
+      path: Key\Macroeconomic\TKM\GDP
+      variable: Annual Activity Level
+      unit: Billion 2020 USD
+      leap_branch: GDP
+      leap_region: Turkmenistan
     GDP_UZB:
       path: Key\Macroeconomic\UZB\GDP
       variable: Annual Activity Level
@@ -78,6 +90,12 @@ WEAP:
       unit: '% share'
       leap_branch: Industrial_VA_fraction
       leap_region: Tajikistan
+    Industrial_VA_TKM:
+      path: Key\Macroeconomic\TKM\Industrial value added
+      variable: Annual Activity Level
+      unit: '% share'
+      leap_branch: Industrial_VA_fraction
+      leap_region: Turkmenistan
     Industrial_VA_UZB:
       path: Key\Macroeconomic\UZB\Industrial value added
       variable: Annual Activity Level
@@ -161,7 +179,7 @@ WEAP:
           leap_hpps: [TYUYAMUYUNSKAYA]
         Tupalang:
           weap_path: Supply and Resources\River\Surkhandarrya River\Reservoirs\Tupalang reservoir
-          leap_hpps: [TUPALONG 1]
+          leap_hpps: [TUPOLANG 1]
         Ayni:
           weap_path: Supply and Resources\River\Zeravshan River\Run of River Hydro\Ayni
           leap_hpps: [AYNI]
@@ -244,7 +262,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: wave central asia v52
+  Area: wave central asia v53
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
@@ -436,8 +454,8 @@ LEAP:
         TSENTRALNAYA TAJIK:
           leap_path: Transformation\Electricity Production\Processes\TSENTRALNAYA TAJIK
           leap_region: Tajikistan
-        TUPALONG 1:
-          leap_path: Transformation\Electricity Production\Processes\TUPALONG 1
+        TUPOLANG 1:
+          leap_path: Transformation\Electricity Production\Processes\TUPOLANG 1
           leap_region: Uzbekistan
         TYUYAMUYUNSKAYA:
           leap_path: Transformation\Electricity Production\Processes\TYUYAMUYUNSKAYA
