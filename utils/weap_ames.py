@@ -22,16 +22,16 @@ def export_csv(WEAP, fname, favname):
 
 # WEAP favorites to export
 def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_params, rowskip):
-    """Export WEAP favorites so they can be converted to Macro inputs using weap_to_macro_processing()
+    """Export WEAP favorites so they can be converted to AMES inputs using weap_to_ames_processing()
 
     Input arguments:
         fdirweapoutput: the folder for WEAP outputs as prepared by get_weap_ag_results()
-        fdirmain: the folder containing LEAP_Macro models
+        fdirmain: the folder containing AMES models
         weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
         WEAP: WEAP object
         rowskip: Number of rows to skip in WEAP favorites export files
 
-    Returns: Pandas dataframes for weap_to_macro_processing():
+    Returns: Pandas dataframes for weap_to_ames_processing():
         dfcov: Demand site coverage at detailed level
         dfwatdmd: Water demand used as weights to calculate average coverage
         dfcrop: Potential crop production using MABIA potential yields and crop areas
@@ -89,7 +89,7 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     #------------------------------------
     # Crop prices
     #------------------------------------
-    fname = os.path.join(os.getcwd(), "data", config_params['LEAP-Macro']['WEAP']['price_data'])
+    fname = os.path.join(os.getcwd(), "data", config_params['AMES']['WEAP']['price_data'])
     dfcropprice = pd.read_csv(fname, skiprows=rowskip)
 
     #------------------------------------
@@ -107,9 +107,9 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
 
     return dfcov, dfwatdmd, dfcrop, dfcropprice
 
-def weap_to_macro_processing(weap_scenario, leap_scenario,
+def weap_to_ames_processing(weap_scenario, leap_scenario,
                              config_params, region, countries,
-                             fdirmacroinput, fdirweapoutput,
+                             fdiramesinput, fdirweapoutput,
                              dfcov, dfwatdmd, dfcrop, dfcropprice):
     """Process WEAP results and generate CSV files for Macro
 
@@ -118,7 +118,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
         config_params: the configuration data structure for the integration program
         region: the LEAP region to prepare CSV files for
         countries: the WEAP countries that corresponds to the region
-        fdirmacroinput: the input folder for LEAP-Macro (where the files are placed)
+        fdiramesinput: the input folder for AMES (where the files are placed)
         fdirweapoutput: the folder for WEAP outputs as prepared by get_weap_ag_results()
         dfcov, dfwatdmd, dfcrop, dfcropprice: the Pandas dataframes returned by get_weap_ag_results()
     Returns: Nothing
@@ -130,8 +130,8 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Process coverage data
     #------------------------------------
     coverage = pd.DataFrame()
-    for weap_sectorname, weap_sectorentry in config_params['LEAP-Macro']['Regions'][region]['weap_coverage_mapping'].items():
-        for macro_agsubsect in weap_sectorentry:
+    for weap_sectorname, weap_sectorentry in config_params['AMES']['Regions'][region]['weap_coverage_mapping'].items():
+        for ames_agsubsect in weap_sectorentry:
             #----------------------------------------------------------------
             # Get detailed WEAP coverage data
             #----------------------------------------------------------------
@@ -186,21 +186,21 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             # Drop 'other' region if present
             coveragetemp = coveragetemp.drop('other', errors='ignore')
             
-            # Replace country label (no longer needed) with the current macro sector within the current weap sector
-            coveragetemp = coveragetemp.rename(index={countries[0]: macro_agsubsect})
+            # Replace country label (no longer needed) with the current AMES sector within the current weap sector
+            coveragetemp = coveragetemp.rename(index={countries[0]: ames_agsubsect})
             # Add to the coverage dataframe
             coverage = pd.concat([coverage, coveragetemp])
     
     # Convert from coverage to maximum capacity utilization (if exponent = 0, max_util = 1.0; if = 1, then max_util = coverage)
     # TODO: For crops, should do actual output/potential
-    coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent']
+    coverage = coverage.transpose()**config_params['AMES']['WEAP']['cov_to_util_exponent']
     # After transpose, the index is years, so convert to integer
     coverage.index = coverage.index.astype('int64')
     # Have to add entry for 2019: Assume it's the same as in 2020
     coverage.loc[2019] = coverage.loc[2020]
     coverage.sort_index(inplace=True)
     # Write to file
-    fname = os.path.join(fdirmacroinput, leap_scenario + "_max_util.csv")
+    fname = os.path.join(fdiramesinput, leap_scenario + "_max_util.csv")
     coverage.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     #------------------------------------
@@ -208,22 +208,22 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     #------------------------------------
     # Invert dict of crop categories to create the map
     weap_joint_crop_map = {}
-    macro_joint_agsec_map = {}
-    macro_joint_agprod_map = {}
-    for category, entry in config_params['LEAP-Macro']['Regions'][region]['crop_categories'].items():
+    ames_joint_agsec_map = {}
+    ames_joint_agprod_map = {}
+    for category, entry in config_params['AMES']['Regions'][region]['crop_categories'].items():
         for crop in entry['weap']:
             weap_joint_crop_map[crop] = category
-        for agsector in entry['macro']['sector']:
-            macro_joint_agsec_map[agsector] = category
-        for agprod in entry['macro']['product']:
-            macro_joint_agprod_map[agprod] = category
+        for agsector in entry['ames']['sector']:
+            ames_joint_agsec_map[agsector] = category
+        for agprod in entry['ames']['product']:
+            ames_joint_agprod_map[agprod] = category
 
     # Add crop categories to dfcropprice
     dfcropprice.loc[:,'crop category'] = dfcropprice.loc[:,'crop'].map(weap_joint_crop_map)
     dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index
 
     # Only include branches related to this sector
-    dfcropsec = dfcrop[dfcrop['Branch'].str.contains(config_params['LEAP-Macro']['WEAP']['agsector'])].copy()
+    dfcropsec = dfcrop[dfcrop['Branch'].str.contains(config_params['AMES']['WEAP']['agsector'])].copy()
     # Extract every row for the WEAP countries in this LEAP region
     conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries))
     # Add a column to list the countries (default to 'other' if not in the list)
@@ -337,41 +337,41 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     
     #--- By Macro ag sector
     # Create dataframe with no entries
-    pricegrowth_macro_agsec = pd.DataFrame.from_dict(macro_joint_agsec_map, columns=['crop category'], orient='index')
-    pricegrowth_macro_agsec.reset_index(inplace = True)
-    pricegrowth_macro_agsec = pricegrowth_macro_agsec.rename(columns = {'index':'macro_agsec'})
+    pricegrowth_ames_agsec = pd.DataFrame.from_dict(ames_joint_agsec_map, columns=['crop category'], orient='index')
+    pricegrowth_ames_agsec.reset_index(inplace = True)
+    pricegrowth_ames_agsec = pricegrowth_ames_agsec.rename(columns = {'index':'ames_agsec'})
     
     # Merge with pricegrowth_jointcrop to assign values, then drop crop categories column
-    pricegrowth_macro_agsec = pricegrowth_macro_agsec.merge(pricegrowth_jointcrop,
+    pricegrowth_ames_agsec = pricegrowth_ames_agsec.merge(pricegrowth_jointcrop,
                                                               left_on=['crop category'],
                                                               right_on=['crop category'],
                                                               how='left')
-    pricegrowth_macro_agsec.drop('crop category', axis=1, inplace=True)
-    pricegrowth_macro_agsec.set_index('macro_agsec', inplace=True)
+    pricegrowth_ames_agsec.drop('crop category', axis=1, inplace=True)
+    pricegrowth_ames_agsec.set_index('ames_agsec', inplace=True)
     
     # Convert from growth rate to index
-    pricendx_macro_agsec = (1.0 + pricegrowth_macro_agsec).cumprod(axis = 1)
+    pricendx_ames_agsec = (1.0 + pricegrowth_ames_agsec).cumprod(axis = 1)
     # Insert index = 1 in first year position
-    pricendx_macro_agsec.insert(0, int(min(pricendx_macro_agsec)) - 1, 1.0)
+    pricendx_ames_agsec.insert(0, int(min(pricendx_ames_agsec)) - 1, 1.0)
     
     #--- By Macro ag product
     # Create dataframe with no entries
-    pricegrowth_macro_agprod = pd.DataFrame.from_dict(macro_joint_agprod_map, columns=['crop category'], orient='index')
-    pricegrowth_macro_agprod.reset_index(inplace = True)
-    pricegrowth_macro_agprod = pricegrowth_macro_agprod.rename(columns = {'index':'macro_agprod'})
+    pricegrowth_ames_agprod = pd.DataFrame.from_dict(ames_joint_agprod_map, columns=['crop category'], orient='index')
+    pricegrowth_ames_agprod.reset_index(inplace = True)
+    pricegrowth_ames_agprod = pricegrowth_ames_agprod.rename(columns = {'index':'ames_agprod'})
     
     # Merge with pricegrowth_jointcrop to assign values, then drop crop categories column
-    pricegrowth_macro_agprod = pricegrowth_macro_agprod.merge(pricegrowth_jointcrop,
+    pricegrowth_ames_agprod = pricegrowth_ames_agprod.merge(pricegrowth_jointcrop,
                                                               left_on=['crop category'],
                                                               right_on=['crop category'],
                                                               how='left')
-    pricegrowth_macro_agprod.drop('crop category', axis=1, inplace=True)
-    pricegrowth_macro_agprod.set_index('macro_agprod', inplace=True)
+    pricegrowth_ames_agprod.drop('crop category', axis=1, inplace=True)
+    pricegrowth_ames_agprod.set_index('ames_agprod', inplace=True)
     
     # Convert from growth rate to index
-    pricendx_macro_agprod = (1.0 + pricegrowth_macro_agprod).cumprod(axis = 1)
+    pricendx_ames_agprod = (1.0 + pricegrowth_ames_agprod).cumprod(axis = 1)
     # Insert index = 1 in first year position
-    pricendx_macro_agprod.insert(0, int(min(pricendx_macro_agprod)) - 1, 1.0)
+    pricendx_ames_agprod.insert(0, int(min(pricendx_ames_agprod)) - 1, 1.0)
 
     #------------------------------------
     # nominal output index
@@ -380,48 +380,48 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     valndx_joint = dfcropsecgrp.groupby('crop category').sum()
     valndx_joint = valndx_joint.div(valndx_joint[min(valndx_joint)], axis=0)
     
-    # Assign to macro ag products
+    # Assign to AMES ag products
     # Create dataframe with no entries
-    valndx_macro_agsec = pd.DataFrame.from_dict(macro_joint_agsec_map, columns=['crop category'], orient='index')
-    valndx_macro_agsec.reset_index(inplace = True)
-    valndx_macro_agsec = valndx_macro_agsec.rename(columns = {'index':'macro_agsec'})
+    valndx_ames_agsec = pd.DataFrame.from_dict(ames_joint_agsec_map, columns=['crop category'], orient='index')
+    valndx_ames_agsec.reset_index(inplace = True)
+    valndx_ames_agsec = valndx_ames_agsec.rename(columns = {'index':'ames_agsec'})
     
     # Merge with valndx_joint to assign values, then drop crop categories column
-    valndx_macro_agsec = valndx_macro_agsec.merge(valndx_joint,
+    valndx_ames_agsec = valndx_ames_agsec.merge(valndx_joint,
                                                     left_on=['crop category'],
                                                     right_on=['crop category'],
                                                     how='left')
-    valndx_macro_agsec.drop('crop category', axis=1, inplace=True)
-    valndx_macro_agsec.set_index('macro_agsec', inplace=True)
+    valndx_ames_agsec.drop('crop category', axis=1, inplace=True)
+    valndx_ames_agsec.set_index('ames_agsec', inplace=True)
     
     # Calculate real index by dividing value index by price index
-    realndx_macro_agsec = valndx_macro_agsec/pricendx_macro_agsec.values
+    realndx_ames_agsec = valndx_ames_agsec/pricendx_ames_agsec.values
     
     #------------------------------------
     # Write out Macro input files
     #------------------------------------
     # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
-    firstyear = int(min(realndx_macro_agsec))
-    fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
-    realndx_macro_agsec = realndx_macro_agsec.transpose()
-    realndx_macro_agsec.index = realndx_macro_agsec.index.astype('int64') # After transpose, the index is years
+    firstyear = int(min(realndx_ames_agsec))
+    fname = os.path.join(fdiramesinput, leap_scenario + "_realoutputindex.csv")
+    realndx_ames_agsec = realndx_ames_agsec.transpose()
+    realndx_ames_agsec.index = realndx_ames_agsec.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/realndx_macro_agsec.loc[firstyear+1]
+    factor = 1/realndx_ames_agsec.loc[firstyear+1]
     for y in range(firstyear,2009,-1):
-        realndx_macro_agsec.loc[y] = val
+        realndx_ames_agsec.loc[y] = val
         val *= factor
-    realndx_macro_agsec.sort_index(inplace=True)
-    realndx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
+    realndx_ames_agsec.sort_index(inplace=True)
+    realndx_ames_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
-    fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
-    pricendx_macro_agprod = pricendx_macro_agprod.transpose()
-    pricendx_macro_agprod.index = pricendx_macro_agprod.index.astype('int64') # After transpose, the index is years
+    fname = os.path.join(fdiramesinput, leap_scenario + "_priceindex.csv")
+    pricendx_ames_agprod = pricendx_ames_agprod.transpose()
+    pricendx_ames_agprod.index = pricendx_ames_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
-    factor = 1/pricendx_macro_agprod.loc[firstyear+1]
+    factor = 1/pricendx_ames_agprod.loc[firstyear+1]
     for y in range(firstyear,2009,-1):
-        pricendx_macro_agprod.loc[y] = val
+        pricendx_ames_agprod.loc[y] = val
         val *= factor
-    pricendx_macro_agprod.sort_index(inplace=True)
-    pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
+    pricendx_ames_agprod.sort_index(inplace=True)
+    pricendx_ames_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
