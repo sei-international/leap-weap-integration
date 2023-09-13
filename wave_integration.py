@@ -829,6 +829,16 @@ def main_integration():
         completed_iterations += 1
         
         #------------------------------------------------------------------------------------------------------------------------
+        #
+        # Pass LEAP hydropower generation to WEAP
+        #
+        #------------------------------------------------------------------------------------------------------------------------
+        logging.info(_('Moving hydropower generation to WEAP...'))
+        for sl in leap_scenarios:
+            sw = scenarios_map[sl]
+            export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
+
+        #------------------------------------------------------------------------------------------------------------------------
         # Calculate AMES with new results from WEAP and LEAP
         #------------------------------------------------------------------------------------------------------------------------
         if using_ames:
@@ -872,21 +882,6 @@ def main_integration():
                         logging.error(msg)
                         sys.exit(msg)
     
-        #------------------------------------------------------------------------------------------------------------------------
-        #
-        # Pass LEAP hydropower generation to WEAP
-        #
-        #------------------------------------------------------------------------------------------------------------------------
-        logging.info(_('Moving hydropower generation to WEAP and rerunning WEAP...'))
-        for sl in leap_scenarios:
-            sw = scenarios_map[sl]
-            export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
-        
-        logging.info(_('Calculating WEAP...'))
-        weap.Calculate(0, 0, False) # Only calculate if needed
-        while weap.IsCalculating :
-            leap.Sleep(1000)
-
     msg = _('Completed WEAP-LEAP integration procedure')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(100)
