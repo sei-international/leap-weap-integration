@@ -17,13 +17,15 @@ def leapfloat(x):
 
 # Load favorite for selected scenario and export -- takes a long time to render, so disable controls
 def export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname, units):
-#    leap.DisableControls
     leap.ActiveView = "Results"
-    leap.Favorites(favname).Activate
+    # Should be calculated, but check
+    while leap.IsCalculating:
+        time.sleep(1)
+    leap.ActiveScenario = leap_scenario
+    leap.Favorites(favname).Activate()
     leap.ActiveUnit = units
     leap.ExportResultsCSV(leap_export_fname)
     leap.ActiveView = "Analysis"
-#    leap.EnableControls
 
 def get_leap_timeslice_info(leap, months):
     month_dict = dict(zip(months, [i+1 for i in range(len(months))]))
@@ -151,19 +153,22 @@ def proc_leap_hpp(leap_export_fname, config_params):
         # Loop over rows of values, summing up months
         curr_month = ""
         for val in csv_reader:
-            m = month_re.match(val[0]).group(1)
-            if m != curr_month:
-                new = True
-                curr_month = m
-            else:
-                new = False
-            for h in hpp:
-                if hpp[h]['cols']:
-                    curr_vals = [leapfloat(x) for x in [val[i + 1] for i in hpp[h]['cols']]]
-                    if new:
-                        hpp[h]['vals'][m] = curr_vals
-                    else:
-                        hpp[h]['vals'][m] = [hpp[h]['vals'][m][i] + curr_vals[i] for i in range(len(curr_vals))]
+            # If there is a total row it will give "None"
+            month_match = month_re.match(val[0])
+            if month_match is not None:
+                m = month_match.group(1)
+                if m != curr_month:
+                    new = True
+                    curr_month = m
+                else:
+                    new = False
+                for h in hpp:
+                    if hpp[h]['cols']:
+                        curr_vals = [leapfloat(x) for x in [val[i + 1] for i in hpp[h]['cols']]]
+                        if new:
+                            hpp[h]['vals'][m] = curr_vals
+                        else:
+                            hpp[h]['vals'][m] = [hpp[h]['vals'][m][i] + curr_vals[i] for i in range(len(curr_vals))]
                         
     return hpp
                 
