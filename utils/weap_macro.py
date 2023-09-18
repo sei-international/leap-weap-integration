@@ -151,7 +151,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             dfcovsec.set_index(['Demand Site', 'country'], inplace=True)
             # Remove month name and get monthly average over the year
             dfcovsec.columns = dfcovsec.columns.str[4:]
-            dfcovsec = dfcovsec.T.groupby(level=0).mean()
+            dfcovsec = dfcovsec.groupby(level=0, axis=1).mean()
             # Normalize
             dfcovsec = dfcovsec/100
 
@@ -193,7 +193,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     
     # Convert from coverage to maximum capacity utilization (if exponent = 0, max_util = 1.0; if = 1, then max_util = coverage)
     # TODO: For crops, should do actual output/potential
-    coverage = coverage.T**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent']
+    coverage = coverage.transpose()**config_params['LEAP-Macro']['WEAP']['cov_to_util_exponent']
     # After transpose, the index is years, so convert to integer
     coverage.index = coverage.index.astype('int64')
     # Have to add entry for 2019: Assume it's the same as in 2020
@@ -403,7 +403,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
     firstyear = int(min(realndx_macro_agsec))
     fname = os.path.join(fdirmacroinput, leap_scenario + "_realoutputindex.csv")
-    realndx_macro_agsec = realndx_macro_agsec.T
+    realndx_macro_agsec = realndx_macro_agsec.transpose()
     realndx_macro_agsec.index = realndx_macro_agsec.index.astype('int64') # After transpose, the index is years
     val = 1
     factor = 1/realndx_macro_agsec.loc[firstyear+1]
@@ -414,7 +414,7 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     realndx_macro_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     fname = os.path.join(fdirmacroinput, leap_scenario + "_priceindex.csv")
-    pricendx_macro_agprod = pricendx_macro_agprod.T
+    pricendx_macro_agprod = pricendx_macro_agprod.transpose()
     pricendx_macro_agprod.index = pricendx_macro_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
     factor = 1/pricendx_macro_agprod.loc[firstyear+1]
