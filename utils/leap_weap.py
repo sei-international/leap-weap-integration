@@ -205,10 +205,8 @@ def proc_weap_hpp(weap, hpp, config_params):
                         new = False
                     else:
                         if hpp_weap['years'] != hpp[hl]['years']:
-                            # TODO: In main script, use commented lines
-                            # msg = _('When aggregating WEAP hydropower plant {a} found inconsistent years in LEAP hydropower plants {b}.  Exiting...').format(a = hw, b = ", ".join(entry['leap_hpps']))
-                            msg = 'When aggregating WEAP hydropower plant {a} found inconsistent years in LEAP hydropower plants {b}.  Exiting...'.format(a = hw, b = ", ".join(entry['leap_hpps']))
-                            # logging.error(msg)
+                            msg = _('When aggregating WEAP hydropower plant {a} found inconsistent years in LEAP hydropower plants {b}.  Exiting...').format(a = hw, b = ", ".join(entry['leap_hpps']))
+                            logging.error(msg)
                             sys.exit(msg)
                         for m in config_params['LEAP']['Months']:
                             hpp_weap['dams'][hw]['vals'][m] = [hpp_weap['dams'][hw]['vals'][m][i] + hpp[hl]['vals'][m][i] for i in range(len(hpp_weap['years']))]
