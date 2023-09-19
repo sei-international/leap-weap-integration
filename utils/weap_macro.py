@@ -154,8 +154,6 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
             dfcovsec = (dfcovsec.T.groupby(level=0).mean()).T
             # Normalize
             dfcovsec = dfcovsec/100
-            
-            sys.exit()
 
             #----------------------------------------------------------------
             # Get WEAP water demand (to calculate weights in weighted average)
