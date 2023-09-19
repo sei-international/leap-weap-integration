@@ -4,7 +4,7 @@
 # Needs to be kept up-to-date by user
 ###############################################################
 Integrated model:
-    Tolerance: 0.1
+    Tolerance: 0.12
     Maximum iterations: 10
 
 WEAP:
