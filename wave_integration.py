@@ -398,9 +398,13 @@ def main_integration():
         weap.ActiveScenario = s
         for wb in weap_hydro_branches:
             weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
-            if not 'Run of River' in weap_path: 
-                weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
-
+            if not 'Run of River' in weap_path:
+                try:
+                    weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
+                except AttributeError as e:
+                    msg = _('For branch "{b}" encountered the follwing error: {e}'.format(b = weap_path, e = str(e)))
+                    logging.warning(msg)
+                    
     # Initial LEAP-Macro run, to provide macro-economic variables to LEAP
     if leap_macro:
         for s in leap_scenarios:
