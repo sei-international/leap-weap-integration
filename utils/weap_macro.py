@@ -10,6 +10,15 @@ import numpy as np
 import pandas as pd
 import os
 
+# TODO: START DEBUGGING
+import sys
+import win32com.client as win32
+import yaml
+
+def _(s):
+    return s
+# TODO: END DEBUGGING
+
 # Load and calculate correct scenario
 def load_weap_scen(WEAP, weap_scenario):
     WEAP.View = "Results"
@@ -425,3 +434,35 @@ def weap_to_macro_processing(weap_scenario, leap_scenario,
     pricendx_macro_agprod.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     # TODO: Investment parameters
+
+# TODO: START DEBUGGING
+def wait_apps(wait_app, sleep_app):
+    while not wait_app.ProgramStarted:
+        sleep_app.Sleep(1000)
+
+with open(r'config.yml') as file:
+    config_params = yaml.full_load(file)
+
+leap = win32.Dispatch('LEAP.LEAPApplication') # will open Freedonia
+weap = win32.Dispatch('WEAP.WEAPApplication') # will open last area
+wait_apps(weap, leap)
+
+CSV_ROW_SKIP = 3 # number of rows to skip in weap csv outputs
+leap_scenario = "S1 Baseline Historical"
+weap_scenario = "S1 Historical"
+
+macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
+fdirmain = macromodelspath
+fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
+
+dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
+for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
+    # set file directories for WEAP to LEAP-Macro
+    fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
+        
+    # process WEAP data for LEAP-Macro
+    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov.copy(), dfcovdmd.copy(), dfcrop.copy(), dfcropprice.copy())
+
+    break # Just do one
+
+# TODO: END DEBUGGING
