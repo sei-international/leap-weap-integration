@@ -111,7 +111,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
                              config_params, region, countries,
                              fdiramesinput, fdirweapoutput,
                              dfcov, dfwatdmd, dfcrop, dfcropprice):
-    """Process WEAP results and generate CSV files for Macro
+    """Process WEAP results and generate CSV files for AMES
 
     Input arguments:
         weap_scenario, leap_scenario: strings labeling the WEAP and LEAP scenarios to pull from and push to
@@ -151,7 +151,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
             dfcovsec.set_index(['Demand Site', 'country'], inplace=True)
             # Remove month name and get monthly average over the year
             dfcovsec.columns = dfcovsec.columns.str[4:]
-            dfcovsec = dfcovsec.groupby(level=0, axis=1).mean()
+            dfcovsec = (dfcovsec.T.groupby(level=0).mean()).T
             # Normalize
             dfcovsec = dfcovsec/100
 
@@ -193,7 +193,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     
     # Convert from coverage to maximum capacity utilization (if exponent = 0, max_util = 1.0; if = 1, then max_util = coverage)
     # TODO: For crops, should do actual output/potential
-    coverage = coverage.transpose()**config_params['AMES']['WEAP']['cov_to_util_exponent']
+    coverage = coverage.T**config_params['AMES']['WEAP']['cov_to_util_exponent']
     # After transpose, the index is years, so convert to integer
     coverage.index = coverage.index.astype('int64')
     # Have to add entry for 2019: Assume it's the same as in 2020
@@ -335,7 +335,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     pricegrowth_jointcrop = pricegrowth_jointcrop.droplevel('country')
     pricegrowth_jointcrop = pricegrowth_jointcrop.groupby(['crop category']).sum()
     
-    #--- By Macro ag sector
+    #--- By AMES ag sector
     # Create dataframe with no entries
     pricegrowth_ames_agsec = pd.DataFrame.from_dict(ames_joint_agsec_map, columns=['crop category'], orient='index')
     pricegrowth_ames_agsec.reset_index(inplace = True)
@@ -354,7 +354,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     # Insert index = 1 in first year position
     pricendx_ames_agsec.insert(0, int(min(pricendx_ames_agsec)) - 1, 1.0)
     
-    #--- By Macro ag product
+    #--- By AMES ag product
     # Create dataframe with no entries
     pricegrowth_ames_agprod = pd.DataFrame.from_dict(ames_joint_agprod_map, columns=['crop category'], orient='index')
     pricegrowth_ames_agprod.reset_index(inplace = True)
@@ -398,12 +398,12 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     realndx_ames_agsec = valndx_ames_agsec/pricendx_ames_agsec.values
     
     #------------------------------------
-    # Write out Macro input files
+    # Write out AMES input files
     #------------------------------------
     # Note: Must add some values to get to earlier years: go back to 2010 (only 2014 actually needed, for UZB)
     firstyear = int(min(realndx_ames_agsec))
     fname = os.path.join(fdiramesinput, leap_scenario + "_realoutputindex.csv")
-    realndx_ames_agsec = realndx_ames_agsec.transpose()
+    realndx_ames_agsec = realndx_ames_agsec.T
     realndx_ames_agsec.index = realndx_ames_agsec.index.astype('int64') # After transpose, the index is years
     val = 1
     factor = 1/realndx_ames_agsec.loc[firstyear+1]
@@ -414,7 +414,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     realndx_ames_agsec.to_csv(fname, index=True, index_label = "year") # final output to csv
 
     fname = os.path.join(fdiramesinput, leap_scenario + "_priceindex.csv")
-    pricendx_ames_agprod = pricendx_ames_agprod.transpose()
+    pricendx_ames_agprod = pricendx_ames_agprod.T
     pricendx_ames_agprod.index = pricendx_ames_agprod.index.astype('int64') # After transpose, the index is years
     val = 1
     factor = 1/pricendx_ames_agprod.loc[firstyear+1]

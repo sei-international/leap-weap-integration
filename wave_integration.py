@@ -398,8 +398,12 @@ def main_integration():
         weap.ActiveScenario = s
         for wb in weap_hydro_branches:
             weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
-            if not 'Run of River' in weap_path: 
-                weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
+            if not 'Run of River' in weap_path:
+                try:
+                    weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
+                except AttributeError as e:
+                    msg = _('For branch "{b}" encountered the following error: {e}'.format(b = weap_path, e = str(e)))
+                    logging.warning(msg)
 
     # Initial AMES run, to provide macroeconomic variables to LEAP
     if using_ames:
@@ -833,7 +837,7 @@ def main_integration():
         # Pass LEAP hydropower generation to WEAP
         #
         #------------------------------------------------------------------------------------------------------------------------
-        logging.info(_('Moving hydropower generation to WEAP...'))
+        logging.info(_('Moving hydropower generation from LEAP to WEAP...'))
         for sl in leap_scenarios:
             sw = scenarios_map[sl]
             export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
