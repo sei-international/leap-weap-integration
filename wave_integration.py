@@ -33,7 +33,7 @@ else:
 # Load gettext and install translator before importing other local scripts
 from utils.julia import get_julia_path
 from utils.leap_weap import add_leap_data_to_weap_interp, get_leap_timeslice_info, export_leap_hpp_to_weap
-from utils.weap_macro import get_weap_ag_results, weap_to_macro_processing
+from utils.weap_ames import get_weap_ag_results, weap_to_ames_processing
 
 #==================================================================================================#
 # Script for integrating WAVE WEAP and LEAP models.
@@ -234,8 +234,8 @@ def main_integration():
     shell = win32.Dispatch("WScript.Shell")
     shell.AppActivate("LEAP: ")
 
-    # Check whether leap_macro is being run
-    leap_macro = 'LEAP-Macro' in config_params.keys()
+    # Check whether AMES is being run
+    using_ames = 'AMES' in config_params.keys()
 
     procedure_title = _('WEAP-LEAP Integration Procedure')
     msg = _('Initiating integration procedure...')
@@ -243,17 +243,17 @@ def main_integration():
     shell.AppActivate("LEAP: ")
     leap.ShowProgressBar(procedure_title, msg)
 
-    if leap_macro:
+    if using_ames:
         # get Julia install location path
         juliapath = get_julia_path(shell)
         if juliapath == None:
             msg = _('Could not locate the Julia executable. Try adding the path to the executable to the Windows PATH environment variable.')
             logging.error(msg)
             sys.exit(msg)
-        # Get Macro models folder path and create it if it doesn't exist
-        macromodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP-Macro']['Folder']))
-        if not os.path.exists(macromodelspath):
-            os.makedirs(macromodelspath)
+        # Get AMES models folder path and create it if it doesn't exist
+        amesmodelspath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['AMES']['Folder']))
+        if not os.path.exists(amesmodelspath):
+            os.makedirs(amesmodelspath)
 
     # Get path for storing Excel files and create it if it doesn't exist
     hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
@@ -402,21 +402,21 @@ def main_integration():
                 try:
                     weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
                 except AttributeError as e:
-                    msg = _('For branch "{b}" encountered the follwing error: {e}'.format(b = weap_path, e = str(e)))
+                    msg = _('For branch "{b}" encountered the following error: {e}'.format(b = weap_path, e = str(e)))
                     logging.warning(msg)
-                    
-    # Initial LEAP-Macro run, to provide macro-economic variables to LEAP
-    if leap_macro:
+
+    # Initial AMES run, to provide macroeconomic variables to LEAP
+    if using_ames:
         for s in leap_scenarios:
-            logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-            for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
+            logging.info(_('Running AMES for scenario: {s}').format(s = s))
+            for r, rinfo in config_params['AMES']['Regions'].items():
                 logging.info('\t' + _('Region: {r}').format(r = r))
-                macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
-                exec_string = juliapath + " \"" + macrodir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
+                amesdir = os.path.join(amesmodelspath,  rinfo['directory_name'], rinfo['script'])
+                exec_string = juliapath + " \"" + amesdir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
                 logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
-                    msg = _('LEAP-Macro exited with an error')
+                    msg = _('AMES exited with an error')
                     logging.error(msg)
                     sys.exit(msg)
 
@@ -434,8 +434,8 @@ def main_integration():
     # Initialize target results for convergence checks during iterative calculations, by scenario
     target_leap_results = list(config_params['LEAP']['Hydropower_plants']['plants'].keys())
     target_weap_results = list(config_params['WEAP']['Hydropower_plants']['dams'].keys())
-    if leap_macro:
-        target_leapmacro_results = config_params['LEAP-Macro']['LEAP']['target_variables']
+    if using_ames:
+        target_ames_results = config_params['AMES']['LEAP']['target_variables']
 
     while completed_iterations <= max_iterations :
         msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
@@ -687,7 +687,7 @@ def main_integration():
         leap.SetProgressBar(80)
         
         this_iteration_leap_results = {}
-        this_iteration_leapmacro_results = {}
+        this_iteration_ames_results = {}
         this_iteration_weap_results = {}
 
         leap_unit = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_unit']
@@ -716,23 +716,23 @@ def main_integration():
                     current_index += 1
 
 
-            if leap_macro:
-                logging.info('\t' + _('Checking Macro results...'))
-                # Create an array of target Macro result values obtained in this iteration and stored in LEAP
-                leapmacro_results_size = len(target_leapmacro_results) * len(config_params['LEAP-Macro']['Regions'].keys()) * len(leap_calc_years)
-                this_iteration_leapmacro_results[sl] = np.empty(leapmacro_results_size, dtype=object)
+            if using_ames:
+                logging.info('\t' + _('Checking AMES results...'))
+                # Create an array of target AMES result values obtained in this iteration and stored in LEAP
+                ames_results_size = len(target_ames_results) * len(config_params['AMES']['Regions'].keys()) * len(leap_calc_years)
+                this_iteration_ames_results[sl] = np.empty(ames_results_size, dtype=object)
                 
                 current_index = 0
-                for e in target_leapmacro_results:
+                for e in target_ames_results:
                     leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
-                    for r in config_params['LEAP-Macro']['Regions']:
+                    for r in config_params['AMES']['Regions']:
                         leap_region_id = leap_region_ids[r]
                         leap.ActiveRegion = leap_region_id
                         for y in leap_calc_years:
                             val = leap_var.Value(y)
                             if val is None:
-                                logging.error(_('LEAP did not return a value for Macro result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
-                            this_iteration_leapmacro_results[sl][current_index] = val
+                                logging.error(_('LEAP did not return a value for AMES result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
+                            this_iteration_ames_results[sl][current_index] = val
                             current_index += 1
 
             logging.info('\t' + _('Checking WEAP results...'))
@@ -777,16 +777,16 @@ def main_integration():
                         results_converged = False
                         break
 
-                # Only carry out LEAP-Macro convergence checks if all LEAP-Macro is turned on and all LEAP checks passed
-                if leap_macro and results_converged:
-                    for i in range(0, len(this_iteration_leapmacro_results[sl])):
-                        if abs(this_iteration_leapmacro_results[sl][i] - last_iteration_leapmacro_results[sl][i]) > abs(last_iteration_leapmacro_results[sl][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_leapmacro_results, list(config_params['LEAP-Macro']['Regions'].keys()), leap_calc_years)
-                            logging.info('\t\t' + _('Difference exceeded tolerance for LEAP-Macro result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_leapmacro_results[sl][i], c = this_iteration_leapmacro_results[sl][i]))
+                # Only carry out AMES convergence checks if all AMES is turned on and all LEAP checks passed
+                if using_ames and results_converged:
+                    for i in range(0, len(this_iteration_ames_results[sl])):
+                        if abs(this_iteration_ames_results[sl][i] - last_iteration_ames_results[sl][i]) > abs(last_iteration_ames_results[sl][i]) * tolerance + float_info.epsilon:
+                            diff_loc = index_to_elements(i, target_ames_results, list(config_params['AMES']['Regions'].keys()), leap_calc_years)
+                            logging.info('\t\t' + _('Difference exceeded tolerance for AMES result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_ames_results[sl][i], c = this_iteration_ames_results[sl][i]))
                             results_converged = False
                             break
 
-                # Only carry out WEAP convergence checks if all LEAP (and LEAP-Macro) checks passed
+                # Only carry out WEAP convergence checks if all LEAP (and AMES) checks passed
                 if results_converged :
                     for i in range(0, len(this_iteration_weap_results[sw])):
                         if abs(this_iteration_weap_results[sw][i] - last_iteration_weap_results[sw][i]) > abs(last_iteration_weap_results[sw][i]) * tolerance + float_info.epsilon:
@@ -801,7 +801,7 @@ def main_integration():
                     # Remove this scenario from lists
                     del scenarios_map[sl]
                     del this_iteration_leap_results[sl]
-                    del this_iteration_leapmacro_results[sl]
+                    del this_iteration_ames_results[sl]
                     del this_iteration_weap_results[sw]
                     continue # Go to next scenario, if any
                 else:
@@ -828,7 +828,7 @@ def main_integration():
         # Update information for next iteration
         last_iteration_leap_results = this_iteration_leap_results
         last_iteration_weap_results = this_iteration_weap_results
-        last_iteration_leapmacro_results = this_iteration_leapmacro_results
+        last_iteration_ames_results = this_iteration_ames_results
 
         completed_iterations += 1
         
@@ -843,15 +843,15 @@ def main_integration():
             export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
 
         #------------------------------------------------------------------------------------------------------------------------
-        # Calculate Macro with new results from WEAP and LEAP
+        # Calculate AMES with new results from WEAP and LEAP
         #------------------------------------------------------------------------------------------------------------------------
-        if leap_macro:
-            logging.info(_('Pushing WEAP results to Macro...'))
+        if using_ames:
+            logging.info(_('Pushing WEAP results to AMES...'))
             for leap_scenario in leap_scenarios:
                 weap_scenario = scenarios_map[leap_scenario]
                 
                 # create directory to store WEAP outputs
-                fdirmain = macromodelspath
+                fdirmain = amesmodelspath
                 fdirweapoutput = os.path.join(fdirmain, "WEAP outputs")
                 if not os.path.exists(fdirweapoutput):
                     os.mkdir(fdirweapoutput)
@@ -860,20 +860,20 @@ def main_integration():
                 dfcov, dfcovdmd, dfcrop, dfcropprice = get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, weap, config_params, CSV_ROW_SKIP)
                 
                 logging.info(_('Processing for WEAP scenario: {s}').format(s = weap_scenario))
-                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():  
-                    # set file directories for WEAP to LEAP-Macro
-                    fdirmacroinput = os.path.join(macromodelspath, rinfo['directory_name'], "inputs")
+                for r, rinfo in config_params['AMES']['Regions'].items():  
+                    # set file directories for WEAP to AMES
+                    fdiramesinput = os.path.join(amesmodelspath, rinfo['directory_name'], "inputs")
                         
-                    # process WEAP data for LEAP-Macro
-                    weap_to_macro_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdirmacroinput, fdirweapoutput, dfcov.copy(), dfcovdmd.copy(), dfcrop.copy(), dfcropprice.copy())
+                    # process WEAP data for AMES
+                    weap_to_ames_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdiramesinput, fdirweapoutput, dfcov.copy(), dfcovdmd.copy(), dfcrop.copy(), dfcropprice.copy())
 
-            # Run LEAP-Macro
+            # Run AMES
             for s in leap_scenarios:
-                logging.info(_('Running LEAP-Macro for scenario: {s}').format(s = s))
-                for r, rinfo in config_params['LEAP-Macro']['Regions'].items():
+                logging.info(_('Running AMES for scenario: {s}').format(s = s))
+                for r, rinfo in config_params['AMES']['Regions'].items():
                     logging.info('\t' + _('Region: {r}').format(r = r))
-                    macrodir = os.path.join(macromodelspath,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + macrodir + "\" \"" + s + "\"" + \
+                    amesdir = os.path.join(amesmodelspath,  rinfo['directory_name'], rinfo['script'])
+                    exec_string = juliapath + " \"" + amesdir + "\" \"" + s + "\"" + \
                                     " -c -p -w -v" + \
                                     " -y " + str(leap_calc_years[-1]) + \
                                     " -u \"" + version_comment + "\"" + \
@@ -882,7 +882,7 @@ def main_integration():
                     logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
-                        msg = _('LEAP-Macro exited with an error')
+                        msg = _('AMES exited with an error')
                         logging.error(msg)
                         sys.exit(msg)
     
