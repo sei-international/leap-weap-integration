@@ -252,4 +252,7 @@ def export_leap_hpp_to_weap(leap, weap, iteration, leap_scenario, weap_scenario,
     weap_fname_full = os.path.join(config_params['WEAP']['Folder'], weap_fname)
     for hppname, hppitem in hpp_weap['dams'].items():
         expression = "ReadFromFile(\"" + weap_fname_full + "\", \"" + hppname + "\")"
-        weap.Branches(hppitem['path']).Variables('Energy Demand').Expression = expression
+        hppobj = weap.Branches(hppitem['path'])
+        # A particular plant may not be active in a scenario -- check
+        if hppobj is not None:
+            hppobj.Variables('Energy Demand').Expression = expression

@@ -504,8 +504,11 @@ def main_integration():
             leap.ActiveScenario = leap_scenario_id
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
+                weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
+                # It is possible that the plant does not appear in this scenario
+                if weap_hpp is None: continue
                 xlsx_file = "".join(["hydro_availability_wbranch",
-                                     str(weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Id),
+                                     str(weap_hpp.Id),
                                      "_lscenario", str(leap_scenario_id),
                                      "_iteration", str(completed_iterations + 1),
                                      ".xlsx" ])
@@ -521,13 +524,13 @@ def main_integration():
                 num_lines_written = 0 # Number of lines written to CSV file
 
                 # check unit
-                weap_unit= weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Variables('Hydropower Generation').Unit
+                weap_unit= weap_hpp.Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
                     msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
                 # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
-                weap_hpp_gen = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']).Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
+                weap_hpp_gen = weap_hpp.Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
 
                 # check that there are values for every month
                 if not len(weap_hpp_gen)%12 == 0:
