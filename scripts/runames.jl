@@ -55,37 +55,78 @@ function parse_commandline()
     return parse_args(argp)
 end
 
+"Return a string vector whether given a string or a vector of strings"
+function stringvec(s::Union{String,Vector{String}})
+	if s isa String
+		return [s]
+	else
+		return s
+	end
+end
+
+"Check whether a Dict has a key and that the value is not `nothing`"
+function haskeyvalue(d::Dict, k::Any)
+    return haskey(d,k) && !isnothing(d[k])
+end # haskeyvalue
+
 curr_working_dir = pwd()
 cd(@__DIR__)
 
+# Get command line arguments
 parsed_args = parse_commandline()
+
+# Read the config file
 cfg_file = parsed_args["config_file"]
 cfg_yaml = YAML.load_file(cfg_file)
+
 # These must be set to these values for the script to work
 cfg_yaml["model"]["run_leap"] = true
 cfg_yaml["model"]["max_runs"] = 0
-# Get options from command line
-cfg_yaml["output_folder"] = parsed_args["scenario"]
-cfg_yaml["LEAP-info"]["scenario"] = parsed_args["scenario"]
-cfg_yaml["model"]["hide_leap"] = parsed_args["suppress_leap"]
-cfg_yaml["years"]["end"] = parsed_args["final_year"]
-cfg_yaml["report-diagnostics"] = parsed_args["report_diagnostics"]
-
-if parsed_args["use_weap_results"]
-	cfg_yaml["exog-files"]["pot_output"] = parsed_args["scenario"] * "_realoutputindex.csv"
-	cfg_yaml["exog-files"]["max_util"] = parsed_args["scenario"] * "_max_util.csv"
-	cfg_yaml["exog-files"]["real_price"] = parsed_args["scenario"] * "_priceindex.csv"
-else
-	cfg_yaml["exog-files"]["pot_output"] = nothing
-	cfg_yaml["exog-files"]["max_util"] = nothing
-	cfg_yaml["exog-files"]["real_price"] = nothing
-end
 
 if parsed_args["init_run_number"] != 0
     cfg_yaml["clear-folders"]["results"] = false
     cfg_yaml["clear-folders"]["calibration"] = false
     cfg_yaml["clear-folders"]["diagnostics"] = false
 end
+
+#--------------------------------------------
+# Get options from command line
+#--------------------------------------------
+cfg_yaml["output_folder"] = parsed_args["scenario"]
+cfg_yaml["LEAP-info"]["scenario"] = parsed_args["scenario"]
+cfg_yaml["model"]["hide_leap"] = parsed_args["suppress_leap"]
+cfg_yaml["years"]["end"] = parsed_args["final_year"]
+cfg_yaml["report-diagnostics"] = parsed_args["report_diagnostics"]
+
+#--------------------------------------------
+# Several cases for exogenous files
+#--------------------------------------------
+exog_dict = Dict(
+				 "pot_output" => "_realoutputindex",
+				 "max_util" => "_max_util",
+				 "real_price" => "_priceindex"
+				)
+exog_files_block = cfg_yaml["exog-files"]
+for (c, f) in exog_dict
+	# First, clean up by getting rid of any prior integration script filenames
+	if haskeyvalue(exog_files_block, c)
+		flist = stringvec(exog_files_block[c])
+		deleteat!(flist, occursin.(f, flist))
+	else
+		flist = []
+	end
+	# Next, if using WEAP results, add integration script filenames
+	if parsed_args["use_weap_results"]
+		push!(flist, parsed_args["scenario"] * f * ".csv")
+	end
+	# Finally, assign to the YAML file
+	if length(flist) > 0
+		exog_files_block[c] = flist
+	else
+		exog_files_block[c] = nothing
+	end
+end
+
 YAML.write_file(cfg_file, cfg_yaml)
 
 AMES.run(parsed_args["config_file"],
