@@ -1,5 +1,5 @@
-# script 'runleapmacro.jl'
-using LEAPMacro
+# script 'runames.jl'
+using AMES
 using YAML
 using ArgParse
 
@@ -24,14 +24,14 @@ function parse_commandline()
             help = "try to continue if the linear goal program returns an error"
             action = :store_true
         "--load-leap-first", "-l"
-            help = "load results from LEAP before running Macro"
+            help = "load results from LEAP before running AMES"
             action = :store_true
         "--use-leap-version", "-u"
             help = "If load-leap-first is set, pull results from this version"
 			# Default arg_type = Any
 			# Default default = nothing
         "--only-push-leap-results", "-p"
-            help = "only push results to LEAP and do not run LEAP from Macro"
+            help = "only push results to LEAP and do not run LEAP from AMES"
             action = :store_true
         "--init-run-number", "-r"
             help = "initial run number"
@@ -88,7 +88,7 @@ if parsed_args["init_run_number"] != 0
 end
 YAML.write_file(cfg_file, cfg_yaml)
 
-LEAPMacro.run(parsed_args["config_file"],
+AMES.run(parsed_args["config_file"],
               dump_err_stack = parsed_args["verbose_errors"],
 			  load_leap_first = parsed_args["load_leap_first"],
               get_results_from_leap_version = parsed_args["use_leap_version"], 
