@@ -99,9 +99,11 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
     weap_scenarios_local = weap_scenarios.copy()
     leap_scenarios_local.append('Current Accounts')
     weap_scenarios_local.append('Current Accounts')
+    leap.ActiveRegion = leap_region
     # Loop over scenarios and add LEAP data to WEAP expressions.
     for i in range(0, len(leap_scenarios_local)):
         weap.ActiveScenario = weap_scenarios_local[i]
+        leap.ActiveScenario = leap_scenarios_local[i]
         # logging.info('LEAP Scenario: ' + leap_scenarios_local[i] + '; LEAP Variable: ' + weap.Branches(weap_branch).Variables(weap_variable).Name)
         weap_expression = weap.Branches(weap_branch).Variables(weap_variable).Expression # ' Target expression in WEAP; must be an Interp expression
         if not weap_expression[0:6] == 'Interp':
@@ -112,7 +114,7 @@ def add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, wea
         split_weap_expression = split_interp_ex(weap_expression, startyear, endyear, listseparator)
         new_data = "" #New data to be inserted into target WEAP expression
         for y in range(startyear, endyear+1):
-            new_data = "".join([new_data, str(y), listseparator, str(leap.Branches(leap_branch).Variables(leap_variable).ValueRS(leap.regions(leap_region).id, leap_scenarios_local[i], y) * data_multiplier), listseparator])
+            new_data = "".join([new_data, str(y), listseparator, str(leap.Branches(leap_branch).Variables(leap_variable).Value(y) * data_multiplier), listseparator])
         new_weap_expression = split_weap_expression[0]
         if new_weap_expression[-1] == "(":
             new_weap_expression = "".join([new_weap_expression, new_data])
