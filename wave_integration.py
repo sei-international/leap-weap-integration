@@ -453,6 +453,7 @@ def main_integration():
             leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
             leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
             leap_region = config_params['WEAP']['Branches'][k]['leap_region']
+            # TODO put these into the config file
             if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
                 unit_multiplier = 1
             elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
