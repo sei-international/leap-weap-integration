@@ -868,7 +868,7 @@ def main_integration():
                     fdiramesinput = os.path.join(amesmodelspath, rinfo['directory_name'], "inputs")
                         
                     # process WEAP data for AMES
-                    weap_to_ames_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdiramesinput, fdirweapoutput, dfcov.copy(), dfcovdmd.copy(), dfcrop.copy(), dfcropprice.copy())
+                    weap_to_ames_processing(weap_scenario, leap_scenario, config_params, r, rinfo['weap_region'], fdiramesinput, fdirweapoutput, dfcov, dfcovdmd, dfcrop, dfcropprice)
 
             # Run AMES
             for s in leap_scenarios:

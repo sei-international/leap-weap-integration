@@ -126,6 +126,10 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     TODO: Specify list_separator
     """
 
+    dfcov_local = dfcov.copy()
+    dfwatdmd_local = dfwatdmd.copy()
+    dfcrop_local = dfcrop.copy()
+    dfcropprice_local = dfcropprice_local.copy()
     #------------------------------------
     # Process coverage data
     #------------------------------------
@@ -136,7 +140,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
             # Get detailed WEAP coverage data
             #----------------------------------------------------------------
             # Remove any demand sites not related to this sector
-            dfcovsec = dfcov[dfcov['Demand Site'].str.contains(weap_sectorname)].copy()
+            dfcovsec = dfcov_local[dfcov_local['Demand Site'].str.contains(weap_sectorname)].copy()
             # Extract every row for the WEAP countries in this LEAP region
             conditions = list(map(dfcovsec.loc[:,'Demand Site'].str.contains, countries))
             # Add a column to list the countries (default to 'other' if not in the list)
@@ -159,7 +163,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
             # Get WEAP water demand (to calculate weights in weighted average)
             #----------------------------------------------------------------
             # Remove any branches not related to this sector
-            dfwatdmdsec = dfwatdmd[dfwatdmd['Branch'].str.contains(weap_sectorname)].copy()
+            dfwatdmdsec = dfwatdmd_local[dfwatdmd_local['Branch'].str.contains(weap_sectorname)].copy()
             # Extract every row for the WEAP countries in this LEAP region
             conditions = list(map(dfwatdmdsec.loc[:,'Branch'].str.contains, countries))
             # Add a column to list the countries (default to 'other' if not in the list)
@@ -218,12 +222,12 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
         for agprod in entry['ames']['product']:
             ames_joint_agprod_map[agprod] = category
 
-    # Add crop categories to dfcropprice
-    dfcropprice.loc[:,'crop category'] = dfcropprice.loc[:,'crop'].map(weap_joint_crop_map)
-    dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index
+    # Add crop categories to dfcropprice_local
+    dfcropprice_local.loc[:,'crop category'] = dfcropprice_local.loc[:,'crop'].map(weap_joint_crop_map)
+    dfcropprice_local.set_index(['country', 'crop', 'crop category'], inplace=True)  # sets first three columns as index
 
     # Only include branches related to this sector
-    dfcropsec = dfcrop[dfcrop['Branch'].str.contains(config_params['AMES']['WEAP']['agsector'])].copy()
+    dfcropsec = dfcrop_local[dfcrop_local['Branch'].str.contains(config_params['AMES']['WEAP']['agsector'])].copy()
     # Extract every row for the WEAP countries in this LEAP region
     conditions = list(map(dfcropsec.loc[:,'Branch'].str.contains, countries))
     # Add a column to list the countries (default to 'other' if not in the list)
@@ -250,34 +254,34 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     # Ensure number of columns & rows are the same in the prices and crop production matrices
     #----------------------------------------------------------------------------------------
     # ***** Columns
-    # Find difference between the columns in dfcrop and dfcropprice
-    diff_cols = dfcropprice.columns.difference(dfcrop.columns)
-    # Limit to those containing years (giving True for isdigit) and drop from dfcropprice
+    # Find difference between the columns in dfcrop_local and dfcropprice_local
+    diff_cols = dfcropprice_local.columns.difference(dfcrop_local.columns)
+    # Limit to those containing years (giving True for isdigit) and drop from dfcropprice_local
     diff_cols = [x for x in diff_cols if x.isdigit()]
-    dfcropprice = dfcropprice.drop(columns = diff_cols)
-    # Fill in any missing years from dfcrop, assuming constant below and above the min/max year
-    dfcropprice_cols = dfcropprice.columns
+    dfcropprice_local = dfcropprice_local.drop(columns = diff_cols)
+    # Fill in any missing years from dfcrop_local, assuming constant below and above the min/max year
+    dfcropprice_cols = dfcropprice_local.columns
     dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()]
-    diff_cols = dfcrop.columns.difference(dfcropprice_cols)
+    diff_cols = dfcrop_local.columns.difference(dfcropprice_cols)
     diff_cols = [x for x in diff_cols if x.isdigit()]
     # If there are years beyond the available time series, set equal to the value for the earliest/latest year
     minyr = min(dfcropprice_cols)
     maxyr = max(dfcropprice_cols)
     for x in diff_cols:
         if x < minyr:
-            dfcropprice[x] = dfcropprice[minyr]
+            dfcropprice_local[x] = dfcropprice_local[minyr]
         elif x > maxyr:
-            dfcropprice[x] = dfcropprice[maxyr]
+            dfcropprice_local[x] = dfcropprice_local[maxyr]
         else:
             # Must include all years between the min & max, so any interpolation must be done offline
             msg = _('Must have a complete time series for crop prices: Missing value in year {a}, which is between the minimum and maximum years {b} and {c}').format(a = x, b = minyr, c = maxyr)
             logging.error(msg)
             sys.exit(msg)
     # Resort columns labeling years to ensure they are in order
-    dfcropprice_cols = dfcropprice.columns
+    dfcropprice_cols = dfcropprice_local.columns
     dfcropprice_cols = [x for x in dfcropprice_cols if x.isdigit()]
     dfcropprice_cols.sort()
-    dfcropprice = dfcropprice.loc[:,dfcropprice_cols]
+    dfcropprice_local = dfcropprice_local.loc[:,dfcropprice_cols]
 
     # ***** Rows
     # Sector crop production: Create a "helper column" called "key"
@@ -285,32 +289,32 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     dfcropsecgrp = dfcropsecgrp.reset_index()
     dfcropsecgrp['key'] = dfcropsecgrp['country']+dfcropsecgrp['crop'] # helper column
     # Crop price: Create a "helper column" and called "key"
-    dfcropprice = dfcropprice.reset_index()
-    dfcropprice['key'] = dfcropprice['country']+dfcropprice['crop'] # helper column
+    dfcropprice_local = dfcropprice_local.reset_index()
+    dfcropprice_local['key'] = dfcropprice_local['country']+dfcropprice_local['crop'] # helper column
     # Delete any rows that don't match
-    dfcropprice = dfcropprice[dfcropprice['key'].isin(dfcropsecgrp['key'])]
+    dfcropprice_local = dfcropprice_local[dfcropprice_local['key'].isin(dfcropsecgrp['key'])]
     # Sort on the (identical) helper columns & then drop, since no longer needed
     dfcropsecgrp = dfcropsecgrp.sort_values('key')
-    dfcropprice = dfcropprice.sort_values('key')
+    dfcropprice_local = dfcropprice_local.sort_values('key')
     dfcropsecgrp = dfcropsecgrp.drop(columns = 'key')
-    dfcropprice = dfcropprice.drop(columns = 'key')
+    dfcropprice_local = dfcropprice_local.drop(columns = 'key')
     # Reset index columns (country x crop x crop category)
     dfcropsecgrp.set_index(['country', 'crop', 'crop category'], inplace=True)
-    dfcropprice.set_index(['country', 'crop', 'crop category'], inplace=True)
+    dfcropprice_local.set_index(['country', 'crop', 'crop category'], inplace=True)
     dfcropsecgrp.drop(index='other', level='country', errors='ignore', inplace=True) # Drop 'other' if it is present
 
     #------------------------------------
     # price inflation (growth rate of crop price)
     #------------------------------------
-    dfinflation = dfcropprice.drop(columns = min(dfcropprice.columns))
-    dfinflation_lag = dfcropprice.drop(columns = max(dfcropprice.columns))
+    dfinflation = dfcropprice_local.drop(columns = min(dfcropprice_local.columns))
+    dfinflation_lag = dfcropprice_local.drop(columns = max(dfcropprice_local.columns))
     dfinflation = dfinflation/dfinflation_lag.values - 1.0
  
     #------------------------------------
     # share of production by joint crop category
     #------------------------------------
     # Numerator
-    dfnum = dfcropsecgrp * dfcropprice
+    dfnum = dfcropsecgrp * dfcropprice_local
     # Denominator
     dfdom = dfnum.groupby(['country', 'crop category']).sum()
     # Associate denominator with numerator by merging -- will assign "_x" and "_y" for the year columns in dfnum & dfdom
@@ -325,7 +329,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     # Divide numerator by denominator
     dfshare = dfnum.div(dfdom)
     # Drop first year because it's not present in the growth rate data frames
-    dfcrop_cols = [x for x in dfcrop.columns if x.isdigit()] # keeps if column header has digits (years)
+    dfcrop_cols = [x for x in dfcrop_local.columns if x.isdigit()] # keeps if column header has digits (years)
     dfshare = dfshare.drop(columns = min(dfcrop_cols))
 
     #------------------------------------
