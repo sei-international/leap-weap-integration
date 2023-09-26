@@ -129,7 +129,7 @@ def weap_to_ames_processing(weap_scenario, leap_scenario,
     dfcov_local = dfcov.copy()
     dfwatdmd_local = dfwatdmd.copy()
     dfcrop_local = dfcrop.copy()
-    dfcropprice_local = dfcropprice_local.copy()
+    dfcropprice_local = dfcropprice.copy()
     #------------------------------------
     # Process coverage data
     #------------------------------------
