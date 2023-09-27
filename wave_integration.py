@@ -157,7 +157,19 @@ def index_to_elements(i, *lists_tuple):
         elements.append(l[i_rem % llen])
         i_rem //= llen
     return list(reversed(elements))
-    
+
+# Generate a "long" index from multiple lists
+def elements_to_index(elements, *lists_tuple):
+    lists = list(lists_tuple)
+    lengths = [len(l) for l in lists]
+    locs = [l.index(e) for (e, l) in zip(elements, lists)]
+    i = 0
+    m = 1
+    for j in reversed(range(len(lists))):
+        i += m * locs[j]
+        m *= lengths[j]
+    return i
+
 # function to clear out any running instances of Excel (no return value)
 def kill_excel():
     ps_re = re.compile(r'excel', flags=re.IGNORECASE)
@@ -771,15 +783,26 @@ def main_integration():
                 logging.info('\t' + _('Checking convergence for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
 
                 results_converged = True # Tentative; may be overwritten during following convergence checks
-
-                # For each check, allow for deviations within machine precision, as given by system "epsilon"
                 
-                for i in range(0, len(this_iteration_leap_results[sl])):
-                    if abs(this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i]) > abs(last_iteration_leap_results[sl][i]) * tolerance + float_info.epsilon:
-                        diff_loc = index_to_elements(i, target_leap_results, leap_calc_years)
-                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
+                for y in leap_calc_years:
+                    diff_sum = 0.0
+                    tot_sum = 0.0
+                    for e in target_leap_results:
+                        i = elements_to_index([e, y], target_leap_results, leap_calc_years)
+                        tot_sum += last_iteration_leap_results[sl][i]
+                        diff_sum += (this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i])**2
+                    # Comparison is sqrt(sum_of_squares)/sum_of_values > tolerance/sqrt(N)
+                    if np.sqrt(diff_sum * len(target_leap_results)) > tolerance * tot_sum:
+                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP in year {y}: {r} > {t}').format(y = y, r = np.sqrt(diff_sum)/tot_sum, t = tolerance/srt(len(target_leap_results))))
                         results_converged = False
                         break
+                        
+                # for i in range(0, len(this_iteration_leap_results[sl])):
+                    # if abs(this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i]) > abs(last_iteration_leap_results[sl][i]) * tolerance + float_info.epsilon:
+                        # diff_loc = index_to_elements(i, target_leap_results, leap_calc_years)
+                        # logging.info('\t\t' + _('Difference exceeded tolerance for LEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
+                        # results_converged = False
+                        # break
 
                 # Only carry out AMES convergence checks if all AMES is turned on and all LEAP checks passed
                 if using_ames and results_converged:
