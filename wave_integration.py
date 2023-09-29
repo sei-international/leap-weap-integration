@@ -793,7 +793,7 @@ def main_integration():
                         diff_sum += (this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i])**2
                     # Comparison is sqrt(sum_of_squares)/sum_of_values > tolerance/sqrt(N)
                     if np.sqrt(diff_sum * len(target_leap_results)) > tolerance * tot_sum:
-                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP in year {y}: {r} > {t}').format(y = y, r = np.sqrt(diff_sum)/tot_sum, t = tolerance/srt(len(target_leap_results))))
+                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP in year {y}: {r} > {t}').format(y = y, r = np.sqrt(diff_sum)/tot_sum, t = tolerance/np.sqrt(len(target_leap_results))))
                         results_converged = False
                         break
                         
