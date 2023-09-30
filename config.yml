@@ -8,7 +8,7 @@ Integrated model:
     Maximum iterations: 10
 
 WEAP:
-  Area: WAVE-Amu_Syr_Darya 2023_09_13
+  Area: WAVE-Amu_Syr_Darya 2023_09_26
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
