@@ -792,7 +792,7 @@ def main_integration():
                 den = 0.5 * np.maximum(np.abs(this_iteration_leap_results[sl] + last_iteration_leap_results[sl]), float_info.epsilon)
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
-                    logging.info('\t\t' + _('Difference exceeded tolerance for LEAP: Test value = {t:.2%}').format(t = test_value))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for LEAP: Test value = {t:.2%} > {r:.2%}').format(t = test_value, r = tolerance))
                     results_converged = False
                 
                 # WEAP
@@ -800,7 +800,7 @@ def main_integration():
                 den = 0.5 * np.maximum(np.abs(this_iteration_weap_results[sw] + last_iteration_weap_results[sw]), float_info.epsilon)
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
-                    logging.info('\t\t' + _('Difference exceeded tolerance for WEAP: Test value = {t:.2%}').format(t = test_value))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for WEAP: Test value = {t:.2%} > {r:.2%}').format(t = test_value, r = tolerance))
                     results_converged = False
                     
                 # AMES
@@ -808,7 +808,7 @@ def main_integration():
                 den = 0.5 * np.maximum(np.abs(this_iteration_ames_results[sl] + last_iteration_ames_results[sl]), float_info.epsilon)
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
-                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES: Test value = {t:.2%}').format(t = test_value))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES: Test value = {t:.2%} > {r:.2%}').format(t = test_value, r = tolerance))
                     results_converged = False
 
                 if results_converged:
