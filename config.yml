@@ -5,7 +5,7 @@
 ###############################################################
 Integrated model:
     Tolerance: 0.10
-    Maximum iterations: 3
+    Maximum iterations: 10
 
 WEAP:
   Area: WAVE-Amu_Syr_Darya 2023_09_13
@@ -262,7 +262,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: wave central asia v53
+  Area: wave central asia v53b
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
