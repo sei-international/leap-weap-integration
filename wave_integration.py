@@ -782,45 +782,34 @@ def main_integration():
                 
                 logging.info('\t' + _('Checking convergence for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
 
-                results_converged = True # Tentative; may be overwritten during following convergence checks
+                # Initialize results_converged to True; may be overwritten during following convergence checks
+                # Show results for LEAP, WEAP, and AMES, even if a prior one failed
+                results_converged = True
                 
-                for y in leap_calc_years:
-                    diff_sum = 0.0
-                    tot_sum = 0.0
-                    for e in target_leap_results:
-                        i = elements_to_index([e, y], target_leap_results, leap_calc_years)
-                        tot_sum += last_iteration_leap_results[sl][i]
-                        diff_sum += (this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i])**2
-                    # Comparison is sqrt(sum_of_squares)/sum_of_values > tolerance/sqrt(N)
-                    if np.sqrt(diff_sum * len(target_leap_results)) > tolerance * tot_sum:
-                        logging.info('\t\t' + _('Difference exceeded tolerance for LEAP in year {y}: {r} > {t}').format(y = y, r = np.sqrt(diff_sum)/tot_sum, t = tolerance/srt(len(target_leap_results))))
-                        results_converged = False
-                        break
-                        
-                # for i in range(0, len(this_iteration_leap_results[sl])):
-                    # if abs(this_iteration_leap_results[sl][i] - last_iteration_leap_results[sl][i]) > abs(last_iteration_leap_results[sl][i]) * tolerance + float_info.epsilon:
-                        # diff_loc = index_to_elements(i, target_leap_results, leap_calc_years)
-                        # logging.info('\t\t' + _('Difference exceeded tolerance for LEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_leap_results[sl][i], c = this_iteration_leap_results[sl][i]))
-                        # results_converged = False
-                        # break
-
-                # Only carry out AMES convergence checks if all AMES is turned on and all LEAP checks passed
-                if using_ames and results_converged:
-                    for i in range(0, len(this_iteration_ames_results[sl])):
-                        if abs(this_iteration_ames_results[sl][i] - last_iteration_ames_results[sl][i]) > abs(last_iteration_ames_results[sl][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_ames_results, list(config_params['AMES']['Regions'].keys()), leap_calc_years)
-                            logging.info('\t\t' + _('Difference exceeded tolerance for AMES result "{e}" in year {y} for region {r}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[2], r = diff_loc[1], p = last_iteration_ames_results[sl][i], c = this_iteration_ames_results[sl][i]))
-                            results_converged = False
-                            break
-
-                # Only carry out WEAP convergence checks if all LEAP (and AMES) checks passed
-                if results_converged :
-                    for i in range(0, len(this_iteration_weap_results[sw])):
-                        if abs(this_iteration_weap_results[sw][i] - last_iteration_weap_results[sw][i]) > abs(last_iteration_weap_results[sw][i]) * tolerance + float_info.epsilon:
-                            diff_loc = index_to_elements(i, target_weap_results, list(range(weap.BaseYear, weap.EndYear+1)))
-                            logging.info('\t\t' + _('Difference exceeded tolerance for WEAP result "{e}" in year {y}: previous value = {p}, current value = {c}').format(e = diff_loc[0], y = diff_loc[1], p = last_iteration_weap_results[sw][i], c = this_iteration_weap_results[sw][i]))
-                            results_converged = False
-                            break
+                # LEAP
+                num = np.abs(this_iteration_leap_results[sl] - last_iteration_leap_results[sl])
+                # This formulation avoids divide by zero
+                den = 0.5 * np.maximum(np.abs(this_iteration_leap_results[sl] + last_iteration_leap_results[sl]), float_info.epsilon)
+                test_value = np.sqrt(sum((num/den)**2)/len(den))
+                if test_value > tolerance:
+                    logging.info('\t\t' + _('Difference exceeded tolerance for LEAP: Test value = {t:.2%}').format(t = test_value))
+                    results_converged = False
+                
+                # WEAP
+                num = np.abs(this_iteration_weap_results[sw] - last_iteration_weap_results[sw])
+                den = 0.5 * np.maximum(np.abs(this_iteration_weap_results[sw] + last_iteration_weap_results[sw]), float_info.epsilon)
+                test_value = np.sqrt(sum((num/den)**2)/len(den))
+                if test_value > tolerance:
+                    logging.info('\t\t' + _('Difference exceeded tolerance for WEAP: Test value = {t:.2%}').format(t = test_value))
+                    results_converged = False
+                    
+                # AMES
+                num = np.abs(this_iteration_ames_results[sl] - last_iteration_ames_results[sl])
+                den = 0.5 * np.maximum(np.abs(this_iteration_ames_results[sl] + last_iteration_ames_results[sl]), float_info.epsilon)
+                test_value = np.sqrt(sum((num/den)**2)/len(den))
+                if test_value > tolerance:
+                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES: Test value = {t:.2%}').format(t = test_value))
+                    results_converged = False
 
                 if results_converged:
                     msg = '\t\t' + _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed for this scenario.').format(t = tolerance * 100)
@@ -830,7 +819,6 @@ def main_integration():
                     del this_iteration_leap_results[sl]
                     del this_iteration_ames_results[sl]
                     del this_iteration_weap_results[sw]
-                    continue # Go to next scenario, if any
                 else:
                     logging.info('\t\t' + _('Results did not converge for this scenario.'))
         
