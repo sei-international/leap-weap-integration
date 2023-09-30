@@ -812,7 +812,7 @@ def main_integration():
                     results_converged = False
 
                 if results_converged:
-                    msg = '\t\t' + _('All target WEAP and LEAP results converged to within the specified tolerance ({t}%). No additional iterations of WEAP and LEAP calculations are needed for this scenario.').format(t = tolerance * 100)
+                    msg = '\t\t' + _('All target WEAP and LEAP results converged to within the specified tolerance ({t:.2%}). No additional iterations of WEAP and LEAP calculations are needed for this scenario.').format(t = tolerance)
                     logging.info(msg)
                     # Remove this scenario from lists
                     del scenarios_map[sl]
