@@ -50,17 +50,13 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     favname = "WEAP Macro\Demand Site Coverage"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Coverage_Percent.csv")
     export_csv(WEAP, fname, favname)
-    dfcov = pd.read_csv(fname, skiprows=rowskip)
-    dfcov.fillna(0.0)
-    dfcov.replace(r'^\s*$', 0.0, regex=True) # fill in blanks with 0
+    dfcov = pd.read_csv(fname, skiprows=rowskip, na_values = [" "]).fillna(0)
 
     # Water demand in order to figure out coverage for each country
     favname = "WEAP Macro\Water Demand Annual Total - Level 1"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Water_Demand_Lvl1.csv")
     export_csv(WEAP, fname, favname)
-    dfwatdmd = pd.read_csv(fname, skiprows=rowskip)
-    dfwatdmd.fillna(0.0)
-    dfwatdmd.replace(r'^\s*$', 0.0, regex=True) # fill in blanks with 0
+    dfwatdmd = pd.read_csv(fname, skiprows=rowskip, na_values = [" "]).fillna(0)
 
     #------------------------------------
     # Potential crop production (for realndx_incr and price series)
@@ -69,16 +65,12 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     favname = "WEAP Macro\Area"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Area.csv")
     export_csv(WEAP, fname, favname)
-    dfcroparea = pd.read_csv(fname, skiprows=rowskip)
-    dfcroparea.fillna(0.0)
-    dfcroparea = dfcroparea.replace(r'^\s*$', 0.0, regex=True) # fill in blanks with 0
+    dfcroparea = pd.read_csv(fname, skiprows=rowskip, na_values = [" "]).fillna(0)
 
     favname = "WEAP Macro\Potential Yield"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Potential_Yield.csv")
     export_csv(WEAP, fname, favname)
-    dfcroppotyld = pd.read_csv(fname, skiprows=rowskip)
-    dfcroppotyld.fillna(0.0)
-    dfcroppotyld = dfcroppotyld.replace(r'^\s*$', 0, regex=True) # fill in blanks with 0
+    dfcroppotyld = pd.read_csv(fname, skiprows=rowskip, na_values = [" "]).fillna(0)
 
     # The tables pull a lot of irrelevant branches -- the intersection is what we want
     common_branches = set(dfcroparea['Branch']).intersection(set(dfcroppotyld['Branch']))
