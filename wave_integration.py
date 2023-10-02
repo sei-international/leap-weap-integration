@@ -231,8 +231,9 @@ def main_integration():
         msg = _('WAVE integration: Cannot start LEAP and WEAP. Exiting...')
         logging.error(msg)
         sys.exit(msg)
-        
-    # leap.Verbose = 1
+    
+    # Clear any filters that might have been applied
+    weap.Filter = ""
 
     if runfrom_app == "LEAP" :
         runfrom_app_obj = leap
