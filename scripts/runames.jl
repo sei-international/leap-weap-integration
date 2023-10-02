@@ -26,8 +26,11 @@ function parse_commandline()
         "--load-leap-first", "-l"
             help = "load results from LEAP before running AMES"
             action = :store_true
+        "--inherit-input-files", "-i"
+            help = "apply existing input files before loading files generated from WEAP"
+            action = :store_true
         "--use-leap-version", "-u"
-            help = "If load-leap-first is set, pull results from this version"
+            help = "if load-leap-first is set, pull results from this version"
 			# Default arg_type = Any
 			# Default default = nothing
         "--only-push-leap-results", "-p"
@@ -109,7 +112,7 @@ exog_dict = Dict(
 exog_files_block = cfg_yaml["exog-files"]
 for (c, f) in exog_dict
 	# First, clean up by getting rid of any prior integration script filenames
-	if haskeyvalue(exog_files_block, c)
+	if parsed_args["inherit_input_files"] && haskeyvalue(exog_files_block, c)
 		flist = stringvec(exog_files_block[c])
 		deleteat!(flist, occursin.(f, flist))
 	else

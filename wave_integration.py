@@ -424,8 +424,12 @@ def main_integration():
             logging.info(_('Running AMES for scenario: {s}').format(s = s))
             for r, rinfo in config_params['AMES']['Regions'].items():
                 logging.info('\t' + _('Region: {r}').format(r = r))
+                if rinfo['use_existing_input_files']:
+                    i_flag = "-i"
+                else:
+                    i_flag = ""
                 amesdir = os.path.join(amesmodelspath,  rinfo['directory_name'], rinfo['script'])
-                exec_string = juliapath + " \"" + amesdir + "\" \"" +  s + "\" -c -p -v -y " + str(leap_calc_years[-1])
+                exec_string = juliapath + " \"" + amesdir + "\" \"" + s + "\" " + i_flag + " -c -p -v -y " + str(leap_calc_years[-1])
                 logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
@@ -891,8 +895,12 @@ def main_integration():
                 logging.info(_('Running AMES for scenario: {s}').format(s = s))
                 for r, rinfo in config_params['AMES']['Regions'].items():
                     logging.info('\t' + _('Region: {r}').format(r = r))
+                    if rinfo['use_existing_input_files']:
+                        i_flag = "-i"
+                    else:
+                        i_flag = ""
                     amesdir = os.path.join(amesmodelspath,  rinfo['directory_name'], rinfo['script'])
-                    exec_string = juliapath + " \"" + amesdir + "\" \"" + s + "\"" + \
+                    exec_string = juliapath + " \"" + amesdir + "\" \"" + s + "\" " + i_flag + \
                                     " -c -p -w -v" + \
                                     " -y " + str(leap_calc_years[-1]) + \
                                     " -u \"" + version_comment + "\"" + \

@@ -511,6 +511,7 @@ AMES: # Removing this will stop wave-integration from running with AMES
       Kazakhstan:
         directory_name: KAZ_AMES
         script: runames.jl
+        use_existing_input_files: false
         weap_region: [KAZ]
         weap_coverage_mapping: 
           Agriculture_: [S_agfor]
@@ -541,6 +542,7 @@ AMES: # Removing this will stop wave-integration from running with AMES
       Kyrgyzstan:
         directory_name: KGZ_AMES
         script: runames.jl
+        use_existing_input_files: false
         weap_region: [KGZ]
         weap_coverage_mapping: 
           Agriculture_: [S_agfor]
@@ -553,6 +555,7 @@ AMES: # Removing this will stop wave-integration from running with AMES
       Uzbekistan:
         directory_name: UZB_AMES
         script: runames.jl
+        use_existing_input_files: true
         weap_region: [UZB]
         weap_coverage_mapping: 
           Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
