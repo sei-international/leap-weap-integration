@@ -232,9 +232,6 @@ def main_integration():
         logging.error(msg)
         sys.exit(msg)
     
-    # Clear any filters that might have been applied
-    weap.Filter = ""
-
     if runfrom_app == "LEAP" :
         runfrom_app_obj = leap
         other_app_obj = weap
@@ -277,6 +274,9 @@ def main_integration():
     wait_apps(weap, leap)
     leap.ActiveArea = config_params['LEAP']['Area']
     wait_apps(leap, weap)
+    
+    # Clear any filters that might have been applied
+    weap.Filter = ""
 
     leap_ts_info = get_leap_timeslice_info(leap, config_params['LEAP']['Months'])
     leap_region_ids = get_leap_region_ids(leap)
