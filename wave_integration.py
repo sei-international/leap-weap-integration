@@ -413,7 +413,7 @@ def main_integration():
             weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
             if not 'Run of River' in weap_path:
                 try:
-                    weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
+                    weap.Branch(weap_path).Variable('Energy Demand').Expression = ""
                 except AttributeError as e:
                     msg = _('For branch "{b}" encountered the following error: {e}'.format(b = weap_path, e = str(e)))
                     logging.warning(msg)
