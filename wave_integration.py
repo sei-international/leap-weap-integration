@@ -793,7 +793,7 @@ def main_integration():
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
                     diff_loc = index_to_elements(np.argmax(num/den), target_leap_results, leap_calc_years)
-                    logging.info('\t\t' + _('Difference exceeded tolerance for LEAP ({t:.2%} > {t0:.2%}); Maximum deviation for result "{e}" in year {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[1]))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for LEAP ({t:.2%} > {t0:.2%}); Maximum deviation for {e} in {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[1]))
                     results_converged = False
                 
                 # WEAP
@@ -802,7 +802,7 @@ def main_integration():
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
                     diff_loc = index_to_elements(np.argmax(num/den), target_weap_results, list(range(weap.BaseYear, weap.EndYear+1)))
-                    logging.info('\t\t' + _('Difference exceeded tolerance for WEAP ({t:.2%} > {t0:.2%}); Maximum deviation for result "{e}" in year {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[1]))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for WEAP ({t:.2%} > {t0:.2%}); Maximum deviation for {e} in {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[1]))
                     results_converged = False
                     
                 # AMES
@@ -811,7 +811,7 @@ def main_integration():
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
                     diff_loc = index_to_elements(np.argmax(num/den), target_ames_results, list(config_params['AMES']['Regions'].keys()), leap_calc_years)
-                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES ({t:.2%} > {t0:.2%}); Maximum deviation for result "{e}" in year {y} and region {r}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[2], r = diff_loc[1]))
+                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES ({t:.2%} > {t0:.2%}); Maximum deviation for {e} in {r} in {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[2], r = diff_loc[1]))
                     results_converged = False
 
                 if results_converged:
