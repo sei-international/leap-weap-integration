@@ -646,7 +646,7 @@ def main_integration():
                     expr = "Interp("  # Expression that will be set in LEAP
                     for y in range(weap.BaseYear, weap.EndYear+1):
                         val = 0  # Value that will be written into expr for y
-                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Agriculture"):
+                        for wb in weap.Catchments.FilterByTag("Agriculture").FilterByTag(weap_basin):
                             if re.search(wr, wb.FullName) is None:
                                 continue
                             val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
@@ -664,11 +664,11 @@ def main_integration():
                     for y in range(weap.BaseYear, weap.EndYear+1):
                         val = 0  # Value that will be written into expr for y
                         # Combine industrial and domestic
-                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Industrial"):
+                        for wb in weap.DemandSites.FilterByTag("Industrial").FilterByTag(weap_basin):
                             if re.search(wr, wb.FullName) is None:
                                 continue
                             val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
-                        for wb in weap.Catchments.FilterByTag(weap_basin + ",Domestic"):
+                        for wb in weap.DemandSites.FilterByTag("Domestic").FilterByTag(weap_basin):
                             if re.search(wr, wb.FullName) is None:
                                 continue
                             val += weap.ResultValue("".join([wb.FullName, weap_pump_var]), y, 1, weap_scenarios[i], y, 12, 'Total')
