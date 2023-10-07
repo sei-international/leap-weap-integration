@@ -52,6 +52,7 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     export_csv(WEAP, fname, favname)
     dfcov = pd.read_csv(fname, skiprows=rowskip, na_values = [" "], index_col=['Demand Site']).astype(float)
     dfcov.interpolate(axis = 1, inplace = True)
+    dfcov.reset_index(inplace=True)
 
     # Water demand in order to figure out coverage for each country
     favname = "WEAP Macro\Water Demand Annual Total - Level 1"
@@ -59,6 +60,7 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     export_csv(WEAP, fname, favname)
     dfwatdmd = pd.read_csv(fname, skiprows=rowskip, na_values = [" "], index_col=['Branch']).astype(float)
     dfwatdmd.interpolate(axis = 1, inplace = True)
+    dfwatdmd.reset_index(inplace=True)
 
     #------------------------------------
     # Potential crop production (for realndx_incr and price series)
@@ -69,12 +71,14 @@ def get_weap_ag_results(fdirweapoutput, fdirmain, weap_scenario, WEAP, config_pa
     export_csv(WEAP, fname, favname)
     dfcroparea = pd.read_csv(fname, skiprows=rowskip, na_values = [" "], index_col=['Branch']).astype(float)
     dfcroparea.interpolate(axis = 1, inplace = True)
+    dfcroparea.reset_index(inplace=True)
 
     favname = "WEAP Macro\Potential Yield"
     fname = os.path.join(fdirweapoutput, weap_scenario + "_Potential_Yield.csv")
     export_csv(WEAP, fname, favname)
     dfcroppotyld = pd.read_csv(fname, skiprows=rowskip, na_values = [" "], index_col=['Branch']).astype(float)
     dfcroppotyld.interpolate(axis = 1, inplace = True)
+    dfcroppotyld.reset_index(inplace=True)
 
     # The tables pull a lot of irrelevant branches -- the intersection is what we want
     common_branches = set(dfcroparea['Branch']).intersection(set(dfcroppotyld['Branch']))
