@@ -415,7 +415,7 @@ def main_integration():
                 try:
                     weap.Branch(weap_path).Variable('Energy Demand').Expression = ""
                 except AttributeError as e:
-                    msg = _('For branch "{b}" encountered the following error: {e}'.format(b = weap_path, e = str(e)))
+                    msg = _('For branch "{b}" encountered the following error: {e}').format(b = weap_path, e = str(e))
                     logging.warning(msg)
 
     # Initial AMES run, to provide macroeconomic variables to LEAP
