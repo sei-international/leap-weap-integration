@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2023-10-17 14:43-0400\n"
+"POT-Creation-Date: 2023-10-17 14:44-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,6 +109,10 @@ msgstr ""
 
 #: wave_integration.py:408
 msgid "Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs."
+msgstr ""
+
+#: wave_integration.py:418
+msgid "For branch \"{b}\" encountered the following error: {e}"
 msgstr ""
 
 #: wave_integration.py:424 wave_integration.py:895
