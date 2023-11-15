@@ -811,13 +811,14 @@ def main_integration():
                     results_converged = False
                     
                 # AMES
-                num = np.abs(this_iteration_ames_results[sl] - last_iteration_ames_results[sl])
-                den = 0.5 * np.maximum(np.abs(this_iteration_ames_results[sl] + last_iteration_ames_results[sl]), float_info.epsilon)
-                test_value = np.sqrt(sum((num/den)**2)/len(den))
-                if test_value > tolerance:
-                    diff_loc = index_to_elements(np.argmax(num/den), target_ames_results, list(config_params['AMES']['Regions'].keys()), leap_calc_years)
-                    logging.info('\t\t' + _('Difference exceeded tolerance for AMES ({t:.2%} > {t0:.2%}); Maximum deviation for {e} in {r} in {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[2], r = diff_loc[1]))
-                    results_converged = False
+                if using_ames:
+                    num = np.abs(this_iteration_ames_results[sl] - last_iteration_ames_results[sl])
+                    den = 0.5 * np.maximum(np.abs(this_iteration_ames_results[sl] + last_iteration_ames_results[sl]), float_info.epsilon)
+                    test_value = np.sqrt(sum((num/den)**2)/len(den))
+                    if test_value > tolerance:
+                        diff_loc = index_to_elements(np.argmax(num/den), target_ames_results, list(config_params['AMES']['Regions'].keys()), leap_calc_years)
+                        logging.info('\t\t' + _('Difference exceeded tolerance for AMES ({t:.2%} > {t0:.2%}); Maximum deviation for {e} in {r} in {y}').format(t = test_value, t0 = tolerance, e = diff_loc[0], y = diff_loc[2], r = diff_loc[1]))
+                        results_converged = False
 
                 if results_converged:
                     msg = '\t\t' + _('All target WEAP and LEAP results converged to within the specified tolerance ({t:.2%}). No additional iterations of WEAP and LEAP calculations are needed for this scenario.').format(t = tolerance)
