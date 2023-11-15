@@ -826,7 +826,7 @@ def main_integration():
                     # Remove this scenario from lists
                     del scenarios_map[sl]
                     del this_iteration_leap_results[sl]
-                    del this_iteration_ames_results[sl]
+                    if using_ames: del this_iteration_ames_results[sl]
                     del this_iteration_weap_results[sw]
                 else:
                     logging.info('\t\t' + _('Results did not converge for this scenario.'))
@@ -852,7 +852,7 @@ def main_integration():
         # Update information for next iteration
         last_iteration_leap_results = this_iteration_leap_results
         last_iteration_weap_results = this_iteration_weap_results
-        last_iteration_ames_results = this_iteration_ames_results
+        if using_ames: last_iteration_ames_results = this_iteration_ames_results
 
         completed_iterations += 1
         
