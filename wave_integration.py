@@ -633,9 +633,9 @@ def main_integration():
                             lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
                             lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
                             lhpp_region_id = leap_region_ids[lhpp_region]
-                            #leap.ActiveRegion = lhpp_region
-                            #leap.ActiveScenario = leap_scenarios[i]
-                            leap.Branches(lhpp_path).Variable("Maximum Availability").ExpressionRS(lhpp_region_id, leap_scenarios[i]) = "".join(["ReadFromExcel(" , xlsx_path , ", A1:C", str(num_lines_written), ")"])
+                            if leap.ActiveRegion.Id != lpp_region_id: leap.ActiveRegion = lhpp_region
+                            if leap.ActiveScenario.Name != leap_scenarios[i]: leap.ActiveScenario = leap_scenarios[i]
+                            leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_path , ", A1:C", str(num_lines_written), ")"])
 
         # Remove win32 objects
         #if excel:
