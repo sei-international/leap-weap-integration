@@ -511,10 +511,6 @@ def main_integration():
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(40)
 
-        #fs_obj = win32.Dispatch('Scripting.FileSystemObject') # Instance of scripting.FileSystemObject; used to manipulate CSV files in following loop
-        #excel = win32.Dispatch('Excel.Application') # Excel Application object used to create data files
-        #excel.ScreenUpdating = False
-
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
@@ -536,14 +532,11 @@ def main_integration():
                                      ".xlsx" ])
                 xlsx_path = os.path.join(hydroexcelpath, xlsx_file)  # Full path to XLSX file being written
                 xlsx_path = fr"{xlsx_path}"
-                #csv_path = os.path.join(hydroexcelpath, "temp.csv")  # Temporary CSV file used to expedite creation of XLSX files
 
                 if os.path.isfile(xlsx_path): os.remove(xlsx_path)
-                #if os.path.isfile(csv_path): os.remove(csv_path)
 
                 xlsx_wbk = xlsxwriter.Workbook(xlsx_path)
                 xlsx_wsh = xlsx_wbk.add_worksheet("Availability")
-                #ts = fs_obj.CreateTextFile(csv_path, True, False)
 
                 num_lines_written = 0 # Number of lines written to CSV file
 
@@ -575,8 +568,6 @@ def main_integration():
                         leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
-                        # Ensure we are in the correct region
-                        #leap.ActiveRegion = leap_region_id
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
@@ -599,10 +590,8 @@ def main_integration():
                             xlsx_wsh.write(num_lines_written, 0, y)
                             xlsx_wsh.write(num_lines_written, 1, ts_name)
                             xlsx_wsh.write(num_lines_written, 2, val)
-                            #ts.WriteLine("".join([str(y), LIST_SEPARATOR, ts_name, LIST_SEPARATOR, str(val)]))
                             num_lines_written += 1
                     
-                #ts.Close()
                 xlsx_wbk.close()
                 
                 if num_lines_written == 0 :
@@ -610,17 +599,6 @@ def main_integration():
                 else :
                     logging.info('\t\t' + _('Saved as Excel with filename "{f}"').format(f = xlsx_file))
                     
-                    """# Convert csv_path into an XLSX file
-                    logging.info('\t\t' + _('Saving as Excel with filename "{f}"').format(f = xlsx_file))
-                    try:
-                        excel.Workbooks.OpenText(csv_path, 2, 1, 1, -4142, False, False, False, True)
-                        excel.ActiveWorkbook.SaveAs(xlsx_path, 51)
-                        excel.ActiveWorkbook.Close()
-                    except Exception as err:
-                        logging.error(_('Could not save to Excel: {e}').format(e = str(err)))
-                    finally:
-                        excel.Application.Quit() """
-
                     if not os.path.isfile(xlsx_path):
                         # TODO: This should be default expression, not existing expression, in case this is a second iteration
                         msg = _('Excel file "{f}" not written correctly: file does not exist. Will use existing expression.').format(f = xlsx_file)
@@ -633,15 +611,9 @@ def main_integration():
                             lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
                             lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
                             lhpp_region_id = leap_region_ids[lhpp_region]
-                            if leap.ActiveRegion.Id != lpp_region_id: leap.ActiveRegion = lhpp_region
-                            if leap.ActiveScenario.Name != leap_scenarios[i]: leap.ActiveScenario = leap_scenarios[i]
+                            if leap.ActiveRegion.Id != lhpp_region_id: leap.ActiveRegion = lhpp_region_id
+                            if leap.ActiveScenario.Id != leap_scenario_ids[leap_scenarios[i]]: leap.ActiveScenario = leap_scenario_ids[leap_scenarios[i]]
                             leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_path , ", A1:C", str(num_lines_written), ")"])
-
-        # Remove win32 objects
-        #if excel:
-        #    del excel
-        #if fs_obj:
-        #    del fs_obj
         # END: Move hydropower availability information from WEAP to LEAP.
 
         #------------------------------------------------------------------------------------------------------------------------
