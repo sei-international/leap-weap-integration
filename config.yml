@@ -263,6 +263,8 @@ WEAP:
 
 LEAP:
   Area: wave central asia v53b
+  # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
+  Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist

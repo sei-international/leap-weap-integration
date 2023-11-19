@@ -702,7 +702,27 @@ def main_integration():
 
         logging.info(msg)
         kill_excel()
+
+        # Unless the config file specifies otherwise, temporarily add a before scenario script that kills all Excel processes. This can help avoid errors when calculating multiple scenarios.
+        set_beforescenariocalc = False  # Indicates if integration procedure has set LEAP area's before scenario script
+
+        if config_params['LEAP']['Custom before scenario script'] == "True":
+            logging.info("Using LEAP area's pre-existing before scenario script. Note: it's advisable to integrate contents of kill_excel.vbs into this script.")
+        else:
+            if leap.BeforeScenarioCalc != "":
+                msg = "LEAP area has a before scenario script; this is incompatible with integration procedure unless 'Custom before scenario script' is set to True in config.yml."
+                logging.error(msg)
+                sys.exit(msg)
+            
+            leap.BeforeScenarioCalc = os.path.join(os.getcwd(), "kill_excel.vbs")
+            set_beforescenariocalc = True
+        
         leap.Calculate(False)
+        
+        if set_beforescenariocalc:
+            leap.BeforeScenarioCalc = ""
+
+        logging.info('Finished calculating LEAP.')
 
         # Ensure that areas are saved
         logging.info(_('Saving LEAP and WEAP areas'))
