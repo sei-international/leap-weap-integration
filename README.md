@@ -11,7 +11,7 @@ Download and install the [latest Python 3 release](https://www.python.org/downlo
 - When you run the installer, make sure to check "Add python.exe to PATH".
 - After installing, open a Windows command prompt and run the following command:
 	```
-	pip install pywin32 psutil PyYaml numpy pandas
+	pip install pywin32 psutil PyYaml numpy pandas XlsxWriter
 	```
 
 ### Installing NEMO, LEAP, WEAP, and AMES
