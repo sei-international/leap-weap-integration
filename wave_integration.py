@@ -496,11 +496,36 @@ def main_integration():
         leap.SetProgressBar(30)
 
         logging.info(_('Calculating WEAP (iteration {i})').format(i = completed_iterations + 1))
-        weap.Calculate(0, 0, False) # Only calculate what needs calculation
+        weap.Calculate(0, 0, False, False, int(os.cpu_count() / 2)) # Only calculate what needs calculation; use parallel calculations with NumWorkers = 1/2 # of logical processors
         while weap.IsCalculating :
            leap.Sleep(1000)
 
-        logging.info(_('Finished calculating WEAP. Moving hydropower maximum availabilities from WEAP to LEAP....'))
+        all_weap_scenarios_calculated = True  # Indicates whether all scenarios in weap_scenarios successfully calculated
+
+        for s in weap_scenarios:
+            if weap.Scenarios(s).NeedsCalculation:
+                all_weap_scenarios_calculated = False
+                break
+
+        if not all_weap_scenarios_calculated:
+            logging.info(('Some WEAP scenarios did not calculate successfully. Recalculating all scenarios...'))
+            weap.Calculate(0, 0, True, False, int(os.cpu_count() / 2)) # Force calculation of all scenarios; use parallel calculations with NumWorkers = 1/2 # of logical processors
+            while weap.IsCalculating :
+                leap.Sleep(1000)
+
+            all_weap_scenarios_calculated = True
+
+            for s in weap_scenarios:
+                if weap.Scenarios(s).NeedsCalculation:
+                    all_weap_scenarios_calculated = False
+                    break
+            
+            if not all_weap_scenarios_calculated:
+                msg = "Could not get all WEAP scenarios to calculate despite running calculations twice. Exiting..."
+                logging.error(msg)
+                sys.exit(msg)
+
+        logging.info(('Finished calculating WEAP. Moving hydropower maximum availabilities from WEAP to LEAP....'))
 
         #------------------------------------------------------------------------------------------------------------------------
         # Move hydropower availability information from WEAP to LEAP.
