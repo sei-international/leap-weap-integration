@@ -716,11 +716,12 @@ def main_integration():
             
             leap.BeforeScenarioCalc = os.path.join(os.getcwd(), "kill_excel.vbs")
             set_beforescenariocalc = True
-        
-        leap.Calculate(False)
-        
-        if set_beforescenariocalc:
-            leap.BeforeScenarioCalc = ""
+
+        try:        
+            leap.Calculate(False)
+        finally:
+            if set_beforescenariocalc:
+                leap.BeforeScenarioCalc = ""
 
         logging.info('Finished calculating LEAP.')
 
