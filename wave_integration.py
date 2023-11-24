@@ -178,6 +178,29 @@ def kill_excel():
         if ps_re.search(proc.name()) is not None:
             proc.kill()
 
+# Reopens the currently active WEAP area by temporarily activating another area, then re-activating the original area. This can
+#   work around a WEAP bug that causes weap.Branches calls to fail.
+def reopen_weap_area(weap):
+    original_area_name = weap.ActiveArea.Name  # Name of WEAP area that was active when this function was called
+    area_changed = False  # Indicates whether function changed active WEAP area
+
+    if original_area_name != "Weaping River Basin" and weap.Areas.Exists("Weaping River Basin"):
+        # Weaping River Basin is small, so switching to it should be quick; use it by default
+        weap.ActiveArea = "Weaping River Basin"
+        area_changed = True
+    elif weap.Areas.Count > 1:
+        for a in weap.Areas:
+            if a.Name != original_area_name:
+                weap.ActiveArea = a.Name
+                area_changed = True
+                break
+    else:
+        logging.info("Attempted to reopen WEAP area but could not because there are no other areas available to open temporarily.")
+
+    if area_changed:
+        weap.ActiveArea = original_area_name
+# reopen_weap_area(weap)
+
 #==================================================================================================#
 #                                         MAIN ROUTINE                                             #
 #==================================================================================================#
@@ -890,6 +913,9 @@ def main_integration():
 
         completed_iterations += 1
         
+        # Reopen WEAP area to work around a bug that causes weap.Branches to return nothing
+        reopen_weap_area(weap)
+
         #------------------------------------------------------------------------------------------------------------------------
         #
         # Pass LEAP hydropower generation to WEAP
