@@ -15,7 +15,7 @@ Download and install the [latest Python 3 release](https://www.python.org/downlo
 	```
 
 ### Installing NEMO, LEAP, WEAP, and AMES
-For LEAP and WEAP, a license is required. Go to the [LEAP](https://leap.sei.org/) and [WEAP](https://weap.sei.org/) websites to obtain licenses. You may be available for a free or reduced-cost license. Use the contact information on the websites for more information.
+For LEAP and WEAP, a license is required. Go to the [LEAP](https://leap.sei.org/) and [WEAP](https://weap.sei.org/) websites to obtain licenses. You may be eligible for a free or reduced-cost license. Use the contact information on the websites for more information.
 
 Both NEMO and AMES are written in Julia. They are open-source programs and do not require licenses. NEMO will install a copy of Julia, so it is convenient to install NEMO before AMES.
 
@@ -36,7 +36,7 @@ Note that the integration program requires the Julia `ArgParse` package. You mus
 1. Type `add ArgParse` and press enter.
 
 ## Loading the models
-Find the most recent LEAP and WEAP models. These will be made available separately -- for example, via Dropbox. They should have `.leap` and `.weap` extensions. Open the files by double-clicking on them and they will be added to the Areas available from inside LEAP and WEAP.
+Find the most recent LEAP and WEAP models. These will be made available separately -- for example, via Dropbox. They should have `.leap` and `.weap` extensions. Open the files by double-clicking on them, and they will be added to the areas available inside LEAP and WEAP. Then enable scripts in LEAP by going to Settings -> Scripts and choosing to run all scripts without approval. This is necessary because the integration program dynamically adds a script to the LEAP model to improve the robustness of LEAP's interactions with Excel.
 
 The most recent AMES files will also be available separately. These are in the form of folders, such as "KAZ_Macro". To use the integration program out of the box, do the following:
 1. Find where the `LEAP Areas` folder is located (its "parent" folder) -- this will usually be your `Documents` folder;
