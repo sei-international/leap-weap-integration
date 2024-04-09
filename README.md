@@ -2,7 +2,7 @@
 The scripts in this repository implement the integration between LEAP/NEMO, WEAP, and AMES for the USAID WAVE Central Asia project. The integration script, which is written in Python, executes each program iteratively until convergence. Both LEAP and WEAP require Windows to run, and the full integration can consume substantial computer resources. The computer on which this script is run should have a reasonably fast processor and, more important, ample RAM and disk drive space.
 
 ## Installation
-In addition to the integration script itself, it is necessary to first install Python, LEAP (with NEMO), WEAP, and AMES. It is also recommended to install the [Notepad++ text editor](https://notepad-plus-plus.org/), for reasons explained below.
+In addition to the integration script itself, it is necessary to install Python, LEAP (with NEMO), WEAP, AMES, and Microsoft Excel. It is also recommended to install the [Notepad++ text editor](https://notepad-plus-plus.org/), for reasons explained below.
 
 ### Installing Python
 Download and install the [latest Python 3 release](https://www.python.org/downloads/windows/).
@@ -27,6 +27,10 @@ To set up the full system:
 >1. Open a Julia prompt;
 >1. Press the `]` key to start the package manager;
 >1. Type `add CSV@0.10.4` and press enter to install version 0.10.4.
+
+### Installing Excel
+Install Excel in the usual way. Then it is recommended to disable Excel's AutoRecover feature, as it can cause problems when restarting Excel after a crash of the integration program. To do this in Excel for Microsoft 365 (Version 2403 from April 2024), open Excel, choose File -> Options -> Save, and clear the checkbox for "Save AutoRecover information".
+
 ### Installing the integration program
 The integration program, with configuration scripts and translations, is available as a ZIP file. It is included as part of a release of the integration software on this site. Download the most recent ZIP file and unzip it in a convenient location on your computer.
 
