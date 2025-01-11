@@ -618,9 +618,15 @@ def main_integration():
                         leap_region_id = leap_region_ids[leap_region]
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-                        leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
-                        leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
-                        weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
+                        
+                        # Check whether branch "Minimum Capacity" exists (only available in optimized scenarios). Use exogenous capacity when not available
+                        if leap.Branches(leap_path).Variable("Minimum Capacity") is not None:
+                            leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
+                            leap_minimum_capacity = leap.Branches(leap_path).Variable("Minimum Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
+                            weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
+                        else:
+                            leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
+                            weap_branch_capacity +=leap_exog_capacity
 
                     # Don't bother writing values for years where capacity = 0
                     if weap_branch_capacity > 0 :

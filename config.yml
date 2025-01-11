@@ -5,10 +5,10 @@
 ###############################################################
 Integrated model:
     Tolerance: 0.10
-    Maximum iterations: 10
+    Maximum iterations: 1
 
 WEAP:
-  Area: WAVE-Amu_Syr_Darya 2023_09_26
+  Area: WAVE-Amu_Syr_Darya 2023_12_01
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -262,7 +262,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: wave central asia v53b
+  Area: sei central asia v75
   # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
   Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
@@ -481,107 +481,107 @@ LEAP:
           leap_path: Transformation\Electricity Production\Processes\ZARCHOB 3
           leap_region: Uzbekistan
         
-AMES: # Removing this will stop wave-integration from running with AMES
-  # Main folder for AMES models
-  # This must be at the same level as the "LEAP Areas" folder. It will be created if it does not exist, but it must
-  # exist and have the named directories listed below.
-  Folder: WAVE_AMES
-  # Target variables are the same for each region: must match branches in LEAP config above
-  LEAP:
-    target_variables: [GDP, Industrial VA, Commercial VA, Agricultural VA]
-  WEAP:
-    agsector: Agriculture_
-    price_data: crop_prices.csv
-    cov_to_util_exponent: 0.2
-    all_crops: &WEAP_CROPS
-      - Apples
-      - Barley
-      - Corn
-      - Cotton
-      - Grapes
-      - Oil seeds and pulses
-      - Other crops
-      - Other grains
-      - Other orchards
-      - Potatoes
-      - Rice
-      - Sugar beet
-      - Vegetables
-      - Watermelons and squash
-      - Wheat
-  Regions:
-      Kazakhstan:
-        directory_name: KAZ_AMES
-        script: runames.jl
-        use_existing_input_files: false
-        weap_region: [KAZ]
-        weap_coverage_mapping: 
-          Agriculture_: [S_agfor]
-          Industrial_: [S_food, S_paperpulp, S_otherind]
-          Domestic_: [S_hotelrestaurant, S_otherserv]
-        crop_categories:
-          Perennial crops:
-            weap:
-              - Apples
-              - Grapes
-              - Other orchards
-            ames: {sector: [], product: [P_agforperennial]}
-          Seasonal crops:
-            weap:
-              - Barley
-              - Corn
-              - Cotton
-              - Oil seeds and pulses
-              - Other crops
-              - Other grains
-              - Potatoes
-              - Rice
-              - Sugar beet
-              - Vegetables
-              - Watermelons and squash
-              - Wheat
-            ames: {sector: [S_agfor], product: [P_agforseasonal]}
-      Kyrgyzstan:
-        directory_name: KGZ_AMES
-        script: runames.jl
-        use_existing_input_files: false
-        weap_region: [KGZ]
-        weap_coverage_mapping: 
-          Agriculture_: [S_agfor]
-          Industrial_: [S_food, S_woodpaper, S_otherind]
-          Domestic_: [S_hotelrestaurant, S_otherserv]
-        crop_categories:
-          All crops:
-            weap: *WEAP_CROPS
-            ames: {sector: [S_agfor], product: [P_agfor]}
-      Uzbekistan:
-        directory_name: UZB_AMES
-        script: runames.jl
-        use_existing_input_files: true
-        weap_region: [UZB]
-        weap_coverage_mapping: 
-          Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
-          Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
-          Domestic_: [Acons,Atrad,Atrans,Aots]
-        crop_categories:
-         Cotton:
-            weap: [Cotton]
-            ames: {sector: [Acotton], product: [Ccotton]}
-         Grains:
-            weap: [Barley,Corn,Rice,Wheat,Other grains]
-            ames: {sector: [Agrain], product: [Cgrain]}
-         Vegetables:
-            weap: [Vegetables]
-            ames: {sector: [Atomat,Avegat], product: [Ctomat,Cvegat]}
-         Potatoes:
-            weap: [Potatoes]
-            ames: {sector: [Apotat], product: [Cpotat]}
-         Fruits:
-            weap: [Apples,Other orchards]
-            ames: {sector: [Afruit], product: [Cfruit]}
-         Grapes:
-            weap: [Grapes]
-            ames: {sector: [Agrape], product: [Cgrape]}
-         Other crops:
-            weap: [Oil seeds and pulses,Sugar beet,Watermelons and squash,Other crops]
-            ames: {sector: [AothA,Aanim], product: [CothA]}
+# AMES: # Removing this will stop wave-integration from running with AMES
+#   # Main folder for AMES models
+#   # This must be at the same level as the "LEAP Areas" folder. It will be created if it does not exist, but it must
+#   # exist and have the named directories listed below.
+#   Folder: WAVE_AMES
+#   # Target variables are the same for each region: must match branches in LEAP config above
+#   LEAP:
+#     target_variables: [GDP, Industrial VA, Commercial VA, Agricultural VA]
+#   WEAP:
+#     agsector: Agriculture_
+#     price_data: crop_prices.csv
+#     cov_to_util_exponent: 0.2
+#     all_crops: &WEAP_CROPS
+#       - Apples
+#       - Barley
+#       - Corn
+#       - Cotton
+#       - Grapes
+#       - Oil seeds and pulses
+#       - Other crops
+#       - Other grains
+#       - Other orchards
+#       - Potatoes
+#       - Rice
+#       - Sugar beet
+#       - Vegetables
+#       - Watermelons and squash
+#       - Wheat
+#   Regions:
+#       Kazakhstan:
+#         directory_name: KAZ_AMES
+#         script: runames.jl
+#         use_existing_input_files: false
+#         weap_region: [KAZ]
+#         weap_coverage_mapping: 
+#           Agriculture_: [S_agfor]
+#           Industrial_: [S_food, S_paperpulp, S_otherind]
+#           Domestic_: [S_hotelrestaurant, S_otherserv]
+#         crop_categories:
+#           Perennial crops:
+#             weap:
+#               - Apples
+#               - Grapes
+#               - Other orchards
+#             ames: {sector: [], product: [P_agforperennial]}
+#           Seasonal crops:
+#             weap:
+#               - Barley
+#               - Corn
+#               - Cotton
+#               - Oil seeds and pulses
+#               - Other crops
+#               - Other grains
+#               - Potatoes
+#               - Rice
+#               - Sugar beet
+#               - Vegetables
+#               - Watermelons and squash
+#               - Wheat
+#             ames: {sector: [S_agfor], product: [P_agforseasonal]}
+#       Kyrgyzstan:
+#         directory_name: KGZ_AMES
+#         script: runames.jl
+#         use_existing_input_files: false
+#         weap_region: [KGZ]
+#         weap_coverage_mapping: 
+#           Agriculture_: [S_agfor]
+#           Industrial_: [S_food, S_woodpaper, S_otherind]
+#           Domestic_: [S_hotelrestaurant, S_otherserv]
+#         crop_categories:
+#           All crops:
+#             weap: *WEAP_CROPS
+#             ames: {sector: [S_agfor], product: [P_agfor]}
+#       Uzbekistan:
+#         directory_name: UZB_AMES
+#         script: runames.jl
+#         use_existing_input_files: true
+#         weap_region: [UZB]
+#         weap_coverage_mapping: 
+#           Agriculture_: [Acotton,Agrain,Atomat,Avegat,Afruit,Agrape,Apotat,AothA]
+#           Industrial_: [Ametal,Achem,Amach,Aginning,Atextile,Amilling,Afood,AothI]
+#           Domestic_: [Acons,Atrad,Atrans,Aots]
+#         crop_categories:
+#          Cotton:
+#             weap: [Cotton]
+#             ames: {sector: [Acotton], product: [Ccotton]}
+#          Grains:
+#             weap: [Barley,Corn,Rice,Wheat,Other grains]
+#             ames: {sector: [Agrain], product: [Cgrain]}
+#          Vegetables:
+#             weap: [Vegetables]
+#             ames: {sector: [Atomat,Avegat], product: [Ctomat,Cvegat]}
+#          Potatoes:
+#             weap: [Potatoes]
+#             ames: {sector: [Apotat], product: [Cpotat]}
+#          Fruits:
+#             weap: [Apples,Other orchards]
+#             ames: {sector: [Afruit], product: [Cfruit]}
+#          Grapes:
+#             weap: [Grapes]
+#             ames: {sector: [Agrape], product: [Cgrape]}
+#          Other crops:
+#             weap: [Oil seeds and pulses,Sugar beet,Watermelons and squash,Other crops]
+#             ames: {sector: [AothA,Aanim], product: [CothA]}
