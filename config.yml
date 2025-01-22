@@ -5,7 +5,9 @@
 ###############################################################
 Integrated model:
     Tolerance: 0.10
-    Maximum iterations: 1
+    Maximum iterations: 4 # including iterations prior to restart, if restart >=3
+    Restart: 1# optional, set to 1 if restarting, defaults to not restarting
+    Restart after iteration: 3 # optional - set to last successfully completed iteration
 
 WEAP:
   Area: WAVE-Amu_Syr_Darya 2023_12_01
@@ -262,7 +264,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: sei central asia v75
+  Area: sei central asia v75_no optim
   # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
   Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]

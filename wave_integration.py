@@ -16,6 +16,7 @@ import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 import xlsxwriter
+import glob
 
 import gettext, locale, ctypes
 # Allow a user to "short-circuit" the system language with an environment variable
@@ -240,6 +241,17 @@ def main_integration():
         
     tolerance = config_params['Integrated model']['Tolerance']
     max_iterations = config_params['Integrated model']['Maximum iterations']
+    if config_params['Integrated model']['Restart'] is None:
+        restart = None
+    else:
+        if config_params['Integrated model']['Restart']==0: 
+            restart = None
+        else :
+            restart = config_params['Integrated model']['Restart']
+            if config_params['Integrated model']['Restart after iteration'] is None:
+                restart_iteration = None
+            else:
+                restart_iteration = config_params['Integrated model']['Restart after iteration']
 
     # Ensure both LEAP and WEAP are open
     leap = win32.Dispatch('LEAP.LEAPApplication') # will open Freedonia
@@ -428,19 +440,90 @@ def main_integration():
     # get calculated years in leap
     leap_calc_years = get_leap_calc_years(leap)
 
-    # Clear hydropower reservoir energy demand from WEAP scenarios
-    logging.info(_('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.'))
-    weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
-    for s in weap_scenarios:
-        weap.ActiveScenario = s
-        for wb in weap_hydro_branches:
-            weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
-            if not 'Run of River' in weap_path:
-                try:
-                    weap.Branch(weap_path).Variable('Energy Demand').Expression = ""
-                except AttributeError as e:
-                    msg = _('For branch "{b}" encountered the following error: {e}').format(b = weap_path, e = str(e))
-                    logging.warning(msg)
+    # if not restarting, clear hydropower reservoir energy demand from WEAP scenarios
+    if restart is None:
+        #clear out folder where availabilities are stored
+        logging.info(_('Deleting Excel files with availability curves from past integration runs.'))
+        # Use glob to find all Excel files in the folder
+        excel_files = glob.glob(os.path.join(hydroexcelpath, "*.xlsx*"))
+
+        # Loop through the files and delete them
+        for file in excel_files:
+            try:
+                os.remove(file)
+                logging.info(_('Deleted: {file}'))
+            except Exception as e:
+                logging.info(_('Error deleting {file}: {e}'))
+
+        logging.info(_('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.'))
+        weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
+        for s in weap_scenarios:
+            weap.ActiveScenario = s
+            for wb in weap_hydro_branches:
+                weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
+                if not 'Run of River' in weap_path:
+                    try:
+                        weap.Branch(weap_path).Variable('Energy Demand').Expression = ""
+                    except AttributeError as e:
+                        msg = _('For branch "{b}" encountered the following error: {e}').format(b = weap_path, e = str(e))
+                        logging.warning(msg)
+
+    else :
+        # check that files for this iteration and scenario exist for each HPP and scenario 
+        logging.info(_('This is a RESTART - checking that restart files of hydropower availabilities exist for each HPP and scenario'))
+        weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
+        for i in range(0, len(weap_scenarios)):
+            leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
+            for wb in weap_hydro_branches:
+                weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
+                # It is possible that the plant does not appear in this scenario
+                if weap_hpp is None: continue
+                xlsx_file = "".join(["hydro_availability_wbranch",
+                                        str(weap_hpp.Id),
+                                        "_lscenario", str(leap_scenario_id),
+                                        "_iteration", str(restart_iteration),
+                                        ".xlsx" ])
+                xlsx_path = os.path.join(hydroexcelpath, xlsx_file)
+
+                # Now check Maximum Availability variable under LEAP technology matches that file path in this scenario
+                # To do : we could consider writing it 
+                leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
+                for lhpp in leap_hpps:
+                    logging.info('\t\t' + _('Assigning to LEAP hydropower plant: {h}').format(h = lhpp))
+                    lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
+                    lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
+                    lhpp_region_id = leap_region_ids[lhpp_region]
+
+                    # Esure correct region and scenario is activated to make sure variable is visible
+                    if leap.ActiveRegion.Id != lhpp_region_id: 
+                        leap.ActiveRegion = lhpp_region_id
+                    if leap.ActiveScenario.Id != leap_scenario_ids[leap_scenarios[i]]:
+                        leap.ActiveScenario = leap_scenario_ids[leap_scenarios[i]]
+                    
+                    # dont bother checking for file if exogenous capacity is 0 
+                    if leap.Branches(lhpp_path).Variable("Exogenous Capacity").Expression != "0":
+                        # Check if the file exists in folder
+                        if os.path.isfile(xlsx_path):
+                            logging.info(f"The file '{xlsx_file}' exists in the folder '{hydroexcelpath}'.")
+                        else:
+                            logging.info(f"The file '{xlsx_file}' does not exist in the folder '{hydroexcelpath}'.")
+                            logging.info(f"Aborting integration run ...")
+                            # exit integration
+                            sys.exit("Script aborted: Required file '{xlsx_file}' not found.")
+                            # Ensure the session is closed even if an error occurs
+                            session.close()
+
+                        # Check if LEAP points to the file
+                        if xlsx_path in leap.Branches(lhpp_path).Variable("Maximum Availability").Expression: continue
+                        else : 
+                            logging.info(f"The file '{xlsx_file}' has not been linked to LEAP - iteration likely did not complete successfully")
+                            logging.info(f"Instead '{leap.Branches(lhpp_path).Variable("Maximum Availability").Expression} is used by LEAP")
+                            logging.info(f"We suggest that you start from the previous iteration")
+                            logging.info(f"Aborting integration run ...")
+                            # exit integration
+                            sys.exit("Script aborted: Required file '{xlsx_file}' not found.")
+                            # Ensure the session is closed even if an error occurs
+                            session.close()
 
     # Initial AMES run, to provide macroeconomic variables to LEAP
     if using_ames:
@@ -462,11 +545,15 @@ def main_integration():
                     sys.exit(msg)
 
     #------------------------------------------------------------------------------------------------------------------------
+
     #
     # Start iterations
     #
     #------------------------------------------------------------------------------------------------------------------------
-    completed_iterations = 0
+    if restart :
+        completed_iterations = restart_iteration
+    else :
+        completed_iterations = 0
     results_converged = False
     
     # This only needs to be evaluated once
@@ -839,7 +926,14 @@ def main_integration():
         #------------------------------------------------------------------------------------------------------------------------
         # Check for convergence (after initial run)
         #------------------------------------------------------------------------------------------------------------------------
-        if completed_iterations > 0:
+        
+        if restart:
+            threshold_for_convergence_check = restart_iteration
+        else:
+            threshold_for_convergence_check = 0
+            
+        # check whether this is not the first iteration in this particular run
+        if completed_iterations > threshold_for_convergence_check:
             logging.info(_('Checking whether calculations converged...'))
             msg = _('Recording results and checking for convergence (iteration {i})').format(i = completed_iterations+1)
             leap.ShowProgressBar(procedure_title, msg)
@@ -989,7 +1083,7 @@ def main_integration():
     # This should not be needed, but being thorough
     weap.SaveArea()
     leap.SaveArea()
-
+    
     tet = time.time()
     total_elapsed_time = tet - tst
     logging.info(_('Total elapsed time: {t}').format(t = hms_from_sec(total_elapsed_time)))
