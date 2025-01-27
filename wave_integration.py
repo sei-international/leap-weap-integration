@@ -646,6 +646,12 @@ def main_integration():
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(40)
 
+        SeasonalValue_expression = (
+                            "SeasonalValue(January, MaxAvail_Jan, February, MaxAvail_Feb, March, MaxAvail_Mar, "
+                            "April, MaxAvail_Apr, May, MaxAvail_May, June, MaxAvail_Jun, July, MaxAvail_Jul, "
+                            "August, MaxAvail_Aug, September, MaxAvail_Sep, October, MaxAvail_Oct, "
+                            "November, MaxAvail_Nov, December, MaxAvail_Dec)")
+        
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
@@ -660,37 +666,24 @@ def main_integration():
                 weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
                 # It is possible that the plant does not appear in this scenario
                 if weap_hpp is None: continue
-                xlsx_file = "".join(["hydro_availability_wbranch",
-                                     str(weap_hpp.Id),
-                                     "_lscenario", str(leap_scenario_id),
-                                     "_iteration", str(completed_iterations + 1),
-                                     ".xlsx" ])
-                xlsx_path = os.path.join(hydroexcelpath, xlsx_file)  # Full path to XLSX file being written
-                xlsx_path = fr"{xlsx_path}"
-
-                if os.path.isfile(xlsx_path): os.remove(xlsx_path)
-
-                xlsx_wbk = xlsxwriter.Workbook(xlsx_path)
-                xlsx_wsh = xlsx_wbk.add_worksheet("Availability")
-
-                num_lines_written = 0 # Number of lines written to CSV file
-
-                # check unit
+                # check unit in weap
                 weap_unit= weap_hpp.Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
                     msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
-                # if correct unit pull weap values from weap baseyear to endyear, remove first item, convert to GJ, and round)
-                weap_hpp_gen = weap_hpp.Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
 
-                # check that there are values for every month
+                #  pull weap values from weap baseyear to endyear,and remove first item)
+                weap_hpp_gen = weap_hpp.Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
                 if not len(weap_hpp_gen)%12 == 0:
                     msg = _('Energy generation in WEAP is not monthly or not available for every simulation month. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
+
                 y_range = range(weap.BaseYear, weap.EndYear+1)
-                
+                # Initialize with zero values
+                weap_branch_generation_potential_MWh = [0, ] * len(y_range) * 12 # number of years x months per year
+                yi=0   
                 for y in y_range:
                     leap_capacity_year = y
                     if leap_base_year > y :
@@ -698,14 +691,15 @@ def main_integration():
                     if leap_end_year < y :
                         leap_capacity_year = leap_end_year
                     weap_branch_capacity = 0  # Capacity in LEAP corresponding to WEAP branch [MW]
-                    leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
-                    for lb in leap_hpps:
+                    leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps'] 
+                    for lb in leap_hpps: # there might be multiple corresponding to this WEAP HPP
                         leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
                         leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         
+                        # Find capacity for that branch and year
                         # Check whether branch "Minimum Capacity" exists (only available in optimized scenarios). Use exogenous capacity when not available
                         if leap.Branches(leap_path).Variable("Minimum Capacity") is not None:
                             leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
@@ -713,48 +707,63 @@ def main_integration():
                             weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
                         else:
                             leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
-                            weap_branch_capacity +=leap_exog_capacity
+                            weap_branch_capacity +=leap_exog_capacity             
 
-                    # Don't bother writing values for years where capacity = 0
-                    if weap_branch_capacity > 0 :
-                        month_vals = dict()
-                        for ts_name, m_num in leap_ts_info.items():
-                            if m_num in month_vals:
-                                # Same value for all time slices in a month
-                                val = month_vals[m_num]
-                            else:
-                                # Percentage availability value to be written to csv_path (Note: 1 MWh = 3.6 GJ)
-                                val = round(weap_hpp_gen[(y - y_range[0])*12 + m_num - 1] / 3.6 / (weap_branch_capacity * monthrange(y, m_num)[1] * 24) * 100, 1)
-                                if val > 100 : val = 100
-                                month_vals[m_num] = val
+                    # Calculate monthly generation potential
+                    # Note : should be made flexible to different time slice set up on the LEAP side at some point - at the moment expects monthly timeslices
+                    for r in range(1,12+1):
+                        if weap_branch_capacity > 0 :
+                            weap_branch_generation_potential_MWh[yi] = weap_branch_capacity * monthrange(y, r)[1] * 24
+                            yi = yi+1
+                        else: 
+                            weap_branch_generation_potential_MWh[yi] = 0.000001 #set to very small number to avoid divison by 0
+                            yi = yi+1
 
-                            xlsx_wsh.write(num_lines_written, 0, y)
-                            xlsx_wsh.write(num_lines_written, 1, ts_name)
-                            xlsx_wsh.write(num_lines_written, 2, val)
-                            num_lines_written += 1
-                    
-                xlsx_wbk.close()
-                
-                if num_lines_written == 0 :
-                    if os.path.isfile(xlsx_path): os.remove(xlsx_path)
-                else :
-                    logging.info('\t\t' + _('Saved as Excel with filename "{f}"').format(f = xlsx_file))
-                    
-                    if not os.path.isfile(xlsx_path):
-                        # TODO: This should be default expression, not existing expression, in case this is a second iteration
-                        msg = _('Excel file "{f}" not written correctly: file does not exist. Will use existing expression.').format(f = xlsx_file)
-                        logging.warning(msg)
-                    else:
-                        # Update LEAP Maximum Availability expression
-                        leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
-                        for lhpp in leap_hpps:
-                            logging.info('\t\t' + _('Assigning to LEAP hydropower plant: {h}').format(h = lhpp))
-                            lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
-                            lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
-                            lhpp_region_id = leap_region_ids[lhpp_region]
-                            if leap.ActiveRegion.Id != lhpp_region_id: leap.ActiveRegion = lhpp_region_id
-                            if leap.ActiveScenario.Id != leap_scenario_ids[leap_scenarios[i]]: leap.ActiveScenario = leap_scenario_ids[leap_scenarios[i]]
-                            leap.Branches(lhpp_path).Variable("Maximum Availability").Expression = "".join(["ReadFromExcel(" , xlsx_path , ", A1:C", str(num_lines_written), ")"])
+
+                # Now iterate over leap HPPs again and add capacity
+                for lb in leap_hpps: # there might be multiple corresponding to this WEAP HPP
+                    leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
+                    leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
+                    leap_region_id = leap_region_ids[leap_region]
+                    # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
+                    # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
+
+                    # Make sure we are in the correct region 
+                    leap.ActiveRegion = leap_region
+
+                    ## check that for this region and scenario HPP maximum availability points to monthly user variables of Maximum Availabilities
+                    if restart is None:
+                        if completed_iterations == 0 :
+                            if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
+                                logging.info(('Updating "Maximum Availability"-variable for this power plant to use SeasonalValue()-function to point to user variables'))
+                                leap.Branches(leap_path).Variable("Maximum Availability").Expression = SeasonalValue_expression
+                    else : 
+                         if completed_iterations == restart_iteration:
+                            if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
+                                logging.info(('Updating "Maximum Availability"-variable for this power plant to use SeasonalValue()-function to point to user variables'))
+                                leap.Branches(leap_path).Variable("Maximum Availability").Expression = SeasonalValue_expression
+
+                    # calculate maximum availability for each series of monthly values   
+                    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    years =  list(range(weap.BaseYear, weap.EndYear + 1))
+                    for m in range(0, len(months)): 
+                        # write values into monthly user variables for maximum availability
+                        uservariable_this_month = "MaxAvail_" + months[m]
+
+                        # Extract values for this particular manoth
+                        weap_hpp_gen_this_month = list(weap_hpp_gen[m::12])
+                        weap_branch_capacity_this_month = weap_branch_generation_potential_MWh[m::12]
+
+                        # calculate time series of maxiumum availabilities using element-wise division
+                        weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
+
+                        # Replace values less than 0.001 with 0, and values greater 100 with 100 using list comprehension
+                        weap_max_avail_this_month = [0 if value < 0.001 else value for value in weap_max_avail_this_month]
+                        weap_max_avail_this_month = [100 if value >100 else value for value in weap_max_avail_this_month]
+
+                        # Set LEAP user variable to WEAP generation
+                        leap.Branches(leap_path).Variable(uservariable_this_month).Expression = "interp(" + ", ".join(f"{year}, {value}" for year, value in zip(years, weap_max_avail_this_month)) + ")"
+                        # # Note: Would be more error proof with ExpressionRS(), and would avoid slow leap.ActiveRegion call, but ExpressionRS doesnt allow setting expression via the API
         # END: Move hydropower availability information from WEAP to LEAP.
 
         #------------------------------------------------------------------------------------------------------------------------
