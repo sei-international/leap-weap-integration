@@ -107,6 +107,7 @@ def check_branch_var(app, branch_path, variable, unit) :
                 if app.Branch(branch_path).Variable(variable).ScaleUnit == unit :
                     check_passed = True
     if not check_passed :
+        leap.CloseProgressBar()
         msg = _('The active {a} area does not contain the required variable {b}:{v} with unit {v}. Please check the area and try again. Exiting...').format(a = app_name, b = branch_path, v = variable, u = unit)
         logging.error(msg)
         sys.exit(msg)
@@ -118,6 +119,7 @@ def check_region(leap, region) :
         leap.Regions(region).ResultsShown = True
         check_passed = True
     if not check_passed :
+        leap.CloseProgressBar()
         msg = _('Could not enable calculations for region {r} in the active LEAP area. Please check the area and try again. Exiting...').format(r = region)
         logging.error(msg)
         sys.exit(msg)
@@ -220,6 +222,7 @@ def main_integration():
     #------------------------------------------------------------------------------------------------------------------------
     LIST_SEPARATOR = get_list_separator() # Windows list separator character (e.g., ",")
     if not len(LIST_SEPARATOR) == 1 :
+        leap.CloseProgressBar()
         msg = _('The Windows list separator is longer than 1 character, which is incompatible with the WEAP-LEAP integration procedure. Exiting...')
         logging.error(msg)
         sys.exit(msg)
@@ -263,6 +266,7 @@ def main_integration():
     wait_apps(weap, leap)
 
     if not leap or not weap:
+        leap.CloseProgressBar()
         msg = _('WAVE integration: Cannot start LEAP and WEAP. Exiting...')
         logging.error(msg)
         sys.exit(msg)
@@ -292,6 +296,7 @@ def main_integration():
         # get Julia install location path
         juliapath = get_julia_path(shell)
         if juliapath == None:
+            leap.CloseProgressBar()
             msg = _('Could not locate the Julia executable. Try adding the path to the executable to the Windows PATH environment variable.')
             logging.error(msg)
             sys.exit(msg)
@@ -301,9 +306,9 @@ def main_integration():
             os.makedirs(amesmodelspath)
 
     # Get path for storing Excel files and create it if it doesn't exist
-    hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
-    if not os.path.exists(hydroexcelpath):
-        os.makedirs(hydroexcelpath)
+    #hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
+    #if not os.path.exists(hydroexcelpath):
+    #    os.makedirs(hydroexcelpath)
 
     weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
@@ -331,7 +336,7 @@ def main_integration():
     msg = _('Validating WEAP and LEAP areas')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
-
+    
     # validate branches
     logging.info(_('Validating branches in WEAP and LEAP'))
     for aep in config_params:
@@ -409,10 +414,12 @@ def main_integration():
 
 
     if not at_least_1_calculated :
+        leap.CloseProgressBar()
         msg = _('At least one scenario must be calculated in the active {a} area. Exiting...').format(a = runfrom_app)
         logging.error(msg)
         sys.exit(msg)
     elif len(scenarios_map)== 0:
+        leap.CloseProgressBar()
         msg = _('Could not find scenarios in the active {a2} area corresponding to the scenarios calculated in the active {a1} area. Exiting...').format(a1 = runfrom_app, a2 = other_app)
         logging.error(msg)
         sys.exit(msg)
@@ -422,6 +429,7 @@ def main_integration():
         leap_scenarios = list(scenarios_map.keys())
         weap_scenarios = list(scenarios_map.values())
     else :
+        leap.CloseProgressBar()
         msg = _('Unsupported application: "{a}". Exiting...').format(a = runfrom_app)
         logging.error(msg)
         sys.exit(msg)
@@ -454,63 +462,29 @@ def main_integration():
                     except AttributeError as e:
                         msg = _('For branch "{b}" encountered the following error: {e}').format(b = weap_path, e = str(e))
                         logging.warning(msg)
+    # check that Maximum Avaiability variable in LEAP points to monthly availability variables
+    else : 
+            logging.info(_('RESTART: Ensuring MAximum Availability in LEAP points to user variables containing monthly estimates from WEAP.'))
+            for i in range(0, len(weap_scenarios)):
+                for wb in weap_hydro_branches:
+                    weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
+                    # It is possible that the plant does not appear in this scenario
+                    if weap_hpp is None: continue
+                        # Now iterate over leap HPPs again and add capacity
+                    leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps'] 
+                    for lb in leap_hpps: # there might be multiple corresponding to this WEAP HPP
+                        leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
+                        leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
+                        # Make sure we are in the correct region 
+                        if leap.ActiveRegion != leap_region:
+                            leap.ActiveRegion = leap_region
 
-    else :
-        # check that files for this iteration and scenario exist for each HPP and scenario 
-        logging.info(_('This is a RESTART - checking that restart files of hydropower availabilities exist for each HPP and scenario'))
-        weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
-        for i in range(0, len(weap_scenarios)):
-            leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
-            for wb in weap_hydro_branches:
-                weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
-                # It is possible that the plant does not appear in this scenario
-                if weap_hpp is None: continue
-                xlsx_file = "".join(["hydro_availability_wbranch",
-                                        str(weap_hpp.Id),
-                                        "_lscenario", str(leap_scenario_id),
-                                        "_iteration", str(restart_iteration),
-                                        ".xlsx" ])
-                xlsx_path = os.path.join(hydroexcelpath, xlsx_file)
-
-                # Now check Maximum Availability variable under LEAP technology matches that file path in this scenario
-                # To do : we could consider writing it 
-                leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps']
-                for lhpp in leap_hpps:
-                    logging.info('\t\t' + _('Assigning to LEAP hydropower plant: {h}').format(h = lhpp))
-                    lhpp_path = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_path']
-                    lhpp_region = config_params['LEAP']['Hydropower_plants']['plants'][lhpp]['leap_region']
-                    lhpp_region_id = leap_region_ids[lhpp_region]
-
-                    # Esure correct region and scenario is activated to make sure variable is visible
-                    if leap.ActiveRegion.Id != lhpp_region_id: 
-                        leap.ActiveRegion = lhpp_region_id
-                    if leap.ActiveScenario.Id != leap_scenario_ids[leap_scenarios[i]]:
-                        leap.ActiveScenario = leap_scenario_ids[leap_scenarios[i]]
-                    
-                    # dont bother checking for file if exogenous capacity is 0 
-                    if leap.Branches(lhpp_path).Variable("Exogenous Capacity").Expression != "0":
-                        # Check if the file exists in folder
-                        if os.path.isfile(xlsx_path):
-                            logging.info(f"The file '{xlsx_file}' exists in the folder '{hydroexcelpath}'.")
-                        else:
-                            logging.info(f"The file '{xlsx_file}' does not exist in the folder '{hydroexcelpath}'.")
-                            logging.info(f"Aborting integration run ...")
-                            # exit integration
-                            sys.exit("Script aborted: Required file '{xlsx_file}' not found.")
-                            # Ensure the session is closed even if an error occurs
-                            session.close()
-
-                        # Check if LEAP points to the file
-                        if xlsx_path in leap.Branches(lhpp_path).Variable("Maximum Availability").Expression: continue
-                        else : 
-                            logging.info(f"The file '{xlsx_file}' has not been linked to LEAP - iteration likely did not complete successfully")
-                            logging.info(f"Instead '{leap.Branches(lhpp_path).Variable("Maximum Availability").Expression} is used by LEAP")
-                            logging.info(f"We suggest that you start from the previous iteration")
-                            logging.info(f"Aborting integration run ...")
-                            # exit integration
-                            sys.exit("Script aborted: Required file '{xlsx_file}' not found.")
-                            # Ensure the session is closed even if an error occurs
-                            session.close()
+                        if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
+                            logging.info(_('Scenario {s}').format(s=leap_scenarios[i]))
+                            msg = _('Maximum availability in LEAP branch {l} is not set to SeasonalValue-()-function, this does not appear to be a restart. Exiting...').format(l =lb)
+                            leap.CloseProgressBar()
+                            logging.error(msg)                            
+                            sys.exit(msg)
 
     # Initial AMES run, to provide macroeconomic variables to LEAP
     if using_ames:
@@ -527,12 +501,12 @@ def main_integration():
                 logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                 errorcode= os.system(exec_string)
                 if errorcode != 0:
+                    leap.CloseProgressBar()
                     msg = _('AMES exited with an error')
                     logging.error(msg)
                     sys.exit(msg)
 
     #------------------------------------------------------------------------------------------------------------------------
-
     #
     # Start iterations
     #
@@ -576,6 +550,7 @@ def main_integration():
             elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
                 unit_multiplier = 100
             else:
+                leap.CloseProgressBar()
                 msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
                 logging.error(msg)
                 sys.exit(msg)
@@ -618,6 +593,7 @@ def main_integration():
                     break
             
             if not all_weap_scenarios_calculated:
+                leap.CloseProgressBar()
                 msg = "Could not get all WEAP scenarios to calculate despite running calculations twice. Exiting..."
                 logging.error(msg)
                 sys.exit(msg)
@@ -672,6 +648,7 @@ def main_integration():
                 # check unit in weap
                 weap_unit= weap_hpp.Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
+                    leap.CloseProgressBar()
                     msg = _('Energy Generation in WEAP has to be in Gigajoules. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
@@ -679,6 +656,7 @@ def main_integration():
                 #  pull weap values from weap baseyear to endyear,and remove first item)
                 weap_hpp_gen = weap_hpp.Variables('Hydropower Generation').ResultValues(weap.BaseYear, weap.EndYear, weap_scenarios[i])[1:]
                 if not len(weap_hpp_gen)%12 == 0:
+                    leap.CloseProgressBar()
                     msg = _('Energy generation in WEAP is not monthly or not available for every simulation month. Exiting...')
                     logging.error(msg)
                     sys.exit(msg)
@@ -721,18 +699,23 @@ def main_integration():
                             weap_branch_generation_potential[scenario][wb][yi] = 0.000001 #set to very small number to avoid divison by 0
                             yi = yi+1
 
-
+                #Dont bother writing Maximum Availability if capacity is 0 in all years
+                if sum(weap_branch_generation_potential[scenario][wb]) == 0: 
+                    logging.info(_('WEAP branch {s} has generation potential 0. Not writing maximimum availabilities').format(s = wb)) 
+                    continue
+                
                 # Now iterate over leap HPPs again and add capacity
                 for lb in leap_hpps: # there might be multiple corresponding to this WEAP HPP
                     leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
                     leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
                     leap_region_id = leap_region_ids[leap_region]
-                    # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
-                    # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-
+                    
                     # Make sure we are in the correct region 
                     if leap.ActiveRegion != leap_region:
                         leap.ActiveRegion = leap_region
+
+                    if leap.Branches(leap_path).Variable("Minimum Capacity") is None: 
+                        if leap.Branches(leap_path).Variable("Exogenous Capacity").Expression == "0": continue
 
                     ## check that for this region and scenario HPP maximum availability points to monthly user variables of Maximum Availabilities
                     if restart is None:
@@ -740,11 +723,11 @@ def main_integration():
                             if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
                                 logging.info(('Updating "Maximum Availability"-variable for this power plant to use SeasonalValue()-function to point to user variables'))
                                 leap.Branches(leap_path).Variable("Maximum Availability").Expression = SeasonalValue_expression
-                    else : 
-                         if completed_iterations == restart_iteration:
-                            if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
-                                logging.info(('Updating "Maximum Availability"-variable for this power plant to use SeasonalValue()-function to point to user variables'))
-                                leap.Branches(leap_path).Variable("Maximum Availability").Expression = SeasonalValue_expression
+                    #else : 
+                    #     if completed_iterations == restart_iteration:
+                    #        if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
+                    #            logging.info(('Updating "Maximum Availability"-variable for this power plant to use SeasonalValue()-function to point to user variables'))
+                    #            leap.Branches(leap_path).Variable("Maximum Availability").Expression = SeasonalValue_expression
 
                     # calculate maximum availability for each series of monthly values   
                     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -763,6 +746,8 @@ def main_integration():
                             continue
 
                         # calculate time series of maxiumum availabilities using element-wise division
+                        # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
+                        # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
                         
 
@@ -844,6 +829,7 @@ def main_integration():
             logging.info("Using LEAP area's pre-existing before scenario script. Note: it's advisable to integrate contents of kill_excel.vbs into this script.")
         else:
             if leap.BeforeScenarioCalc != "":
+                leap.CloseProgressBar()
                 msg = "LEAP area has a before scenario script; this is incompatible with integration procedure unless 'Custom before scenario script' is set to True in config.yml."
                 logging.error(msg)
                 sys.exit(msg)
@@ -1088,6 +1074,7 @@ def main_integration():
                     logging.info('\t' + _('Executing: {e}').format(e = exec_string))
                     errorcode= os.system(exec_string)
                     if errorcode != 0:
+                        leap.CloseProgressBar()
                         msg = _('AMES exited with an error')
                         logging.error(msg)
                         sys.exit(msg)
