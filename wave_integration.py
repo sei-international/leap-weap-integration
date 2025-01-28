@@ -653,19 +653,35 @@ def main_integration():
                             "November, MaxAvail_Nov, December, MaxAvail_Dec)")
         
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
+        # Initialize the nested dictionary to store results if this is the first iteration (else old generation potentials will be referenced)
+        if restart is None:
+            if completed_iterations == 0 :
+                weap_branch_generation_potential = {}
+        else:
+            if completed_iterations == restart_iteration:
+                weap_branch_generation_potential = {}
+    
         for i in range(0, len(weap_scenarios)):
             logging.info(_('WEAP scenario: {s}').format(s = weap_scenarios[i]))
             leap_scenario_id = leap_scenario_ids[leap_scenarios[i]]
+            scenario = weap_scenarios[i]
             # Make sure we are in the correct scenario
             leap.ActiveScenario = leap_scenario_id
             leap_base_year = leap.BaseYear
             leap_end_year = leap.EndYear
+        
+            # Add nested dictionary to store weap_branch_generation_potential for this scenario branch 
+            if scenario not in weap_branch_generation_potential:
+                weap_branch_generation_potential[scenario] = {}
 
             for wb in weap_hydro_branches:
                 logging.info('\t' + _('WEAP hydropower reservoir: {r}').format(r = wb))
                 weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
                 # It is possible that the plant does not appear in this scenario
                 if weap_hpp is None: continue
+                #add nested dictionary to store weap_branch_generation_potential for this weap branch
+                if wb not in (weap_branch_generation_potential[scenario]):
+                    weap_branch_generation_potential[scenario][wb] = {}
                 # check unit in weap
                 weap_unit= weap_hpp.Variables('Hydropower Generation').Unit
                 if not weap_unit == 'GJ':
@@ -681,8 +697,7 @@ def main_integration():
                     sys.exit(msg)
 
                 y_range = range(weap.BaseYear, weap.EndYear+1)
-                # Initialize with zero values
-                weap_branch_generation_potential_MWh = [0, ] * len(y_range) * 12 # number of years x months per year
+                weap_branch_generation_potential[scenario][wb] = [0, ] * len(y_range) * 12 # number of years x months per year
                 yi=0   
                 for y in y_range:
                     leap_capacity_year = y
@@ -709,14 +724,14 @@ def main_integration():
                             leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
                             weap_branch_capacity +=leap_exog_capacity             
 
-                    # Calculate monthly generation potential
+                    # Calculate monthly generation potential for this scenario and store for future iterations (units MWh)
                     # Note : should be made flexible to different time slice set up on the LEAP side at some point - at the moment expects monthly timeslices
                     for r in range(1,12+1):
                         if weap_branch_capacity > 0 :
-                            weap_branch_generation_potential_MWh[yi] = weap_branch_capacity * monthrange(y, r)[1] * 24
+                            weap_branch_generation_potential[scenario][wb][yi] = weap_branch_capacity * monthrange(y, r)[1] * 24
                             yi = yi+1
                         else: 
-                            weap_branch_generation_potential_MWh[yi] = 0.000001 #set to very small number to avoid divison by 0
+                            weap_branch_generation_potential[scenario][wb][yi] = 0.000001 #set to very small number to avoid divison by 0
                             yi = yi+1
 
 
@@ -729,7 +744,8 @@ def main_integration():
                     # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
 
                     # Make sure we are in the correct region 
-                    leap.ActiveRegion = leap_region
+                    if leap.ActiveRegion != leap_region:
+                        leap.ActiveRegion = leap_region
 
                     ## check that for this region and scenario HPP maximum availability points to monthly user variables of Maximum Availabilities
                     if restart is None:
@@ -752,7 +768,7 @@ def main_integration():
 
                         # Extract values for this particular manoth
                         weap_hpp_gen_this_month = list(weap_hpp_gen[m::12])
-                        weap_branch_capacity_this_month = weap_branch_generation_potential_MWh[m::12]
+                        weap_branch_capacity_this_month = weap_branch_generation_potential[scenario][wb][m::12]
 
                         # calculate time series of maxiumum availabilities using element-wise division
                         weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
