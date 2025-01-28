@@ -16,7 +16,6 @@ import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 import xlsxwriter
-import glob
 
 import gettext, locale, ctypes
 # Allow a user to "short-circuit" the system language with an environment variable
@@ -442,19 +441,7 @@ def main_integration():
 
     # if not restarting, clear hydropower reservoir energy demand from WEAP scenarios
     if restart is None:
-        #clear out folder where availabilities are stored
-        logging.info(_('Deleting Excel files with availability curves from past integration runs.'))
-        # Use glob to find all Excel files in the folder
-        excel_files = glob.glob(os.path.join(hydroexcelpath, "*.xlsx*"))
-
-        # Loop through the files and delete them
-        for file in excel_files:
-            try:
-                os.remove(file)
-                logging.info(_('Deleted: {file}'))
-            except Exception as e:
-                logging.info(_('Error deleting {file}: {e}'))
-
+        # Clearing hydropower reservoir energy demand from WEAP scenarios 
         logging.info(_('Clearing hydropower reservoir energy demand from WEAP scenarios to avoid forcing model with results from past integration runs.'))
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
         for s in weap_scenarios:
@@ -766,12 +753,18 @@ def main_integration():
                         # write values into monthly user variables for maximum availability
                         uservariable_this_month = "MaxAvail_" + months[m]
 
-                        # Extract values for this particular manoth
+                        # Extract values for this particular month
                         weap_hpp_gen_this_month = list(weap_hpp_gen[m::12])
                         weap_branch_capacity_this_month = weap_branch_generation_potential[scenario][wb][m::12]
 
+                        # dont bother writing maximum availabilities, if capacity in month m is 0 in every year
+                        if sum(weap_branch_capacity_this_month)==0 : 
+                            logging.info(_('Month {s} has generation potential 0. Not writing maximimum availabilities.').format(s = months[m])) 
+                            continue
+
                         # calculate time series of maxiumum availabilities using element-wise division
                         weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
+                        
 
                         # Replace values less than 0.001 with 0, and values greater 100 with 100 using list comprehension
                         weap_max_avail_this_month = [0 if value < 0.001 else value for value in weap_max_avail_this_month]
