@@ -465,6 +465,7 @@ def main_integration():
     # check that Maximum Avaiability variable in LEAP points to monthly availability variables
     else : 
             logging.info(_('RESTART: Ensuring MAximum Availability in LEAP points to user variables containing monthly estimates from WEAP.'))
+            weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
             for i in range(0, len(weap_scenarios)):
                 for wb in weap_hydro_branches:
                     weap_hpp = weap.Branches(config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path'])
