@@ -306,9 +306,9 @@ def main_integration():
             os.makedirs(amesmodelspath)
 
     # Get path for storing Excel files and create it if it doesn't exist
-    #hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
-    #if not os.path.exists(hydroexcelpath):
-    #    os.makedirs(hydroexcelpath)
+    hydroexcelpath = os.path.normpath(os.path.join(leap.ActiveArea.Directory, "..\\..", config_params['LEAP']['Folder']))
+    if not os.path.exists(hydroexcelpath):
+        os.makedirs(hydroexcelpath)
 
     weap.ActiveArea = config_params['WEAP']['Area']
     wait_apps(weap, leap)
