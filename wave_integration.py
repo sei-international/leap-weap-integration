@@ -292,6 +292,9 @@ def main_integration():
     shell.AppActivate("LEAP: ")
     leap.ShowProgressBar(procedure_title, msg)
 
+    logging.info(_('Convergence threshold: {t} ').format(t = config_params['Tolerance']))
+    logging.info(_('Maximum number of iterations: {i} ').format(i = config_params['Maximum Iterations']))
+
     if using_ames:
         # get Julia install location path
         juliapath = get_julia_path(shell)
@@ -336,7 +339,11 @@ def main_integration():
     msg = _('Validating WEAP and LEAP areas')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
-    
+
+    logging.info(_('This simulation links the following WEAP and LEAP models'))
+    logging.info(_('WEAP area {w} ').format(w = config_params['WEAP']['Area']))
+    logging.info(_('WEAP area {l} ').format(l = config_params['LEAP']['Area']))
+
     # validate branches
     logging.info(_('Validating branches in WEAP and LEAP'))
     for aep in config_params:
@@ -464,7 +471,7 @@ def main_integration():
                         logging.warning(msg)
     # check that Maximum Avaiability variable in LEAP points to monthly availability variables
     else : 
-            logging.info(_('RESTART: Ensuring MAximum Availability in LEAP points to user variables containing monthly estimates from WEAP.'))
+            logging.info(_('THIS IS A RESTART: Ensuring MAximum Availability in LEAP points to user variables containing monthly estimates from WEAP.'))
             weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
             for i in range(0, len(weap_scenarios)):
                 for wb in weap_hydro_branches:
