@@ -1,26 +1,28 @@
 predefined scenarios: # LEAP scenario : WEAP scenario
-  S1 Baseline Historical: S1 Historical
-  S2 National Focus Historical: S2 Historical
-  S3 Water and Ag Imp Historical: S3 Historical
-  S4 Energy and Climate Imp Historical: S4 Historical
-  S5 International Coop Historical: S5 Historical
-  S6 Ecosystem Restoration Historical: S6 Historical
-  S1 Baseline INM: S1 Dry
-  S2 National Focus INM: S2 Dry
-  S3 Water and Ag Imp INM: S3 Dry
-  S4 Energy and Climate Imp INM: S4 Dry
-  S5 International Coop INM: S5 Dry
-  S6 Ecosystem Restoration INM: S6 Dry
-  S1 Baseline MPI: S1 Average
-  S2 National Focus MPI: S2 Average
-  S3 Water and Ag Imp MPI: S3 Average
-  S4 Energy and Climate Imp MPI: S4 Average
-  S5 International Coop MPI: S5 Average
-  S6 Ecosystem Restoration MPI: S6 Average
-  S1 Baseline GFDL: S1 Wet
-  S2 National Focus GFDL: S2 Wet
-  S3 Water and Ag Imp GFDL: S3 Wet
-  S4 Energy and Climate Imp GFDL: S4 Wet
-  S5 International Coop GFDL: S5 Wet
-  S6 Ecosystem Restoration GFDL: S6 Wet
-  
+  S0 Baseline Historical: S0 Historical
+  S1 National Focus Historical: S1 Historical
+  S2 Water and Ag Imp Historical: S2 Historical
+  S3 Energy and Climate Imp Historical: S3 Historical
+  S4 International Coop Historical: S4 Historical
+  S5 Ecosystem Restoration Historical: S5 Historical
+  S0 Baseline INM: S0 Dry
+  S1 National Focus INM: S1 Dry
+  S2 Water and Ag Imp INM: S2 Dry
+  S3 Energy and Climate Imp INM: S3 Dry
+  S4 International Coop INM: S4 Dry
+  S5 Ecosystem Restoration INM: S5 Dry
+  S0 Baseline MPI: S0 Average
+  S1 National Focus MPI: S1 Average
+  S2 Water and Ag Imp MPI: S2 Average5
+  S3 Energy and Climate Imp MPI: S3 Average
+  S4 International Coop MPI: S4 Average
+  S5 Ecosystem Restoration MPI: S5 Average
+  S0 Baseline GFDL: S0 Wet
+  S1 National Focus GFDL: S1 Wet
+  S2 Water and Ag Imp GFDL: S2 Wet
+  S3 Energy and Climate Imp GFDL: S3 Wet
+  S4 International Coop GFDL: S4 Wet
+  S5 Ecosystem Restoration GFDL: S5 Wet
+  S1 National Focus DryHot1: S1_DryHot1
+  S1 National Focus WetWarm1: S1_WetWarm1
+  S1 National Focus PrecipShift_Dry : S1_PrecipShift_Dry
