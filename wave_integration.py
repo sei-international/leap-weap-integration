@@ -487,6 +487,10 @@ def main_integration():
                         if leap.ActiveRegion != leap_region:
                             leap.ActiveRegion = leap_region
 
+                        # If non-optimized run, only check "Exogeneous capacity". If equal zero, don't bother checking expression
+                        if leap.Branches(leap_path).Variable("Minimum Capacity") is None: 
+                            if leap.Branches(leap_path).Variable("Exogenous Capacity").Expression == "0": continue
+
                         if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
                             logging.info(_('Scenario {s}').format(s=leap_scenarios[i]))
                             msg = _('Maximum availability in LEAP branch {l} is not set to SeasonalValue-()-function, this does not appear to be a restart. Exiting...').format(l =lb)
