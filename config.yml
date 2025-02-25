@@ -242,6 +242,15 @@ WEAP:
         Varzob:
           weap_path: Supply and Resources\River\Kafirnigan River\Run of River Hydro\Varzob
           leap_hpps: [VARZOB 2]
+        Pamir 1:
+          weap_path: Supply and Resources\River\Pamir\Run of River Hydro\Pamir 1
+          leap_hpps: [PAMIR 1]
+        Pamir 2:
+          weap_path: Supply and Resources\River\Pamir\Run of River Hydro\Pamir 2
+          leap_hpps: [PAMIR 2]
+         Sichankul Canal:
+          weap_path: Supply and Resources\River\Kashkadarya River\Run of River Hydro\Sichankul Canal
+          leap_hpps: [SICHANKUL CANAL]
 
   Water pumping:
     variable: Supply Requirement
