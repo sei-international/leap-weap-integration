@@ -6,11 +6,11 @@
 Integrated model:
     Tolerance: 0.10
     Maximum iterations: 5 # including iterations prior to restart, if restart >=3
-    Restart: # optional, set to 1 if restarting, defaults to not restarting
-    Restart after iteration: # set if "restart =1" to last successfully completed iteration
+    Restart: # optional, set to 1 if restarting
+    Restart after iteration: # set to last successfully completed iteration, if restarting
 
 WEAP:
-  Area: WAVE-AmuDarya_SyrDarya 2025 v3
+  Area: AmuDarya_SyrDarya_2025_v3
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -270,7 +270,7 @@ LEAP:
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
-  Folder: WAVE_Hydro
+  Folder: LEAP-WEAP-integration Results
   # These are month names as specified in time slices; they should start with January and go through December
   Months: [January, February, March, April, May, June, July, August, September, October, November, December]
   Branches: 
