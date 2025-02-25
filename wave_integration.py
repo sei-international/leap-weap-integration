@@ -107,10 +107,13 @@ def check_branch_var(app, branch_path, variable, unit) :
                 if app.Branch(branch_path).Variable(variable).ScaleUnit == unit :
                     check_passed = True
     if not check_passed :
-        leap.CloseProgressBar()
         msg = _('The active {a} area does not contain the required variable {b}:{v} with unit {v}. Please check the area and try again. Exiting...').format(a = app_name, b = branch_path, v = variable, u = unit)
         logging.error(msg)
         sys.exit(msg)
+        #leap.CloseProgressBar()
+        #msg = _('The active {a} area does not contain the required variable {b}:{v} with unit {v}. Please check the area and try again. Exiting...').format(a = app_name, b = branch_path, v = variable, u = unit)
+        #logging.error(msg)
+        #sys.exit(msg)
 
 # function that checks whether region (this argument should be a region name) exists in the active LEAP area. If it does, enables calculations for region.
 def check_region(leap, region) :
@@ -292,8 +295,8 @@ def main_integration():
     shell.AppActivate("LEAP: ")
     leap.ShowProgressBar(procedure_title, msg)
 
-    logging.info(_('Convergence threshold: {t} ').format(t = config_params['Tolerance']))
-    logging.info(_('Maximum number of iterations: {i} ').format(i = config_params['Maximum Iterations']))
+    logging.info(_('Convergence threshold: {t} ').format(t = tolerance))
+    logging.info(_('Maximum number of iterations: {i} ').format(i = max_iterations))
 
     if using_ames:
         # get Julia install location path
