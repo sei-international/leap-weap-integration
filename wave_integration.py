@@ -16,8 +16,12 @@ import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
 import xlsxwriter
-
+import csv
+import pandas as pd
 import gettext, locale, ctypes
+#import shutil
+#import zipfile
+
 # Allow a user to "short-circuit" the system language with an environment variable
 if os.environ.get('LANG') is not None:
     language = os.environ['LANG']
@@ -30,6 +34,7 @@ if gettext.find('wave_integration', localedir='locale', languages=[language]) is
     transl.install()
 else:
     gettext.install('wave_integration')
+_ = gettext.gettext
 
 # Load gettext and install translator before importing other local scripts
 from utils.julia import get_julia_path
@@ -254,6 +259,7 @@ def main_integration():
                 restart_iteration = None
             else:
                 restart_iteration = config_params['Integrated model']['Restart after iteration']
+                logging.info(_("Restarting from iteration : {i}").format(i = restart_iteration))
 
     # Ensure both LEAP and WEAP are open
     leap = win32.Dispatch('LEAP.LEAPApplication') # will open Freedonia
@@ -336,6 +342,12 @@ def main_integration():
     msg = _('Validating WEAP and LEAP areas')
     leap.ShowProgressBar(procedure_title, msg)
     leap.SetProgressBar(5)
+
+    SeasonalValue_expression = (
+                    "SeasonalValue(January, MaxAvail_Jan, February, MaxAvail_Feb, March, MaxAvail_Mar, "
+                    "April, MaxAvail_Apr, May, MaxAvail_May, June, MaxAvail_Jun, July, MaxAvail_Jul, "
+                    "August, MaxAvail_Aug, September, MaxAvail_Sep, October, MaxAvail_Oct, "
+                    "November, MaxAvail_Nov, December, MaxAvail_Dec)")         
     
     # validate branches
     logging.info(_('Validating branches in WEAP and LEAP'))
@@ -365,6 +377,15 @@ def main_integration():
     for b, entry in config_params['WEAP']['Hydropower_plants']['dams'].items() :
         logging.info('\t' + b)
         check_branch_var(weap, entry['weap_path'], "Hydropower Generation", "GJ")
+    
+    #Validate Favorite chart with Energy Generation results exists in LEAP Area
+    logging.info(_('Checking favorites for necessary chart...'))
+    if leap.Favorites.Exists("9 HPP Energy Generation"):
+        logging.info(_('LEAP Favorite chart for Energy Generation for all HPPs and Scenarios does exist.'))
+    else:
+        msg = _('LEAP Favorite chart for Energy Generation for all HPPs and Scenarios does not exist. Exiting...').format(a = runfrom_app)
+        logging.error(msg)
+        sys.exit(msg)
 
 
     #------------------------------------------------------------------------------------------------------------------------
@@ -464,7 +485,7 @@ def main_integration():
                         logging.warning(msg)
     # check that Maximum Avaiability variable in LEAP points to monthly availability variables
     else : 
-            logging.info(_('RESTART: Ensuring MAximum Availability in LEAP points to user variables containing monthly estimates from WEAP.'))
+            logging.info(_('RESTART: Ensuring "Maximum Availability"-variable in LEAP points to user variables containing monthly estimates from WEAP.'))
             weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
             for i in range(0, len(weap_scenarios)):
                 for wb in weap_hydro_branches:
@@ -514,6 +535,7 @@ def main_integration():
     #------------------------------------------------------------------------------------------------------------------------
     if restart :
         completed_iterations = restart_iteration
+        logging.info(_("Restarting from iteration : {i}").format(i = completed_iterations))
     else :
         completed_iterations = 0
     results_converged = False
@@ -528,38 +550,41 @@ def main_integration():
         target_ames_results = config_params['AMES']['LEAP']['target_variables']
 
     while completed_iterations <= max_iterations :
-        msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
-        leap.ShowProgressBar(procedure_title, "".join(msg))
-        leap.SetProgressBar(20)
-
+        logging.info(_("Completed iterations: {i}").format(i = completed_iterations))
         #------------------------------------------------------------------------------------------------------------------------
         # Push demographic and macroeconomic key assumptions from LEAP to WEAP
         #------------------------------------------------------------------------------------------------------------------------
-        # Values from LEAP base year to end year are embedded in WEAP Interp expressions
-        count = 0
-        logging.info(_('Pushing demographic and macroeconomic drivers from LEAP to WEAP'))
-        for k in config_params['WEAP']['Branches'].keys():
-            logging.info('\t' + k)
-            leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
-            leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
-            leap_region = config_params['WEAP']['Branches'][k]['leap_region']
-            # TODO put these into the config file
-            if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
-                unit_multiplier = 1
-            elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
-                unit_multiplier = 1e-9
-            elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
-                unit_multiplier = 100
-            else:
-                leap.CloseProgressBar()
-                msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
-                logging.error(msg)
-                sys.exit(msg)
-            add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
+        # dont bother pushing demographic and macroeconomic info again, unless AMES is running and they are getting updated
+        if not using_ames and completed_iterations >= (restart_iteration-1 if restart else 1):
+            logging.info(_("This is not a first iteration and AMES is not being used, skipping moving demographic and macroeconomic assumptions from LEAP to WEAP as they have not changed."))
+        else :
+            msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
+            # leap.ShowProgressBar(procedure_title, "".join(msg))
+            # leap.SetProgressBar(20)
+            # # Values from LEAP base year to end year are embedded in WEAP Interp expressions
+            # count = 0
+            # logging.info(_('Pushing demographic and macroeconomic drivers from LEAP to WEAP'))
+            # for k in config_params['WEAP']['Branches'].keys():
+            #     logging.info('\t' + k)
+            #     leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
+            #     leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
+            #     leap_region = config_params['WEAP']['Branches'][k]['leap_region']
+            #     if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
+            #         unit_multiplier = 1
+            #     elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
+            #         unit_multiplier = 1e-9
+            #     elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
+            #         unit_multiplier = 100
+            #     else:
+            #         leap.CloseProgressBar()
+            #         msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
+            #         logging.error(msg)
+            #         sys.exit(msg)
+            #     add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
 
-            count += 1
+            #     count += 1
             
-        logging.info(_('Pushed {n} variable(s) to WEAP').format(n = count))
+            # logging.info(_('Pushed {n} variable(s) to WEAP').format(n = count))
             
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate WEAP
@@ -609,12 +634,6 @@ def main_integration():
         msg = _('Moving hydropower availability from WEAP to LEAP (iteration {i})').format(i = completed_iterations+1)
         leap.ShowProgressBar(procedure_title, msg)
         leap.SetProgressBar(40)
-
-        SeasonalValue_expression = (
-                            "SeasonalValue(January, MaxAvail_Jan, February, MaxAvail_Feb, March, MaxAvail_Mar, "
-                            "April, MaxAvail_Apr, May, MaxAvail_May, June, MaxAvail_Jun, July, MaxAvail_Jul, "
-                            "August, MaxAvail_Aug, September, MaxAvail_Sep, October, MaxAvail_Oct, "
-                            "November, MaxAvail_Nov, December, MaxAvail_Dec)")
         
         weap_hydro_branches = config_params['WEAP']['Hydropower_plants']['dams'].keys()
         # Initialize the nested dictionary to store results if this is the first iteration (else old generation potentials will be referenced)
@@ -718,7 +737,7 @@ def main_integration():
                     if leap.Branches(leap_path).Variable("Minimum Capacity") is None: 
                         if leap.Branches(leap_path).Variable("Exogenous Capacity").Expression == "0": continue
 
-                    ## check that for this region and scenario HPP maximum availability points to monthly user variables of Maximum Availabilities
+                    # check that for this region and scenario HPP maximum availability points to monthly user variables of Maximum Availabilities
                     if restart is None:
                         if completed_iterations == 0 :
                             if leap.Branches(leap_path).Variable("Maximum Availability").ExpressionRS(leap_region, leap_scenarios[i]) != SeasonalValue_expression :
@@ -866,67 +885,83 @@ def main_integration():
         this_iteration_ames_results = {}
         this_iteration_weap_results = {}
 
-        leap_unit = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_unit']
-        leap_varname = config_params['LEAP']['Hydropower_plants']['convergence_check']['leap_variable']
-        for sl in leap_scenarios:
-            leap_scenario_id = leap_scenario_ids[sl]
-            # Make sure we are in the correct scenario
-            leap.ActiveScenario = leap_scenario_id
-            sw = scenarios_map[sl]
-            logging.info(_('Checking results for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
-            
-            logging.info('\t' + _('Checking LEAP results...'))
-            # Create an array of target LEAP result values obtained in this iteration
-            leap_results_size = len(target_leap_results) * len(leap_calc_years)
-            this_iteration_leap_results[sl] = np.empty(leap_results_size, dtype=object)
-            
+        # Activate favorite
+        #leap.ActiveView = "Results"
+        leap.Favorites("9 HPP Energy Generation").Activate()
+        leap.ActiveUnit ='Gigawatt-Hour'
+        # Write results from favorite to excel
+        leap_results_filepath = os.path.join(hydroexcelpath,f"LEAP_results_iteration_{completed_iterations+1}.csv")
+        leap.ExportResultsCSV(leap_results_filepath)
+        leap.ActiveView = "Analysis"
+
+        # Read excel to dataframe
+        with open(leap_results_filepath) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            # Search for header row
+            for hdr in csv_reader:
+                if hdr[0] == "Scenario":
+                    header = hdr
+                    break
+            # Read the rest of the file into a DataFrame
+            df = pd.DataFrame(csv_reader, columns=header)
             current_index = 0
-            for e in target_leap_results:
-                leap_var = leap.Branches(config_params['LEAP']['Hydropower_plants']['plants'][e]['leap_path']).Variables(leap_varname)
-                leap.ActiveRegion = config_params['LEAP']['Hydropower_plants']['plants'][e]['leap_region']
-                for y in leap_calc_years:
-                    val = leap_var.Value(y, leap_unit)
-                    if val is None:
-                        logging.error(_('LEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sl))
-                    this_iteration_leap_results[sl][current_index] = val
-                    current_index += 1
+            for sl in  leap_scenarios:
+                this_iteration_leap_results[sl] = {}
+                filtered_scenario = df[df.iloc[:, 0] == sl]
+                sw = scenarios_map[sl]
+                logging.info(_('Checking results for scenario: {w} (WEAP)/{l} (LEAP)').format(w = sw, l = sl))
+            
+                logging.info('\t' + _('Checking LEAP results...'))
+                # Extract results for each hydropower plant
+                for t in target_leap_results:
+                    for y in leap_calc_years:
+                        # Extract result for this hydropower plant and year
+                        val = filtered_scenario.loc[:, filtered_scenario.columns.str.contains(t) & filtered_scenario.columns.str.contains(str(y))]
+                        # Ensure all values are numeric, converting non-numeric ones to 0
+                        val = val.apply(pd.to_numeric, errors='coerce').fillna(0)
+                        if val is None:
+                            logging.error(_('LEAP did not return a value for "{t}" in year {y} of scenario {s}').format(e = t, y = y, s = sl))
+
+                        this_iteration_leap_results[sl][current_index] = val
+                        current_index += 1
 
 
-            if using_ames:
-                logging.info('\t' + _('Checking AMES results...'))
-                # Create an array of target AMES result values obtained in this iteration and stored in LEAP
-                ames_results_size = len(target_ames_results) * len(config_params['AMES']['Regions'].keys()) * len(leap_calc_years)
-                this_iteration_ames_results[sl] = np.empty(ames_results_size, dtype=object)
+                if using_ames:
+                    logging.info('\t' + _('Checking AMES results...'))
+                    # Create an array of target AMES result values obtained in this iteration and stored in LEAP
+                    ames_results_size = len(target_ames_results) * len(config_params['AMES']['Regions'].keys()) * len(leap_calc_years)
+                    this_iteration_ames_results[sl] = np.empty(ames_results_size, dtype=object)
+                    
+                    current_index = 0
+                    for e in target_ames_results:
+                        leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
+                        for r in config_params['AMES']['Regions']:
+                            leap_region_id = leap_region_ids[r]
+                            leap.ActiveRegion = leap_region_id
+                            for y in leap_calc_years:
+                                val = leap_var.Value(y)
+                                if val is None:
+                                    logging.error(_('LEAP did not return a value for AMES result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
+                                this_iteration_ames_results[sl][current_index] = val
+                                current_index += 1
+
+                logging.info('\t' + _('Checking WEAP results...'))
+                # Create an array of target WEAP result values obtained in this iteration
+                weap_results_size = len(target_weap_results) * (weap.EndYear - weap.BaseYear + 1)
+                this_iteration_weap_results[sw] = np.empty(weap_results_size, dtype=object)
                 
                 current_index = 0
-                for e in target_ames_results:
-                    leap_var = leap.Branches(config_params['LEAP']['Branches'][e]['path']).Variables(config_params['LEAP']['Branches'][e]['variable'])
-                    for r in config_params['AMES']['Regions']:
-                        leap_region_id = leap_region_ids[r]
-                        leap.ActiveRegion = leap_region_id
-                        for y in leap_calc_years:
-                            val = leap_var.Value(y)
-                            if val is None:
-                                logging.error(_('LEAP did not return a value for AMES result "{e}" in year {y} of scenario {s} for {r}').format(e = e, y = y, s = sl, r = r))
-                            this_iteration_ames_results[sl][current_index] = val
-                            current_index += 1
-
-            logging.info('\t' + _('Checking WEAP results...'))
-            # Create an array of target WEAP result values obtained in this iteration
-            weap_results_size = len(target_weap_results) * (weap.EndYear - weap.BaseYear + 1)
-            this_iteration_weap_results[sw] = np.empty(weap_results_size, dtype=object)
-            
-            current_index = 0
-            weap_varname = ":" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_variable']
-            weap_unitname = "[" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_unit'] + "]"
-            for e in target_weap_results:
-                weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants']['dams'][e]['weap_path'], weap_varname, weap_unitname])
-                for y in range(weap.BaseYear, weap.EndYear + 1):
-                    val = weap.ResultValue(weap_pathvar, y, 1, sw, y, 12, 'Total')
-                    if val is None:
-                        logging.error(_('WEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sw))
-                    this_iteration_weap_results[sw][current_index] = val
-                    current_index += 1
+                weap_varname = ":" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_variable']
+                weap_unitname = "[" + config_params['WEAP']['Hydropower_plants']['convergence_check']['weap_unit'] + "]"
+                for e in target_weap_results:
+                    weap_pathvar = "".join([config_params['WEAP']['Hydropower_plants']['dams'][e]['weap_path'], weap_varname, weap_unitname])
+                    for y in range(weap.BaseYear, weap.EndYear + 1):
+                        val = weap.ResultValue(weap_pathvar, y, 1, sw, y, 12, 'Total')
+                        if val is None:
+                            logging.error(_('WEAP did not return a value for "{e}" in year {y} of scenario {s}').format(e = e, y = y, s = sw))
+                        this_iteration_weap_results[sw][current_index] = val
+                        current_index += 1
+        del csv_file
 
         #------------------------------------------------------------------------------------------------------------------------
         # Check for convergence (after initial run)
@@ -954,9 +989,9 @@ def main_integration():
                 results_converged = True
                 
                 # LEAP
-                num = np.abs(this_iteration_leap_results[sl] - last_iteration_leap_results[sl])
+                num = np.abs(np.array(list(this_iteration_leap_results[sl].values())) - np.array(list(last_iteration_leap_results[sl].values()))).ravel().ravel()
                 # This formulation avoids divide by zero
-                den = 0.5 * np.maximum(np.abs(this_iteration_leap_results[sl] + last_iteration_leap_results[sl]), float_info.epsilon)
+                den = 0.5 * np.maximum(np.abs((np.array(list(this_iteration_leap_results[sl].values())) + np.array(list(last_iteration_leap_results[sl].values()))).ravel().ravel()), float_info.epsilon)
                 test_value = np.sqrt(sum((num/den)**2)/len(den))
                 if test_value > tolerance:
                     diff_loc = index_to_elements(np.argmax(num/den), target_leap_results, leap_calc_years)
@@ -991,7 +1026,7 @@ def main_integration():
                     if using_ames: del this_iteration_ames_results[sl]
                     del this_iteration_weap_results[sw]
                 else:
-                    logging.info('\t\t' + _('Results did not converge for this scenario.'))
+                    logging.info('\t\t' + _('Results did not converge for scenario {s}.').format(s = sl))
         
             # Are any scenarios left?
             if len(scenarios_map) == 0:
@@ -1027,6 +1062,7 @@ def main_integration():
         #
         #------------------------------------------------------------------------------------------------------------------------
         logging.info(_('Moving hydropower generation from LEAP to WEAP...'))
+
         for sl in leap_scenarios:
             sw = scenarios_map[sl]
             export_leap_hpp_to_weap(leap, weap, completed_iterations, sl, sw, config_params)
