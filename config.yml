@@ -10,96 +10,96 @@ Integrated model:
     Restart after iteration: # set to last successfully completed iteration, if restarting
 
 WEAP:
-  Area: AmuDarya_SyrDarya_2025_v3
+  Area: AmuDarya_SyrDarya_2025_v5
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
-      path: Key\Demographic\KAZ\National population
+      path: Key\Domestic Demands\KAZ\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population 
       leap_region: Kazakhstan
     Population_KGZ:
-      path: Key\Demographic\KGZ\National population
+      path: Key\Domestic Demands\KGZ\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Kyrgyzstan
     Population_TJK:
-      path: Key\Demographic\TJK\National population
+      path: Key\Domestic Demands\TJK\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Tajikistan
     Population_TKM:
-      path: Key\Demographic\TKM\National population
+      path: Key\Domestic Demands\TKM\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Turkmenistan
     Population_UZB:
-      path: Key\Demographic\UZB\National population
+      path: Key\Domestic Demands\UZB\National population
       variable: Annual Activity Level
       unit: cap
       leap_branch: Population
       leap_region: Uzbekistan
     GDP_KAZ:
-      path: Key\Macroeconomic\KAZ\GDP
+      path: Key\Industrial Demands\Macroeconomic\KAZ\GDP
       variable: Annual Activity Level
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Kazakhstan
     GDP_KGZ:
-      path: Key\Macroeconomic\KGZ\GDP
+      path: Key\Industrial Demands\Macroeconomic\KGZ\GDP
       variable: Annual Activity Level
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Kyrgyzstan
     GDP_TJK:
-      path: Key\Macroeconomic\TJK\GDP
+      path: Key\Industrial Demands\Macroeconomic\TJK\GDP
       variable: Annual Activity Level
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Tajikistan
     GDP_TKM:
-      path: Key\Macroeconomic\TKM\GDP
+      path: Key\Industrial Demands\Macroeconomic\TKM\GDP
       variable: Annual Activity Level
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Turkmenistan
     GDP_UZB:
-      path: Key\Macroeconomic\UZB\GDP
+      path: Key\Industrial Demands\Macroeconomic\UZB\GDP
       variable: Annual Activity Level
       unit: Billion 2020 USD
       leap_branch: GDP
       leap_region: Uzbekistan
     Industrial_VA_KAZ:
-      path: Key\Macroeconomic\KAZ\Industrial value added
+      path: Key\Industrial Demands\Macroeconomic\KAZ\Industrial value added
       variable: Annual Activity Level
       unit: '% share'
       leap_branch: GDP
       leap_branch: Industrial_VA_fraction
       leap_region: Kazakhstan
     Industrial_VA_KGZ:
-      path: Key\Macroeconomic\KGZ\Industrial value added
+      path: Key\Industrial Demands\Macroeconomic\KGZ\Industrial value added
       variable: Annual Activity Level
       unit: '% share'
       leap_branch: Industrial_VA_fraction
       leap_region: Kyrgyzstan
     Industrial_VA_TJK:
-      path: Key\Macroeconomic\TJK\Industrial value added
+      path: Key\Industrial Demands\Macroeconomic\TJK\Industrial value added
       variable: Annual Activity Level
       unit: '% share'
       leap_branch: Industrial_VA_fraction
       leap_region: Tajikistan
     Industrial_VA_TKM:
-      path: Key\Macroeconomic\TKM\Industrial value added
+      path: Key\Industrial Demands\Macroeconomic\TKM\Industrial value added
       variable: Annual Activity Level
       unit: '% share'
       leap_branch: Industrial_VA_fraction
       leap_region: Turkmenistan
     Industrial_VA_UZB:
-      path: Key\Macroeconomic\UZB\Industrial value added
+      path: Key\Industrial Demands\Macroeconomic\UZB\Industrial value added
       variable: Annual Activity Level
       unit: '% share'
       leap_branch: Industrial_VA_fraction
@@ -242,6 +242,15 @@ WEAP:
         Varzob:
           weap_path: Supply and Resources\River\Kafirnigan River\Run of River Hydro\Varzob
           leap_hpps: [VARZOB 2]
+        Pamir 1:
+          weap_path: Supply and Resources\River\Pamir\Run of River Hydro\Pamir 1
+          leap_hpps: [PAMIR 1]
+        Pamir 2:
+          weap_path: Supply and Resources\River\Pamir\Run of River Hydro\Pamir 2
+          leap_hpps: [PAMIR 2]
+        Sichankul Canal:
+          weap_path: Supply and Resources\River\Kashkadarya River\Run of River Hydro\Sichankul Canal
+          leap_hpps: [SICHANKUL CANAL]
 
   Water pumping:
     variable: Supply Requirement
@@ -264,13 +273,13 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: sei central asia v79
+  Area: sei central asia v80
   # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
   Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
   # Folder for storing Excel files with WEAP outputs for hydropower plants used by LEAP as inputs
   # This must be at the same level as the "LEAP Areas" folder, and will be created if it does not exist
-  Folder: LEAP-WEAP-integration Results
+  Folder: LEAP-WEAP Results
   # These are month names as specified in time slices; they should start with January and go through December
   Months: [January, February, March, April, May, June, July, August, September, October, November, December]
   Branches: 
