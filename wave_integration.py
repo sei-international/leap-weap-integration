@@ -559,32 +559,32 @@ def main_integration():
             logging.info(_("This is not a first iteration and AMES is not being used, skipping moving demographic and macroeconomic assumptions from LEAP to WEAP as they have not changed."))
         else :
             msg = _('Moving demographic and macroeconomic assumptions from LEAP to WEAP (iteration {i})').format(i = completed_iterations+1)
-            # leap.ShowProgressBar(procedure_title, "".join(msg))
-            # leap.SetProgressBar(20)
-            # # Values from LEAP base year to end year are embedded in WEAP Interp expressions
-            # count = 0
-            # logging.info(_('Pushing demographic and macroeconomic drivers from LEAP to WEAP'))
-            # for k in config_params['WEAP']['Branches'].keys():
-            #     logging.info('\t' + k)
-            #     leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
-            #     leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
-            #     leap_region = config_params['WEAP']['Branches'][k]['leap_region']
-            #     if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
-            #         unit_multiplier = 1
-            #     elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
-            #         unit_multiplier = 1e-9
-            #     elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
-            #         unit_multiplier = 100
-            #     else:
-            #         leap.CloseProgressBar()
-            #         msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
-            #         logging.error(msg)
-            #         sys.exit(msg)
-            #     add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
+            leap.ShowProgressBar(procedure_title, "".join(msg))
+            leap.SetProgressBar(20)
+            # Values from LEAP base year to end year are embedded in WEAP Interp expressions
+            count = 0
+            logging.info(_('Pushing demographic and macroeconomic drivers from LEAP to WEAP'))
+            for k in config_params['WEAP']['Branches'].keys():
+                logging.info('\t' + k)
+                leap_path = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['path']
+                leap_variable = config_params['LEAP']['Branches'][config_params['WEAP']['Branches'][k]['leap_branch']]['variable']
+                leap_region = config_params['WEAP']['Branches'][k]['leap_region']
+                if config_params['WEAP']['Branches'][k]['leap_branch'] == 'Population':
+                    unit_multiplier = 1
+                elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'GDP':
+                    unit_multiplier = 1e-9
+                elif config_params['WEAP']['Branches'][k]['leap_branch'] == 'Industrial_VA_fraction':
+                    unit_multiplier = 100
+                else:
+                    leap.CloseProgressBar()
+                    msg = _('Unit multiplier for variable "{v}" is unknown. Exiting...').format(v = leap_variable)
+                    logging.error(msg)
+                    sys.exit(msg)
+                add_leap_data_to_weap_interp(weap, leap, weap_scenarios, leap_scenarios, config_params['WEAP']['Branches'][k]['path'], config_params['WEAP']['Branches'][k]['variable'],  leap_path, leap_variable, leap_region, unit_multiplier, LIST_SEPARATOR)
 
-            #     count += 1
+                count += 1
             
-            # logging.info(_('Pushed {n} variable(s) to WEAP').format(n = count))
+            logging.info(_('Pushed {n} variable(s) to WEAP').format(n = count))
             
         #------------------------------------------------------------------------------------------------------------------------
         # Calculate WEAP
