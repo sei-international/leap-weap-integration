@@ -886,8 +886,8 @@ def main_integration():
         weap.SaveArea()
         logging.info(_('Saving versions for iteration {i}').format(i = completed_iterations + 1))
         version_comment = _('Iteration {i} - {u}').format(i = completed_iterations + 1, u = run_uuid)
-        leap.SaveVersion(version_comment, True) # Save results
-        weap.SaveVersion(version_comment, True) # Save results
+        #leap.SaveVersion(version_comment, True) # Save results
+        #weap.SaveVersion(version_comment, True) # Save results
 
         #------------------------------------------------------------------------------------------------------------------------
         # Store target results used in the convergence check

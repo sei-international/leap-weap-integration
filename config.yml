@@ -5,9 +5,9 @@
 ###############################################################
 Integrated model:
     Tolerance: 0.10
-    Maximum iterations: 5 # including iterations prior to restart, if restart >=3
-    Restart: # optional, set to 1 if restarting
-    Restart after iteration: # set to last successfully completed iteration, if restarting
+    Maximum iterations: 11 # including iterations prior to restart, if restart >=3
+    Restart: 1 # optional, set to 1 if restarting
+    Restart after iteration: 6 # set to last successfully completed iteration, if restarting
 
 WEAP:
   Area: AmuDarya_SyrDarya_2025_v6
