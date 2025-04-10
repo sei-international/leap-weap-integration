@@ -10,7 +10,7 @@ Integrated model:
     Restart after iteration: # set to last successfully completed iteration, if restarting
 
 WEAP:
-  Area: AmuDarya_SyrDarya_2025_v5
+  Area: AmuDarya_SyrDarya_2025_v6
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -230,9 +230,6 @@ WEAP:
         Kishraus:
           weap_path: Supply and Resources\River\Khishrau Diversion\Run of River Hydro\Kishraus
           leap_hpps: [KHISHRAUS]
-        Kumkurgan:
-          weap_path: Supply and Resources\River\Surkhandarrya River\Reservoirs\Kumkurgan
-          leap_hpps: [KUMKURGAN]
         Sarvoz:
           weap_path: Supply and Resources\River\Kafirnigan River\Run of River Hydro\Sarvoz
           leap_hpps: [SARVOZ]
@@ -273,7 +270,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: sei central asia v80
+  Area: sei central asia v81
   # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
   Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
@@ -327,7 +324,7 @@ LEAP:
   Hydropower_plants:
     convergence_check:
         leap_variable: Energy Generation # LEAP result to be checked for convergence
-        leap_unit: GWh
+        leap_unit: Gigawatt-Hour
     plants:
         AKHANGARAN:
           leap_path: Transformation\Electricity Production\Processes\AKHANGARAN RESERVOIR

@@ -21,8 +21,8 @@ def export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname,
     # Should be calculated, but check
     while leap.IsCalculating:
         time.sleep(1)
-    leap.ActiveScenario = leap_scenario
     leap.Favorites(favname).Activate()
+    leap.ActiveScenario = leap_scenario # reordered to after leap.Favoorites(favname).Activate)
     leap.ActiveUnit = units
     leap.ExportResultsCSV(leap_export_fname)
     leap.ActiveView = "Analysis"
@@ -188,7 +188,7 @@ def proc_weap_hpp(weap, hpp, config_params):
     for hw, entry in config_params['WEAP']['Hydropower_plants']['dams'].items():
         # Consider adding this check as a short-cut
         # weap_path = config_params['WEAP']['Hydropower_plants']['dams'][wb]['weap_path']
-        # if not 'Run of River' in weap_path: 
+            # if not 'Run of River' in weap_path: 
             # weap.Branches(weap_path).Variables('Energy Demand').Expression = ""
         # Assume zero means default; Can't check if expression is inherited, because in Python properties cannot have arguments
         if weap.Branch(entry['weap_path']).Variable("Energy Demand").Expression != "0":
