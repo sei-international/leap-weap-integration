@@ -697,9 +697,10 @@ def main_integration():
                     sys.exit(msg)
 
                 y_range = range(weap.BaseYear, weap.EndYear+1)
-                weap_branch_generation_potential[scenario][wb] = [0, ] * len(y_range) * 12 # number of years x months per year
+                weap_branch_generation_potential[scenario][wb] = [0, ] * len(y_range) * 12 # empty vector of len number of years x months per year
                 yi=0   
                 for y in y_range:
+                    logging.info(_('Year: {y}').format(y = y))
                     leap_capacity_year = y
                     if leap_base_year > y :
                         leap_capacity_year = leap_base_year
@@ -709,11 +710,11 @@ def main_integration():
                     leap_hpps = config_params['WEAP']['Hydropower_plants']['dams'][wb]['leap_hpps'] 
                     for lb in leap_hpps: # there might be multiple corresponding to this WEAP HPP
                         leap_path = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_path']
+                        #logging.info(_('Max Avail calculated for: {y}').format(y = leap_path))
                         leap_region = config_params['LEAP']['Hydropower_plants']['plants'][lb]['leap_region']
                         leap_region_id = leap_region_ids[leap_region]
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
-                        
                         # Find capacity for that branch and year
                         # Check whether branch "Minimum Capacity" exists (only available in optimized scenarios). Use exogenous capacity when not available
                         if leap.Branches(leap_path).Variable("Minimum Capacity") is not None:
@@ -722,16 +723,18 @@ def main_integration():
                             weap_branch_capacity += max(leap_exog_capacity, leap_minimum_capacity)
                         else:
                             leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
-                            weap_branch_capacity +=leap_exog_capacity             
+                            weap_branch_capacity +=leap_exog_capacity 
+                        logging.info(_('{year} WEAP branch capacity for {hpp}: {y} MW').format(year=y, hpp=lb, y = weap_branch_capacity))            
 
                     # Calculate monthly generation potential for this scenario and store for future iterations (units MWh)
                     # Note : should be made flexible to different time slice set up on the LEAP side at some point - at the moment expects monthly timeslices
                     for r in range(1,12+1):
+                        #logging.info(_('WEAP branch capacity across cascade: {y}').format(y = weap_branch_capacity))     
                         if weap_branch_capacity > 0 :
                             weap_branch_generation_potential[scenario][wb][yi] = weap_branch_capacity * monthrange(y, r)[1] * 24
                             yi = yi+1
                         else: 
-                            weap_branch_generation_potential[scenario][wb][yi] = 0.000001 #set to very small number to avoid divison by 0
+                            weap_branch_generation_potential[scenario][wb][yi] = 0.000001 #set to very small number to avoid divison by 0 error
                             yi = yi+1
 
                 #Dont bother writing Maximum Availability if capacity is 0 in all years
@@ -773,8 +776,11 @@ def main_integration():
 
                         # Extract values for this particular month
                         weap_hpp_gen_this_month = list(weap_hpp_gen[m::12])
-                        weap_branch_capacity_this_month = weap_branch_generation_potential[scenario][wb][m::12]
-
+                        weap_branch_capacity_this_month = weap_branch_generation_potential[scenario][wb][m::12] # maximum generation at full utilization
+                        logging.info(_('Month: {y}').format(y =  months[m])) 
+                        logging.info(_('WEAP branch actual generation [GJ]: {y}').format(y =  weap_hpp_gen_this_month)) 
+                        logging.info(_('WEAP branch generation potential at capacity [MWh]: {y}').format(y =  weap_branch_capacity_this_month))   
+                        
                         # dont bother writing maximum availabilities, if capacity in month m is 0 in every year
                         if sum(weap_branch_capacity_this_month)==0 : 
                             logging.info(_('Month {s} has generation potential 0. Not writing maximimum availabilities.').format(s = months[m])) 
@@ -784,7 +790,7 @@ def main_integration():
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
-                        
+                        logging.info(_('Maximum availability: {y}').format(y =  weap_max_avail_this_month)) 
 
                         # Replace values less than 0.001 with 0, and values greater 100 with 100 using list comprehension
                         weap_max_avail_this_month = [0 if value < 0.001 else value for value in weap_max_avail_this_month]
@@ -1073,7 +1079,7 @@ def main_integration():
 
         #------------------------------------------------------------------------------------------------------------------------
         #
-        # Pass LEAP hydropower generation to WEAP
+        # Pass LEAP hydropower generation to WEAP hydropower energy demand
         #
         #------------------------------------------------------------------------------------------------------------------------
         logging.info(_('Moving hydropower generation from LEAP to WEAP...'))

@@ -31,3 +31,9 @@ predefined scenarios: # LEAP scenario : WEAP scenario
   S1 National Focus WetWarm3: S1_WetWarm3
   S1 National Focus PrecipShift_Dry : S1_PrecipShift_Dry
   S1 National Focus PrecipShift_Wet : S1_PrecipShift_Wet
+  S1 National Focus DryHot_HSA_INM: S1_DryHot_CMCCESM2
+  S2 Water and Ag Imp DryHot_HSA_INM: S2_DryHot_CMCCESM2
+  S3 Energy and Climate Imp DryHot_HSA_INM: S3_DryHot_CMCCESM2
+  S4 International Coop DryHot_HSA_INM: S4_DryHot_CMCCESM2
+
+

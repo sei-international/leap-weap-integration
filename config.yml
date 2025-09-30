@@ -5,12 +5,12 @@
 ###############################################################
 Integrated model:
     Tolerance: 0.10
-    Maximum iterations: 11 # including iterations prior to restart, if restart >=3
-    Restart: 1 # optional, set to 1 if restarting
-    Restart after iteration: 6 # set to last successfully completed iteration, if restarting
+    Maximum iterations: 10 # including iterations prior to restart, if restart >=3
+    Restart: # optional, set to 1 if restarting
+    Restart after iteration: # set to last successfully completed iteration, if restarting
 
 WEAP:
-  Area: AmuDarya_SyrDarya_2025_v6
+  Area: AmuDarya_SyrDarya_2025_v11_2025-08-13
   Folder: UserData # Folder under WEAP area to store ReadFromFile data
   Branches:
     Population_KAZ:
@@ -270,7 +270,7 @@ WEAP:
         TKM: Turkmenistan
 
 LEAP:
-  Area: sei central asia v81
+  Area: sei central asia v84_2025-08-13 S2 S3 S4
   # Set to True if LEAP model has its own before scenario script; in this case, it's advised to integrate the contents of kill_excel.vbs into this script
   Custom before scenario script: False  
   Regions: [Kazakhstan, Kyrgyzstan, Tajikistan, Turkmenistan, Uzbekistan]
