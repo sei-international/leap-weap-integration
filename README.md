@@ -61,7 +61,7 @@ If you prefer a different folder name, you will need to change the name in the `
 1. If available, double-click on the `wave_integration.exe` file or open a terminal window and run the file from there.
    Otherwise, open a terminal window or command prompt window
    - change directory to `leap-weap-integration` folder (e.g. `cd Documents/leap-weap-integration`)
-   - then execute the python file (e.g. `py .\wave_integration.py`)
+   - then execute the python file (e.g. `py .\leap_weap_integration.py`)
 
 The integration program will generate a log file. The log file will have the time stamp and end in `.log`. (E.g., `wave_integration_2023-06-24UTC15_02_54.log`.) The progress of the program can be monitored by watching the log file. There are at least two ways to do that:
 - Open the log file in Notepad++ and click the "eye" icon (the `Monitoring (tail -f)` command);
