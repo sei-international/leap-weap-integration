@@ -309,8 +309,7 @@ LEAP:
       variable: Activity Level
       unit: Cubic Meter/No Data
     Syr_Darya_Ind_water_demand:
-      #path: Demand\Industry\Other\Top Down\Syr Darya Water Pumping
-      path: Demand\Industry\Other\Syr Darya Water Pumping
+      path: Demand\Industry\Other\Top Down\Syr Darya Water Pumping
       variable: Activity Level
       unit: Cubic Meter/No Data
     Amu_Darya_Ag_water_demand:
@@ -318,8 +317,7 @@ LEAP:
       variable: Activity Level
       unit: Cubic Meter/No Data
     Amu_Darya_Ind_water_demand:
-      #path: Demand\Industry\Other\Top Down\Amu Darya Water Pumping
-      path: Demand\Industry\Other\Amu Darya Water Pumping
+      path: Demand\Industry\Other\Top Down\Amu Darya Water Pumping
       variable: Activity Level
       unit: Cubic Meter/No Data
   
