@@ -7,6 +7,10 @@ import sys
 import win32com.client as win32
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
+import ctypes, threading # needed for checking cursor
+#import win32gui, win32con # needed for checking cursor
+from ctypes import wintypes  # needed for checking cursor
+from contextlib import contextmanager  # needed for checking cursor
 
 # Handle the missing value entry "-" in LEAP
 def leapfloat(x):
@@ -15,14 +19,118 @@ def leapfloat(x):
     else:
         return float(x)
 
+user32 = ctypes.WinDLL("user32", use_last_error=True)
+
+class POINT(ctypes.Structure):
+    _fields_ = [("x", wintypes.LONG), ("y", wintypes.LONG)]
+
+# HCURSOR is not defined in ctypes.wintypes on many Python builds; use HANDLE.
+try:
+    HCURSOR = wintypes.HCURSOR  # if present on your build
+except AttributeError:
+    HCURSOR = wintypes.HANDLE   # correct fallback everywhere
+
+class CURSORINFO(ctypes.Structure):
+    _fields_ = [
+        ("cbSize",      wintypes.DWORD),
+        ("flags",       wintypes.DWORD),
+        ("hCursor",     HCURSOR),       # ← use alias instead of wintypes.HCURSOR
+        ("ptScreenPos", POINT),
+    ]
+
+GetCursorInfo = user32.GetCursorInfo
+GetCursorInfo.argtypes = [ctypes.POINTER(CURSORINFO)]
+GetCursorInfo.restype  = wintypes.BOOL
+
+def _safe_get_cursor_handle():
+    """Return HCURSOR (int-like) or None if unreadable this tick."""
+    ci = CURSORINFO(cbSize=ctypes.sizeof(CURSORINFO))
+    ok = GetCursorInfo(ctypes.byref(ci))
+    if not ok:
+        # e.g., transient UI boundary or access denied
+        return None
+    return ci.hCursor
+
+@contextmanager
+def print_while_busy_ctypes(poll=1.0, warmup_idle_secs=0.2,
+                            busy_if_seen_n=2, idle_if_seen_n=2, debug=False):
+    """
+    Prints 'busy loading results' every `poll` seconds while the cursor is "busy".
+    - Learns custom busy cursors when the same non-idle handle is seen busy_if_seen_n times consecutively.
+    - Treats any handle seen during the warmup period as 'idle' baseline(s).
+    - Stops after seeing an idle handle idle_if_seen_n times in a row.
+    """
+    stop = threading.Event()
+    idle_handles = set()   # learned during warmup only
+    busy_handles = set()   # learned during run
+
+    def watcher():
+        # Warmup: learn baseline idle cursor(s)
+        t_end = time.time() + max(0.0, warmup_idle_secs)
+        while time.time() < t_end and not stop.is_set():
+            h = _safe_get_cursor_handle()
+            if h is not None:
+                idle_handles.add(h)
+            time.sleep(0.05)
+
+        last_h = None
+        same_count = 0
+        idle_streak = 0
+        printing = False
+
+        while not stop.is_set():
+            h = _safe_get_cursor_handle()
+            if h is None:
+                time.sleep(poll)
+                continue
+
+            if h == last_h:
+                same_count += 1
+            else:
+                last_h = h
+                same_count = 1
+
+            is_idle = h in idle_handles
+
+            # Learn a custom busy handle only if it persists and isn't in idle set
+            if (not is_idle) and (h not in busy_handles) and same_count >= busy_if_seen_n:
+                busy_handles.add(h)
+                if debug:
+                    try:
+                        print(f"learned busy cursor: {hex(int(h))}", flush=True)
+                    except Exception:
+                        pass
+
+            if (h in busy_handles) and (not is_idle):
+                print("busy loading timesliced energy generation results results", flush=True)
+                printing = True
+                idle_streak = 0
+            else:
+                if printing and is_idle:
+                    idle_streak += 1
+                    if idle_streak >= idle_if_seen_n:
+                        break
+
+            time.sleep(poll)
+
+    t = threading.Thread(target=watcher, daemon=True)
+    t.start()
+    try:
+        yield
+    finally:
+        stop.set()
+        t.join(timeout=2)
+
 # Load favorite for selected scenario and export -- takes a long time to render, so disable controls
 def export_leap_favorite_to_csv(leap, favname, leap_scenario, leap_export_fname, units):
     leap.ActiveView = "Results"
     # Should be calculated, but check
     while leap.IsCalculating:
         time.sleep(1)
-    leap.Favorites(favname).Activate()
-    leap.ActiveScenario = leap_scenario # reordered to after leap.Favoorites(favname).Activate)
+    with print_while_busy_ctypes(poll=1.0, warmup_idle_secs=0.2, busy_if_seen_n=2, idle_if_seen_n=2, debug=False):
+        leap.Favorites(favname).Activate()
+        leap.ActiveScenario = leap_scenario # reordered to after leap.Favorites(favname).Activate)
+    print("ready; continuing…", flush=True)
     leap.ActiveUnit = units
     leap.ExportResultsCSV(leap_export_fname)
     leap.ActiveView = "Analysis"

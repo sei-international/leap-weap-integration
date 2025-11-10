@@ -12,6 +12,7 @@ from sys import float_info
 import psutil
 import numpy as np
 import re
+import getpass #for kill_excel()-function
 import datetime
 import logging
 from collections import OrderedDict # Not necessary with Python 3.7+
@@ -181,12 +182,22 @@ def elements_to_index(elements, *lists_tuple):
         m *= lengths[j]
     return i
 
-# function to clear out any running instances of Excel (no return value)
+# function to clear out any running instances of Excel in this user account (no return value)
 def kill_excel():
     ps_re = re.compile(r'excel', flags=re.IGNORECASE)
-    for proc in psutil.process_iter():
-        if ps_re.search(proc.name()) is not None:
-            proc.kill()
+    current_user = getpass.getuser()
+
+    for proc in psutil.process_iter(['pid', 'name', 'username']):
+        try:
+            if proc.info['name'] and ps_re.search(proc.info['name']):
+                if proc.info['username'] == current_user:
+                    proc.kill()
+                    print(f"Killed Excel process {proc.pid} owned by {current_user}")
+                else:
+                    # Skip processes from other users
+                    print(f"Skipping Excel process {proc.pid} owned by {proc.info['username']}")
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
 
 # Reopens the currently active WEAP area by temporarily activating another area, then re-activating the original area. This can
 #   work around a WEAP bug that causes weap.Branches calls to fail.
@@ -424,7 +435,6 @@ def main_integration():
     for s in runfrom_app_obj.Scenarios :
         if s.name != "Current Accounts" and s.ResultsShown == True :
             at_least_1_calculated = True
-
             if other_app_obj.Scenarios.Exists(s.Name) :
                 scenarios_map.update({s.name : s.name})
             else: # look for scenario name in predefined mapping
@@ -435,7 +445,6 @@ def main_integration():
                     corr_leap_scenario_predef = [i for i in scenarios['predefined scenarios'] if scenarios['predefined scenarios'][i] == s.name]
                     if corr_leap_scenario_predef:
                         scenarios_map.update({corr_leap_scenario_predef[0] : s.name})
-
                 if runfrom_app == "LEAP" :
                     if s.Name in scenarios_map.keys():
                         other_app_obj.Scenarios(scenarios_map[s.Name]).ResultsShown = True
@@ -478,6 +487,10 @@ def main_integration():
 
     # get calculated years in leap
     leap_calc_years = get_leap_calc_years(leap)
+
+    # Align LEAP and WEAP End-years
+    weap.EndYear = leap_calc_years[-1]
+
 
     # if not restarting, clear hydropower reservoir energy demand from WEAP scenarios
     if restart is None:
@@ -831,7 +844,9 @@ def main_integration():
                     leap.Branches(leap_branch).Variables("Activity Level").Expression = expr
 
                 logging.info('\t' + _('{b} basin: Industrial and domestic').format(b = leap_basin))
+                #leap_branch = "Demand\\Industry\\Other\\Top Down\\" + leap_basin + " Water Pumping" # why is this hard coded?
                 leap_branch = "Demand\\Industry\\Other\\" + leap_basin + " Water Pumping"
+
                 for wr, lr in config_params['WEAP']['Water pumping']['region_map'].items():
                     expr = "Interp("  # Expression that will be set in LEAP
                     for y in range(weap.BaseYear, weap.EndYear+1):
