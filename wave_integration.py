@@ -737,7 +737,9 @@ def main_integration():
                         else:
                             leap_exog_capacity = leap.Branches(leap_path).Variable("Exogenous Capacity").ValueR(leap_region_id, leap_capacity_year, "", "")
                             weap_branch_capacity +=leap_exog_capacity 
-                        logging.info(_('{year} WEAP branch capacity for {hpp}: {y} MW').format(year=y, hpp=lb, y = weap_branch_capacity))            
+                        # ------- Begin extra debug logging ------------------------------------------------------------------------------------------------------#
+                        #logging.info(_('{year} WEAP branch capacity for {hpp}: {y} MW').format(year=y, hpp=lb, y = weap_branch_capacity))    
+                        # ------- End extra debug logging --------------------------------------------------------------------------------------------------------#        
 
                     # Calculate monthly generation potential for this scenario and store for future iterations (units MWh)
                     # Note : should be made flexible to different time slice set up on the LEAP side at some point - at the moment expects monthly timeslices
@@ -790,9 +792,11 @@ def main_integration():
                         # Extract values for this particular month
                         weap_hpp_gen_this_month = list(weap_hpp_gen[m::12])
                         weap_branch_capacity_this_month = weap_branch_generation_potential[scenario][wb][m::12] # maximum generation at full utilization
-                        logging.info(_('Month: {y}').format(y =  months[m])) 
-                        logging.info(_('WEAP branch actual generation [GJ]: {y}').format(y =  weap_hpp_gen_this_month)) 
-                        logging.info(_('WEAP branch generation potential at capacity [MWh]: {y}').format(y =  weap_branch_capacity_this_month))   
+                        # ------- Begin extra debug logging ------------------------------------------------------------------------------------------------------#
+                        #logging.info(_('Month: {y}').format(y =  months[m])) 
+                        #logging.info(_('WEAP branch actual generation [GJ]: {y}').format(y =  weap_hpp_gen_this_month)) 
+                        #logging.info(_('WEAP branch generation potential at capacity [MWh]: {y}').format(y =  weap_branch_capacity_this_month))   
+                        # ------- End extra debug logging --------------------------------------------------------------------------------------------------------#
                         
                         # dont bother writing maximum availabilities, if capacity in month m is 0 in every year
                         if sum(weap_branch_capacity_this_month)==0 : 
@@ -803,7 +807,9 @@ def main_integration():
                         # TODO: Find the unit using Variable.DataUnitID, convert using Unit.ConversionFactor; set a target unit and store its conversion factor
                         # Can't specify unit when querying data variables, but unit for Exogenous Capacity is MW
                         weap_max_avail_this_month = [round(hpp / 3.6 / capacity * 100, 1) for hpp, capacity in zip(weap_hpp_gen_this_month, weap_branch_capacity_this_month)]
-                        logging.info(_('Maximum availability: {y}').format(y =  weap_max_avail_this_month)) 
+                        # ------- Begin extra debug logging ------------------------------------------------------------------------------------------------------#
+                        #logging.info(_('Maximum availability: {y}').format(y =  weap_max_avail_this_month)) 
+                        # ------- End extra debug logging --------------------------------------------------------------------------------------------------------#
 
                         # Replace values less than 0.001 with 0, and values greater 100 with 100 using list comprehension
                         weap_max_avail_this_month = [0 if value < 0.001 else value for value in weap_max_avail_this_month]
