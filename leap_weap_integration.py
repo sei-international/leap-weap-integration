@@ -713,7 +713,9 @@ def main_integration():
                 weap_branch_generation_potential[scenario][wb] = [0, ] * len(y_range) * 12 # empty vector of len number of years x months per year
                 yi=0   
                 for y in y_range:
-                    logging.info(_('Year: {y}').format(y = y))
+                    # ------- Begin extra debug logging ------------------------------------------------------------------------------------------------------#
+                    #logging.info(_('Year: {y}').format(y = y))
+                    # ------- End extra debug logging ------------------------------------------------------------------------------------------------------#
                     leap_capacity_year = y
                     if leap_base_year > y :
                         leap_capacity_year = leap_base_year
