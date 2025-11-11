@@ -850,8 +850,11 @@ def main_integration():
                     leap.Branches(leap_branch).Variables("Activity Level").Expression = expr
 
                 logging.info('\t' + _('{b} basin: Industrial and domestic').format(b = leap_basin))
-                #leap_branch = "Demand\\Industry\\Other\\Top Down\\" + leap_basin + " Water Pumping" # why is this hard coded?
-                leap_branch = "Demand\\Industry\\Other\\" + leap_basin + " Water Pumping"
+                leap_branch = None
+                for entry in config_params['LEAP']['Branches'].values():
+                    if all(term in entry.get('path', '') for term in ["Industry", leap_basin, "Water Pumping"]):
+                        leap_branch = entry['path']
+                        break
 
                 for wr, lr in config_params['WEAP']['Water pumping']['region_map'].items():
                     expr = "Interp("  # Expression that will be set in LEAP
