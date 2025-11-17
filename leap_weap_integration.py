@@ -445,13 +445,13 @@ def main_integration():
                     corr_leap_scenario_predef = [i for i in scenarios['predefined scenarios'] if scenarios['predefined scenarios'][i] == s.name]
                     if corr_leap_scenario_predef:
                         scenarios_map.update({corr_leap_scenario_predef[0] : s.name})
-                if runfrom_app == "LEAP" :
-                    if s.Name in scenarios_map.keys():
-                        other_app_obj.Scenarios(scenarios_map[s.Name]).ResultsShown = True
-                elif runfrom_app == "WEAP" :
-                    corr_leap_scenario = [i for i in scenarios_map if scenarios_map[i] == s.Name]
-                    if corr_leap_scenario:
-                        other_app_obj.Scenarios(corr_leap_scenario[0]).ResultsShown = True
+			if runfrom_app == "LEAP" :
+				if s.Name in scenarios_map.keys():
+					other_app_obj.Scenarios(scenarios_map[s.Name]).ResultsShown = True
+			elif runfrom_app == "WEAP" :
+				corr_leap_scenario = [i for i in scenarios_map if scenarios_map[i] == s.Name]
+				if corr_leap_scenario:
+					other_app_obj.Scenarios(corr_leap_scenario[0]).ResultsShown = True
 
 
     if not at_least_1_calculated :
