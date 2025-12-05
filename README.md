@@ -1,5 +1,5 @@
 # Integrating LEAP, WEAP, and AMES
-The scripts in this repository implement the integration between LEAP/NEMO, WEAP, and AMES for the USAID WAVE Central Asia project. The integration script, which is written in Python, executes each program iteratively until convergence. Both LEAP and WEAP require Windows to run, and the full integration can consume substantial computer resources. The computer on which this script is run should have a reasonably fast processor and, more important, ample RAM and disk drive space.
+The scripts in this repository implement the integration between LEAP/NEMO, WEAP, and AMES for the USAID WAVE Central Asia project. The integration script, which is written in Python, executes each program iteratively until convergence. Both [LEAP](https://www.sei.org/tools/leap/) and [WEAP](https://www.sei.org/tools/weap/) require Windows to run, and the full integration can consume substantial computer resources. The computer on which this script is run should have a reasonably fast processor and, more important, ample RAM and disk drive space.
 
 ## Installation
 In addition to the integration script itself, it is necessary to install Python, LEAP (with NEMO), WEAP, AMES, and Microsoft Excel. It is also recommended to install the [Notepad++ text editor](https://notepad-plus-plus.org/), for reasons explained below.
